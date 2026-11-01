@@ -15,7 +15,8 @@
     }
   ],
   "routes": [
-    { "pattern": "docs.nervestudios.net", "custom_domain": true }
+    { "pattern": "docs.nervestudios.net", "custom_domain": true },
+    { "pattern": "docs.nexdev.site", "custom_domain": true }
   ],
   "observability": {
     "enabled": true
