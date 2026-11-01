@@ -1,6 +1,6 @@
-# NEX.dev Documentation
+# Nerve Studios Documentation
 
-The official documentation for NEX.dev's FiveM scripts — install guides,
+The official documentation for Nerve Studios's FiveM scripts — install guides,
 configuration references, and troubleshooting for every resource.
 
 Built with [Fumadocs](https://fumadocs.dev) on Next.js.

@@ -1,5 +1,5 @@
 import { RootProvider } from 'fumadocs-ui/provider/next';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { site } from '@/lib/site';
 import './global.css';
@@ -19,6 +19,13 @@ export const metadata: Metadata = {
     siteName: site.name,
     type: 'website',
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#faf8fc' },
+    { media: '(prefers-color-scheme: dark)', color: '#0b0c12' },
+  ],
 };
 
 export default function Layout({ children }: LayoutProps<'/'>) {

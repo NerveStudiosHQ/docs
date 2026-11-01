@@ -1,12 +1,12 @@
 /** Site-wide constants shared by layouts and metadata. */
 export const site = {
-  name: 'NEX.dev',
-  title: 'NEX.dev Documentation',
+  name: 'Nerve Studios',
+  title: 'Nerve Studios Documentation',
   description:
-    'Install guides, configuration references, and troubleshooting for every NEX.dev FiveM script.',
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://docs.nexdev.store',
+    'Install guides, configuration references, and troubleshooting for every Nerve Studios FiveM script.',
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://docs.nervestudios.net',
   links: {
-    discord: 'https://discord.gg/nexdev',
-    website: 'https://nexdev.store',
+    discord: 'https://discord.gg/nervestudios',
+    website: 'https://nervestudios.net',
   },
 } as const;

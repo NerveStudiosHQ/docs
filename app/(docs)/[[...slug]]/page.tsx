@@ -47,7 +47,7 @@ export async function generateMetadata(
 
   const isHome = page.url === '/';
   // Script pages get the script name in the title so tabs and search results
-  // aren't just sixteen different "Overview | NEX.dev" entries.
+  // aren't just sixteen different "Overview | Nerve Studios" entries.
   const folder = page.slugs.length > 1 ? page.slugs[0] : undefined;
   const title =
     folder && folder.startsWith('nexdev_')

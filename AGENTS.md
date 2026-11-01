@@ -1,8 +1,8 @@
-# NEX.dev docs — project instructions
+# Nerve Studios docs — project instructions
 
 ## About this project
 
-- Documentation for NEX.dev's FiveM scripts.
+- Documentation for Nerve Studios's FiveM scripts.
 - Built with Fumadocs on Next.js. Pages are MDX files with YAML frontmatter
   under `content/docs/`; one folder per script.
 - Sidebar order, section labels, and folder icons live in `meta.json` files
@@ -43,7 +43,7 @@
 
 ## Terminology
 
-- Refer to products by their full name: "NEX.dev Garage", "NEX.dev Queue", etc.
+- Refer to products by their full name: "Nerve Studios Garage", "Nerve Studios Queue", etc.
 - "Resource" or "script" for a FiveM resource; "framework" for QBCore / Qbox / ESX.
 
 ## Style preferences
@@ -79,9 +79,18 @@ does and how to use it — never how it is built.**
 
 ## Branding
 
-- Colors are black (`#000000`) and white (`#FFFFFF`); the site uses the
-  Fumadocs `black` preset.
-- Logos in `public/logo/`: `nex-wordmark.png` (header; white on transparent, CSS-inverted in light mode) and `nex-logo.png` (mark). Favicons are `app/icon.png` and `app/apple-icon.png`, generated from the mark on a black rounded tile.
+- Brand is Nerve Studios; site lives at `https://docs.nervestudios.net`,
+  main site `https://nervestudios.net`, Discord `https://discord.gg/nervestudios`.
+- Script identifiers keep their `nexdev_` names (resource folders, exports,
+  ACE permissions, commands, URLs). Only prose says "Nerve Studios".
+- Colors: near-black (`#0b0c12`) / white base with logo purples — `#a855f7`
+  (core), `#b77cff` (dark-mode primary), `#d8b4fe` (highlight), `#7e22ce`
+  (light-mode primary), `#4c1d95` (deep). Defined in `app/global.css` as
+  overrides on top of the Fumadocs `black` preset.
+- Logos in `public/logo/`: `nerve-wordmark.png` (dark mode; white lettering),
+  `nerve-wordmark-light.png` (light mode; dark lettering), and `nerve-logo.png`
+  (mark). Favicons are `app/icon.png` (glow tile, rounded) and
+  `app/apple-icon.png`.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

@@ -1,8 +1,8 @@
 {
-  "name": "nexdev-docs",
+  "name": "nervestudios-docs",
   "version": "1.0.0",
   "private": true,
-  "description": "NEX.dev documentation site",
+  "description": "Nerve Studios documentation site",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
