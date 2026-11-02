@@ -1,9 +1,7 @@
 ---
 title: "Optional integrations"
-description: "Every external system the resource touches has an adapter in integrations/. All of them are escrow_ignore'd, so you can edit them without re-uploading the asset. Pick the system you want with…"
+description: "Every external system the resource touches has an adapter in integrations/. All of them are escrow_ignore'd, so you can edit them without re-uploading the asset. Pick the system you want with Config.<thing>.System, or set it to 'auto' and the resource picks the first installed one."
 ---
-
-Every external system the resource touches has an adapter in `integrations/`. All of them are `escrow_ignore`'d, so you can edit them without re-uploading the asset. Pick the system you want with `Config.<thing>.System`, or set it to `'auto'` and the resource picks the first installed one.
 
 If your script isn't on the list, every adapter has a `Config.*Fn` override hook — point it at a function and the resource calls yours instead of the built-in branch.
 
