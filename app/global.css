@@ -17,7 +17,8 @@ html > body[data-scroll-locked] {
 }
 
 :root {
-  --fd-layout-width: 1400px;
+  /* Full-width layout so the header bar always spans the whole screen. */
+  --fd-layout-width: 100%;
 }
 
 /*

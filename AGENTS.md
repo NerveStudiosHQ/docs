@@ -99,9 +99,9 @@ does and how to use it — never how it is built.**
   vendored in `components/reactbits/`); styles for cards, chips and the home `<DocsHero />`
   live at the bottom of `app/global.css`. Fumadocs also puts `data-card` on heading anchors,
   so card styles target `[data-card][class*="bg-fd-card"]` only.
-- Logos in `public/logo/`: `nerve-wordmark.png` (dark mode; white lettering),
-  `nerve-wordmark-light.png` (light mode; dark lettering), and `nerve-logo.png`
-  (mark). Favicons are `app/icon.png` (glow tile, rounded) and
+- Header logo is `public/logo/nerve-logo.png` (mark) plus the name as live text
+  (`components/logo.tsx`). `nerve-wordmark*.png` are kept for other uses.
+  The layout is full width (`--fd-layout-width: 100%`) so the header spans the screen. Favicons are `app/icon.png` (glow tile, rounded) and
   `app/apple-icon.png`.
 
 <!-- BEGIN:nextjs-agent-rules -->
