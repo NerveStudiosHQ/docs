@@ -9,6 +9,7 @@ import { notFound } from 'next/navigation';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import type { Metadata } from 'next';
 import { getMDXComponents } from '@/components/mdx';
+import { HomeHero } from '@/components/home';
 import { site } from '@/lib/site';
 
 export default async function Page(props: PageProps<'/[[...slug]]'>) {
@@ -17,11 +18,22 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
   if (!page) notFound();
 
   const MDX = page.data.body;
+  const isHome = page.url === '/';
 
   return (
-    <DocsPage toc={page.data.toc} full={page.data.full}>
-      <DocsTitle>{page.data.title}</DocsTitle>
-      <DocsDescription>{page.data.description}</DocsDescription>
+    <DocsPage
+      toc={page.data.toc}
+      full={page.data.full}
+      breadcrumb={{ enabled: !isHome }}
+    >
+      {isHome ? (
+        <HomeHero description={page.data.description} />
+      ) : (
+        <>
+          <DocsTitle>{page.data.title}</DocsTitle>
+          <DocsDescription>{page.data.description}</DocsDescription>
+        </>
+      )}
       <DocsBody>
         <MDX
           components={getMDXComponents({

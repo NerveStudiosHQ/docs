@@ -19,6 +19,10 @@ const routes = new Set(
   }),
 );
 routes.add('/api/search');
+// Favicons in app/ (icon.png, apple-icon.png) are served as routes, not from public/.
+for (const f of fs.readdirSync(path.join(__dirname, '..', 'app'))) {
+  if (/\.(png|ico|svg|jpe?g)$/.test(f)) routes.add('/' + f);
+}
 
 const problems = [];
 const seen = new Set();

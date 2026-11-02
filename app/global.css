@@ -2,6 +2,11 @@
 @import 'fumadocs-ui/css/black.css';
 @import 'fumadocs-ui/css/preset.css';
 
+@theme inline {
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+}
+
 html {
   scrollbar-gutter: stable;
 }
@@ -16,66 +21,140 @@ html > body[data-scroll-locked] {
 }
 
 /*
- * Nerve Studios palette, layered over the `black` preset. Purples are taken
- * from the logo mark: #a855f7 (core), #b77cff (accent), #d8b4fe (highlight),
- * #7e22ce / #4c1d95 (deep).
+ * Nerve Studios palette, layered over the `black` preset. Surfaces stay
+ * neutral; the logo purples (#a855f7 core, #b77cff / #7e22ce primary,
+ * #d8b4fe highlight) are kept for links, active states and focus only.
  */
 :root {
-  --color-fd-background: hsl(270, 25%, 98.5%);
-  --color-fd-foreground: hsl(260, 30%, 6%);
-  --color-fd-muted: hsl(270, 30%, 95.5%);
-  --color-fd-muted-foreground: hsl(260, 10%, 42%);
-  --color-fd-popover: hsl(0, 0%, 100%);
-  --color-fd-popover-foreground: hsl(260, 30%, 10%);
-  --color-fd-card: hsl(270, 40%, 99%);
-  --color-fd-card-foreground: hsl(260, 30%, 6%);
-  --color-fd-border: hsla(270, 45%, 55%, 0.18);
+  --color-fd-background: #ffffff;
+  --color-fd-foreground: #0a0a0a;
+  --color-fd-muted: #f5f5f5;
+  --color-fd-muted-foreground: #666666;
+  --color-fd-popover: #ffffff;
+  --color-fd-popover-foreground: #0a0a0a;
+  --color-fd-card: #ffffff;
+  --color-fd-card-foreground: #0a0a0a;
+  --color-fd-border: #ebebeb;
   --color-fd-primary: #7e22ce;
   --color-fd-primary-foreground: #ffffff;
-  --color-fd-secondary: hsl(270, 45%, 95%);
-  --color-fd-secondary-foreground: #4c1d95;
-  --color-fd-accent: hsl(270, 70%, 94%);
-  --color-fd-accent-foreground: #6b21a8;
+  --color-fd-secondary: #f5f5f5;
+  --color-fd-secondary-foreground: #0a0a0a;
+  --color-fd-accent: #f2f2f2;
+  --color-fd-accent-foreground: #0a0a0a;
   --color-fd-ring: #a855f7;
 }
 
 .dark {
-  --color-fd-background: #0b0c12;
-  --color-fd-foreground: hsl(260, 30%, 96%);
-  --color-fd-muted: hsl(260, 22%, 9%);
-  --color-fd-muted-foreground: #a3abbd;
-  --color-fd-popover: #0d0c15;
-  --color-fd-popover-foreground: hsl(260, 30%, 96%);
-  --color-fd-card: hsl(260, 25%, 7.5%);
-  --color-fd-card-foreground: hsl(260, 30%, 96%);
-  --color-fd-border: hsla(270, 60%, 65%, 0.16);
+  --color-fd-background: #0a0a0a;
+  --color-fd-foreground: #ededed;
+  --color-fd-muted: #161616;
+  --color-fd-muted-foreground: #8f8f8f;
+  --color-fd-popover: #111111;
+  --color-fd-popover-foreground: #ededed;
+  --color-fd-card: #0f0f0f;
+  --color-fd-card-foreground: #ededed;
+  --color-fd-border: #222222;
   --color-fd-primary: #b77cff;
-  --color-fd-primary-foreground: #0b0c12;
-  --color-fd-secondary: hsl(265, 28%, 13%);
-  --color-fd-secondary-foreground: #d8b4fe;
-  --color-fd-accent: hsla(270, 90%, 65%, 0.14);
-  --color-fd-accent-foreground: #d8b4fe;
+  --color-fd-primary-foreground: #0a0a0a;
+  --color-fd-secondary: #161616;
+  --color-fd-secondary-foreground: #ededed;
+  --color-fd-accent: #1a1a1a;
+  --color-fd-accent-foreground: #ededed;
   --color-fd-ring: #a855f7;
 }
 
-/* Faint purple glow behind the top of every page, echoing the logo. */
 body {
-  background-image: radial-gradient(
-    ellipse 80% 420px at 50% -120px,
-    rgba(168, 85, 247, 0.1),
-    transparent
-  );
-  background-repeat: no-repeat;
-}
-
-.dark body {
-  background-image: radial-gradient(
-    ellipse 80% 480px at 50% -140px,
-    rgba(168, 85, 247, 0.18),
-    transparent
-  );
+  font-feature-settings: 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
-  background: rgba(168, 85, 247, 0.3);
+  background: rgba(168, 85, 247, 0.22);
+}
+
+/* Page headings: tighter, calmer hierarchy. */
+h1 {
+  letter-spacing: -0.025em;
+}
+
+.prose :is(h2, h3, h4) {
+  letter-spacing: -0.015em;
+  scroll-margin-top: 6rem;
+}
+
+.prose h2 {
+  font-size: 1.375rem;
+  margin-top: 2.25em;
+  padding-top: 1.5em;
+  border-top: 1px solid var(--color-fd-border);
+}
+
+.prose > h2:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.prose h3 {
+  font-size: 1.125rem;
+}
+
+/* Inline code: a quiet tint instead of a boxed chip. */
+.prose :not(pre) > code:not(.not-prose *) {
+  padding: 0.15em 0.4em;
+  border: 0;
+  border-radius: 6px;
+  font-size: 0.85em;
+  background: var(--color-fd-muted);
+}
+
+.dark .prose :not(pre) > code:not(.not-prose *) {
+  background: #1c1c1c;
+}
+
+/* Links: plain text with a thin accent underline that firms up on hover. */
+.prose a:not([data-card]) {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  text-decoration-color: color-mix(in oklab, var(--color-fd-primary) 45%, transparent);
+  transition: text-decoration-color 0.15s, color 0.15s;
+}
+
+.prose a:not([data-card]):hover {
+  opacity: 1;
+  color: var(--color-fd-primary);
+  text-decoration-color: var(--color-fd-primary);
+}
+
+/* Code blocks and cards: flat surfaces, hairline borders, no shadows. */
+.prose figure.shiki,
+.prose [data-card] {
+  box-shadow: none;
+}
+
+.prose [data-card] {
+  border-radius: 10px;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.prose [data-card]:hover {
+  background: var(--color-fd-muted);
+  border-color: color-mix(in oklab, var(--color-fd-primary) 35%, var(--color-fd-border));
+}
+
+.prose [data-card] > .not-prose:first-child {
+  box-shadow: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--color-fd-primary);
+}
+
+.prose table {
+  font-size: 0.875rem;
+}
+
+.prose thead th {
+  font-weight: 500;
+  color: var(--color-fd-muted-foreground);
 }

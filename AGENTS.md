@@ -21,13 +21,16 @@
   (e.g. `/nexdev_garages/installation`).
 - Adding a page: create the `.mdx` file **and** add its name to the folder's
   `meta.json` `pages` array, or it will not show in the sidebar.
-- Adding a script: create the folder, its pages, a `meta.json` with `title`,
-  `icon` (a lucide icon name), and `pages`, then add the folder name to
-  `content/docs/meta.json` under the `---Scripts---` separator. Also add a
-  `<Card>` for it on `content/docs/index.mdx`.
+- Adding a script: create the folder, its pages, a `meta.json` with `title`
+  (the readable name, e.g. `"Garages"`, not the `nexdev_` identifier), `icon`
+  (a lucide icon name), and `pages`. Add the folder name to
+  `content/docs/meta.json` under the matching category separator
+  (`---Vehicles---`, `---Jobs and economy---`, `---World---`, `---Player---`,
+  `---Server and interface---`). Then add a `<Script>` for it in the same
+  category on `content/docs/index.mdx`.
 - Site files: `app/` (layouts, routes), `lib/` (content source, nav links,
-  site constants), `components/` (MDX component overrides, logo, icons),
-  `source.config.ts` (MDX/highlighting options).
+  site constants), `components/` (MDX component overrides, home page
+  components, logo, icons), `source.config.ts` (MDX/highlighting options).
 
 ## Components
 
@@ -35,7 +38,11 @@
   `<Callout type="error">`. Put a blank line after the opening tag and before
   the closing tag.
 - Cards: `<Cards>` containing `<Card title="..." icon="Rocket" href="...">`.
-  `icon` is a lucide icon name string (or `"Discord"`).
+  `icon` is a lucide icon name string (or `"Discord"`). Check the name exists
+  in the installed `lucide-react`; unknown names render no icon.
+- Home page only: `<QuickLinks>` with `<QuickLink title icon href>` tiles,
+  and one `<ScriptList>` per category containing
+  `<Script name="Garages" id="nexdev_garages" icon="Warehouse">` rows.
 - Custom heading anchors: `## Heading text [#custom-id]`. Use these when a
   heading contains punctuation (em dashes, slashes, dots) so links stay clean.
 - Code fences: `lua`, `sql`, `json`, and `cfg` (for `server.cfg`) are
@@ -83,10 +90,12 @@ does and how to use it — never how it is built.**
   main site `https://nervestudios.net`, Discord `https://discord.gg/nervestudios`.
 - Script identifiers keep their `nexdev_` names (resource folders, exports,
   ACE permissions, commands, URLs). Only prose says "Nerve Studios".
-- Colors: near-black (`#0b0c12`) / white base with logo purples — `#a855f7`
+- Colors: neutral near-black (`#0a0a0a`) / white base with logo purples — `#a855f7`
   (core), `#b77cff` (dark-mode primary), `#d8b4fe` (highlight), `#7e22ce`
   (light-mode primary), `#4c1d95` (deep). Defined in `app/global.css` as
-  overrides on top of the Fumadocs `black` preset.
+  overrides on top of the Fumadocs `black` preset. Surfaces and borders stay
+  neutral; purple is only for links, active items, and focus. No glows or
+  gradients. Type is Geist / Geist Mono.
 - Logos in `public/logo/`: `nerve-wordmark.png` (dark mode; white lettering),
   `nerve-wordmark-light.png` (light mode; dark lettering), and `nerve-logo.png`
   (mark). Favicons are `app/icon.png` (glow tile, rounded) and
