@@ -2,24 +2,6 @@ import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { resolveIcon, type IconName } from '@/components/icon';
-import { site } from '@/lib/site';
-
-/** Header shown on the home page in place of the regular page title. */
-export function HomeHero({ description }: { description?: string }) {
-  return (
-    <header className="mb-4 border-b pb-8">
-      <p className="mb-3 text-sm font-medium text-fd-primary">{site.name}</p>
-      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-        Documentation
-      </h1>
-      {description && (
-        <p className="mt-3 max-w-xl text-base leading-relaxed text-fd-muted-foreground">
-          {description}
-        </p>
-      )}
-    </header>
-  );
-}
 
 /** Row of compact shortcut tiles. */
 export function QuickLinks({ children }: { children: ReactNode }) {

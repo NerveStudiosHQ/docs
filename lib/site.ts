@@ -8,5 +8,6 @@ export const site = {
   links: {
     discord: 'https://discord.gg/nervestudios',
     website: 'https://nervestudios.net',
+    store: 'https://store.nervestudios.net',
   },
 } as const;

@@ -1,5 +1,5 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-import { Globe, LifeBuoy } from 'lucide-react';
+import { Globe, LifeBuoy, ShoppingBag } from 'lucide-react';
 import { Logo } from '@/components/logo';
 import { DiscordIcon } from '@/components/icons';
 import { site } from '@/lib/site';
@@ -19,6 +19,12 @@ export function baseOptions(): BaseLayoutProps {
         text: 'Support',
         url: '/general/support',
         active: 'url',
+      },
+      {
+        icon: <ShoppingBag />,
+        text: 'Store',
+        url: site.links.store,
+        external: true,
       },
       {
         type: 'icon',

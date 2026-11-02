@@ -1,12 +1,13 @@
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import type { Metadata, Viewport } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Space_Grotesk, Geist_Mono } from 'next/font/google';
+import { SiteBackground } from '@/components/site-background';
 import { site } from '@/lib/site';
 import './global.css';
 
-const geist = Geist({
+const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
-  variable: '--font-geist',
+  variable: '--font-space-grotesk',
 });
 
 const geistMono = Geist_Mono({
@@ -38,10 +39,11 @@ export default function Layout({ children }: LayoutProps<'/'>) {
   return (
     <html
       lang="en"
-      className={`${geist.variable} ${geistMono.variable} font-sans`}
+      className={`${spaceGrotesk.variable} ${geistMono.variable} font-sans`}
       suppressHydrationWarning
     >
       <body className="flex flex-col min-h-screen">
+        <SiteBackground />
         <RootProvider>{children}</RootProvider>
       </body>
     </html>

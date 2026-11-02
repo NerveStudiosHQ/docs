@@ -93,9 +93,12 @@ does and how to use it — never how it is built.**
 - Colors: neutral near-black (`#0a0a0a`) / white base with logo purples — `#a855f7`
   (core), `#b77cff` (dark-mode primary), `#d8b4fe` (highlight), `#7e22ce`
   (light-mode primary), `#4c1d95` (deep). Defined in `app/global.css` as
-  overrides on top of the Fumadocs `black` preset. Surfaces and borders stay
-  neutral; purple is only for links, active items, and focus. No glows or
-  gradients. Type is Geist / Geist Mono.
+  overrides on top of the Fumadocs `black` preset. Purple for links, active items and focus.
+- Type is Space Grotesk (same as the store and nervestudios.net); code uses Geist Mono.
+- Dark mode has a fixed reactbits Aurora + Particles backdrop (`components/site-background.tsx`,
+  vendored in `components/reactbits/`); styles for cards, chips and the home `<DocsHero />`
+  live at the bottom of `app/global.css`. Fumadocs also puts `data-card` on heading anchors,
+  so card styles target `[data-card][class*="bg-fd-card"]` only.
 - Logos in `public/logo/`: `nerve-wordmark.png` (dark mode; white lettering),
   `nerve-wordmark-light.png` (light mode; dark lettering), and `nerve-logo.png`
   (mark). Favicons are `app/icon.png` (glow tile, rounded) and

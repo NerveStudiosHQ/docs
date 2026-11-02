@@ -9,7 +9,7 @@ import { notFound } from 'next/navigation';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import type { Metadata } from 'next';
 import { getMDXComponents } from '@/components/mdx';
-import { HomeHero } from '@/components/home';
+import { DocsHero } from '@/components/docs-hero';
 import { site } from '@/lib/site';
 
 export default async function Page(props: PageProps<'/[[...slug]]'>) {
@@ -27,7 +27,7 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
       breadcrumb={{ enabled: !isHome }}
     >
       {isHome ? (
-        <HomeHero description={page.data.description} />
+        <DocsHero />
       ) : (
         <>
           <DocsTitle>{page.data.title}</DocsTitle>
