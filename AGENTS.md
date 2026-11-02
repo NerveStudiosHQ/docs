@@ -101,7 +101,9 @@ does and how to use it — never how it is built.**
   so card styles target `[data-card][class*="bg-fd-card"]` only.
 - Header logo is `public/logo/nerve-logo.png` (mark) plus the name as live text
   (`components/logo.tsx`). `nerve-wordmark*.png` are kept for other uses.
-  The layout is full width (`--fd-layout-width: 100%`) so the header spans the screen. Favicons are `app/icon.png` (glow tile, rounded) and
+  The layout stays 1400px wide; on desktop a fixed `.header-strip` (app/layout.tsx)
+  paints the header bar full width behind the real header.
+  Favicons are `app/icon.png` (glow tile, rounded) and
   `app/apple-icon.png`.
 
 <!-- BEGIN:nextjs-agent-rules -->

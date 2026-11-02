@@ -44,6 +44,7 @@ export default function Layout({ children }: LayoutProps<'/'>) {
     >
       <body className="flex flex-col min-h-screen">
         <SiteBackground />
+        <div aria-hidden className="header-strip hidden lg:block" />
         <RootProvider>{children}</RootProvider>
       </body>
     </html>

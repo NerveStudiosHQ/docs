@@ -17,8 +17,7 @@ html > body[data-scroll-locked] {
 }
 
 :root {
-  /* Full-width layout so the header bar always spans the whole screen. */
-  --fd-layout-width: 100%;
+  --fd-layout-width: 1400px;
 }
 
 /*
@@ -284,4 +283,27 @@ a[data-card][class*="bg-fd-card"]:hover {
 
 @media (prefers-reduced-motion: reduce) {
   a[data-card][class*="bg-fd-card"]:hover { transform: none; }
+}
+
+/*
+ * Header: the layout is capped at --fd-layout-width, so the real header box is too.
+ * On desktop its background moves to a full-width strip (.header-strip in app/layout.tsx)
+ * that sits right behind it, so the bar always spans the whole screen.
+ */
+@media (min-width: 1024px) {
+  header[class*="grid-area:header"] {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    border-bottom-color: transparent !important;
+  }
+}
+.header-strip {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 3.5rem;
+  z-index: 9;
+  pointer-events: none;
+  background: color-mix(in oklab, var(--color-fd-background) 80%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--color-fd-border);
 }
