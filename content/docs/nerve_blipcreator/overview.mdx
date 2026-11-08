@@ -14,20 +14,24 @@ It needs no framework and works on any FiveM server. The menu ships ready to use
   <Card title="Using the menu" icon="Map" href="/nerve_blipcreator/using-the-menu">
     Create, edit, hide and duplicate blips
   </Card>
-  <Card title="Sharing" icon="Users" href="/nerve_blipcreator/sharing">
+  <Card title="Sharing" icon="Share2" href="/nerve_blipcreator/sharing">
     Nearby invites and share codes for crews
+  </Card>
+  <Card title="Blip groups" icon="Users" href="/nerve_blipcreator/blip-groups">
+    Crews where everyone sees the group's blips
   </Card>
   <Card title="Global blips and access" icon="Shield" href="/nerve_blipcreator/global-blips-and-access">
     Server blips and staff groups
   </Card>
 </Cards>
 
-## Three kinds of blips
+## Kinds of blips
 
 | Kind | Who sees it | Who can make it | Where it is saved |
 | --- | --- | --- | --- |
 | **Private** | Only the player who made it | Every player | On the player's own PC |
 | **Shared** | The owner and everyone they added | Every player | On the server |
+| **Group** | Everyone in the blip group | Group members | On the server |
 | **Global** | Every player on the server | Admins with global access | On the server |
 
 A new blip always starts private. When a player shares it for the first time it becomes a shared blip, and everyone in the group sees the owner's changes live. Global blips are separate and only staff can add them.
@@ -44,6 +48,7 @@ A new blip always starts private. When a player shares it for the first time it 
 - **Share with players near you.** They get an invite they can accept or decline.
 - **Share codes for crews and gangs.** Everyone who enters the code joins, and only that group sees the blip.
 - **Member control.** Owners can remove members, make a new code, turn the code off or stop sharing.
+- **Blip groups.** Create a group, invite up to 10 players (configurable), and everyone sees the blips any member adds to it.
 - **Admin-only global blips** that every player sees.
 - **Access tab** where managers choose which staff groups can place global blips, with no restart needed.
 - **Works with your notifications.** Supports lation_ui, ox_lib, okokNotify, brutal_notify, wasabi_notify, t-notify, mythic_notify, pNotify, qbx_core, ESX and more, or your own.

@@ -120,6 +120,30 @@ Config.Sharing = {
 | `InviteTimeout` | `60` | Seconds before an invite expires |
 | `MaxInvites` | `5` | Open invites one player can have at once |
 
+## Groups
+
+```lua
+Config.Groups = {
+    Enabled = true,
+    MaxMembers = 10,
+    MaxOwned = 3,
+    MaxJoined = 5,
+    MaxBlips = 50,
+    NameLength = 24,
+}
+```
+
+| Option | Default | What it does |
+| --- | --- | --- |
+| `Enabled` | `true` | Lets players create blip groups |
+| `MaxMembers` | `10` | Players in one group, including the owner |
+| `MaxOwned` | `3` | Groups one player can create |
+| `MaxJoined` | `5` | Groups one player can be in, including their own |
+| `MaxBlips` | `50` | Blips in one group |
+| `NameLength` | `24` | Longest group name |
+
+See [Blip groups](/nerve_blipcreator/blip-groups).
+
 ## Database
 
 ```lua
