@@ -117,9 +117,10 @@ does and how to use it — never how it is built.**
 - Flat background only: no grids, glows, aurora or particles.
 - Type is Plus Jakarta Sans (same as the store); code uses Geist Mono.
 - Header is `components/site-header.tsx`, passed as the notebook layout's `header`
-  slot: logo mark + name + tagline, centered links, search and an icon group. It turns
-  into a floating island on scroll (`.nd-island` in `app/global.css`). It reuses the
-  Fumadocs search, sidebar and theme slots, so keep those when editing it.
+  slot: logo mark + name + tagline, centered links, search and an icon group. It is a
+  solid bar pinned to the top that never changes on scroll (no floating island, no
+  blur). It reuses the Fumadocs search, sidebar and theme slots, so keep those when
+  editing it.
   Footer is `components/site-footer.tsx`.
 - Fumadocs also puts `data-card` on heading anchors, so card styles target
   `[data-card][class*="bg-fd-card"]` only.
