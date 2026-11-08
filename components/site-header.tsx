@@ -66,12 +66,12 @@ export function SiteHeader(props: ComponentProps<'header'>) {
     <header
       id="nd-subnav"
       {...props}
-      className="pointer-events-none sticky top-(--fd-docs-row-1) z-30 flex min-w-0 items-center px-3 [grid-area:header] layout:[--fd-header-height:--spacing(18)] md:px-5"
+      className="pointer-events-none sticky top-(--fd-docs-row-1) z-30 flex h-20 min-w-0 items-center px-3 [grid-area:header] layout:[--fd-header-height:--spacing(20)] md:px-5"
     >
       <nav
         aria-label="Main"
         data-island={island ? '' : undefined}
-        className="nd-island pointer-events-auto grid h-full w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
+        className="nd-island pointer-events-auto grid h-15 w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-4 xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
       >
         <div className="flex min-w-0 items-center justify-self-start">
           <Link href="/" className="flex h-12 min-w-0 items-center gap-3" aria-label={`${site.name} docs home`}>
@@ -91,7 +91,7 @@ export function SiteHeader(props: ComponentProps<'header'>) {
           </Link>
         </div>
 
-        <ul className="hidden items-center gap-1 lg:flex">
+        <ul className="hidden items-center gap-1 xl:flex">
           {nav.map((item) => {
             const active = !item.external && isActive(item.href);
             const cls = `flex h-10 items-center gap-1 rounded-lg px-3 text-[0.9375rem] font-semibold transition-colors ${
