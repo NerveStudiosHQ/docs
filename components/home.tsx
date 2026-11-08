@@ -72,7 +72,7 @@ export function Script({
 }) {
   return (
     <Link
-      href={`${id.startsWith('nexdev_') ? '/legacy' : ''}/${id}/overview`}
+      href={`/${id}/overview`}
       className="group flex gap-3 bg-bg p-4 transition-colors hover:bg-fd-card"
     >
       <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-fill-2 text-ink-3 transition-colors group-hover:bg-accent-dim group-hover:text-accent-hi [&_svg]:size-3.5">

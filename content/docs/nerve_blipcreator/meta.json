@@ -1,0 +1,16 @@
+{
+  "title": "Blip Creator",
+  "icon": "MapPin",
+  "pages": [
+    "overview",
+    "installation",
+    "using-the-menu",
+    "sharing",
+    "global-blips-and-access",
+    "configuration",
+    "notifications-and-languages",
+    "exports",
+    "troubleshooting",
+    "changelog"
+  ]
+}

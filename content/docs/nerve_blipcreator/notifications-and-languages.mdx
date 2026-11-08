@@ -1,0 +1,81 @@
+---
+title: "Notifications and languages"
+description: "Use your server's notification system with Nerve Studios Blip Creator, and change or translate its text."
+---
+
+## Notifications
+
+Nerve Studios Blip Creator works with the notification systems most servers already run. Set `Config.Notify` in `config.lua`.
+
+| Value | Uses |
+| --- | --- |
+| `'auto'` | The first supported system running on your server (default) |
+| `'lation_ui'` | lation_ui |
+| `'ox_lib'` | ox_lib |
+| `'okokNotify'` | okokNotify |
+| `'brutal_notify'` | Brutal Notify |
+| `'wasabi_notify'` | Wasabi Notify |
+| `'t-notify'` | t-notify |
+| `'mythic_notify'` | mythic_notify |
+| `'pNotify'` | pNotify |
+| `'qbx_core'` | Qbox notifications |
+| `'qb-core'` | qb-core notifications |
+| `'es_extended'` | ESX notifications |
+| `'native'` | The GTA feed above the minimap, with no extra resource |
+| `'custom'` | Your own code, see below |
+
+With `'auto'`, the script checks in this order and uses the first one that is started:
+
+`lation_ui`, `ox_lib`, `okokNotify`, `brutal_notify`, `wasabi_notify`, `t-notify`, `mythic_notify`, `pNotify`, `qbx_core`, `qb-core`, `es_extended`.
+
+If none of them are running, it uses the GTA feed.
+
+<Callout type="info">
+
+If you pick a system that isn't started, or it throws an error, the script falls back to the GTA feed so players still see the message.
+
+</Callout>
+
+### Using your own notifications
+
+1. Set `Config.Notify = 'custom'`.
+2. Open `notify.lua` in the resource folder.
+3. Replace the body of the `custom` function with your own call:
+
+```lua
+Notify['custom'] = function(title, text, kind)
+    exports['my_notify']:Send(title, text, kind)
+end
+```
+
+`kind` is `'success'`, `'error'` or `'inform'`. Map it to whatever your system expects.
+
+You can also tweak how any of the built-in systems are called in the same file, for example to change how long notifications stay on screen.
+
+## Languages
+
+Nine languages are included: English (`en`), German (`de`), Spanish (`es`), French (`fr`), Dutch (`nl`), Portuguese (`pt`), Italian (`it`), Polish (`pl`) and Turkish (`tr`).
+
+Set the language in `config.lua`:
+
+```lua
+Config.Locale = 'de'
+```
+
+This changes the menu and every notification.
+
+### Changing the text
+
+All text lives in the `locales/` folder, one file per language. To change a word or sentence, edit the value in your language's file and restart the resource. Keep every `%s` in place. It is replaced with a name, number or command, for example:
+
+```json
+"invite_sent": "Invite sent to %s."
+```
+
+### Adding a language
+
+1. Copy `locales/en.json` to a new file named after the language code, e.g. `locales/sv.json`.
+2. Translate the values. Leave the keys on the left as they are.
+3. Set `Config.Locale = 'sv'`.
+
+Any text missing from your file falls back to English, so you can translate it bit by bit.

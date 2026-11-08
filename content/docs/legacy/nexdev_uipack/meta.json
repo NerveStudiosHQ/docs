@@ -1,9 +1,0 @@
-{
-  "title": "UI Pack",
-  "icon": "Palette",
-  "pages": [
-    "overview",
-    "installation",
-    "troubleshooting"
-  ]
-}

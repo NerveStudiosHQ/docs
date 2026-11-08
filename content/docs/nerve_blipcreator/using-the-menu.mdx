@@ -1,0 +1,88 @@
+---
+title: "Using the menu"
+description: "Create, edit, place, preview, hide and duplicate blips from the Nerve Studios Blip Creator menu."
+---
+
+Open the menu with `/blips`, or the key you set in `Config.Keybind`. Players can also bind their own key in **Settings → Key Bindings → FiveM**. Press **Esc** to close it.
+
+## Tabs
+
+| Tab | What's in it |
+| --- | --- |
+| **My blips** | Your private blips, plus the blips you share with others |
+| **Shared with me** | Blips other players shared with you |
+| **Global blips** | Server blips every player sees. Only staff with global access can change them |
+| **Requests** | Invites from nearby players waiting for your answer |
+| **Access** | Managers only. Choose which staff groups can place global blips |
+
+Each tab has a search box and filters for **Point**, **Radius**, **Area** and **Hidden**.
+
+## Create a blip
+
+1. Go to **My blips** and click **New blip**.
+2. Pick a **Type**:
+   - **Point** is a single icon.
+   - **Radius** is a filled circle.
+   - **Area** is a filled rectangle you can resize and rotate.
+3. Type a **Name**. This is what shows in the map legend.
+4. Click **Change** next to **Icon** and pick one of 956 icons. Search by name or ID, or filter by category. Radius and area blips can also show an icon in the middle; turn it off with **Centre icon**.
+5. Pick a **Colour**.
+6. Set the **Location** (see below).
+7. Set the size: **Radius** for circles, or **Width**, **Height** and **Rotation** for areas.
+8. Choose where it shows under **Show on**: **Map**, **Minimap** or **Both**.
+9. Adjust **Icon size** and **Opacity** if you like. Turn on **Short range** to only show it on the minimap when you are close.
+10. Click **Create blip**.
+
+The blip appears on your map straight away.
+
+## Setting the location
+
+You never need to know coordinates. Under **Location** you can use:
+
+- **My position** places it where you are standing.
+- **Waypoint** places it on your current waypoint.
+- **Pick on map** closes the menu and opens the pause map. Place a waypoint where you want the blip and the menu comes back with that spot filled in. Close the map without placing one to cancel.
+
+You can also type exact **X**, **Y** and **Z** values.
+
+<Callout type="info">
+
+**Pick on map** puts your old waypoint back afterwards, so you don't lose your route.
+
+</Callout>
+
+## Preview on the map
+
+Click **Preview on map** in the editor to see the blip on the pause map before saving. It flashes so it's easy to spot. Close the map to return to the editor.
+
+## Edit or delete
+
+Every row in the list has these buttons:
+
+| Button | What it does |
+| --- | --- |
+| Flag | Sets a waypoint to the blip |
+| Eye | Hides or shows the blip on your map |
+| Copy | Duplicates the blip |
+| Share | Opens the share window (your own blips only) |
+| Pencil | Edits the blip |
+| Bin | Deletes your blip, or leaves a shared one |
+
+## Hide a blip
+
+Click the eye on any blip to hide it from your own map. This works on your blips, shared blips and global blips, and only affects you. Hidden blips stay in the list, dimmed, so you can show them again later. Use the **Hidden** filter to see just those.
+
+## Duplicate a blip
+
+Click the copy button and choose where the copy goes:
+
+- **At my position**
+- **At my waypoint**
+- **Pick on map**
+- **Same spot**
+
+The copy is a new private blip in **My blips**. Staff with global access can turn on **Create as global** to make the copy a global blip instead. Duplicating a shared or global blip is the easy way to keep your own copy of it.
+
+## Limits
+
+Each player can keep up to `Config.Limits.PrivateBlips` private blips (50 by default). The counter on **My blips** shows how many you have. See [Configuration](/nerve_blipcreator/configuration#limits) for all limits.

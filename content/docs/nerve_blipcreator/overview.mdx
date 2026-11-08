@@ -1,0 +1,86 @@
+---
+title: "Overview"
+description: "Nerve Studios Blip Creator lets players place their own map blips, share them with their crew, and lets admins add global blips the whole server sees."
+---
+
+Nerve Studios Blip Creator is a standalone blip editor for FiveM. Players open one menu to create, edit and share blips on the pause map and minimap. Admins use the same menu to add server-wide blips and to decide which staff groups can do that.
+
+It needs no framework and works on any FiveM server. The menu ships ready to use, with no build step.
+
+<Cards>
+  <Card title="Installation" icon="Rocket" href="/nerve_blipcreator/installation">
+    Get it running in five minutes
+  </Card>
+  <Card title="Using the menu" icon="Map" href="/nerve_blipcreator/using-the-menu">
+    Create, edit, hide and duplicate blips
+  </Card>
+  <Card title="Sharing" icon="Users" href="/nerve_blipcreator/sharing">
+    Nearby invites and share codes for crews
+  </Card>
+  <Card title="Global blips and access" icon="Shield" href="/nerve_blipcreator/global-blips-and-access">
+    Server blips and staff groups
+  </Card>
+</Cards>
+
+## Three kinds of blips
+
+| Kind | Who sees it | Who can make it | Where it is saved |
+| --- | --- | --- | --- |
+| **Private** | Only the player who made it | Every player | On the player's own PC |
+| **Shared** | The owner and everyone they added | Every player | On the server |
+| **Global** | Every player on the server | Admins with global access | On the server |
+
+A new blip always starts private. When a player shares it for the first time it becomes a shared blip, and everyone in the group sees the owner's changes live. Global blips are separate and only staff can add them.
+
+## Features
+
+- **Three blip types.** A point with an icon, a radius circle, or an area rectangle with width, height and rotation.
+- **956 icons** in a searchable picker with categories, and 41 GTA colours.
+- **Easy placement.** Use your position, your waypoint, or pick a spot on the pause map. You can also type coordinates.
+- **Preview on the map** before you save.
+- **Display options.** Show on the map, the minimap or both, with icon size, opacity and short range.
+- **Duplicate in one click** to your position, your waypoint, a spot on the map or the same spot.
+- **Hide any blip** from your own map, including shared and global blips.
+- **Share with players near you.** They get an invite they can accept or decline.
+- **Share codes for crews and gangs.** Everyone who enters the code joins, and only that group sees the blip.
+- **Member control.** Owners can remove members, make a new code, turn the code off or stop sharing.
+- **Admin-only global blips** that every player sees.
+- **Access tab** where managers choose which staff groups can place global blips, with no restart needed.
+- **Works with your notifications.** Supports lation_ui, ox_lib, okokNotify, brutal_notify, wasabi_notify, t-notify, mythic_notify, pNotify, qbx_core, ESX and more, or your own.
+- **Nine languages:** English, German, Spanish, French, Dutch, Portuguese, Italian, Polish and Turkish.
+- **Exports** so other resources can add and manage global blips.
+
+## Built for big servers
+
+Nerve Studios Blip Creator is designed for 600+ players with no noticeable server load.
+
+- Private blips never touch the server or the database.
+- Global blips load once when the resource starts and stay in memory.
+- A joining player costs one small database lookup.
+- Changes are sent as small updates only to the players who can see them.
+- Edits are saved in batches.
+- There are no background loops on the server or the client.
+
+## Security
+
+The server checks every request, so players can't create blips they aren't allowed to, edit other players' blips or spam the server.
+
+- Every field is validated and clamped: coordinates, sizes, icons, colours and names.
+- Blip names are cleaned of colour codes and formatting.
+- Permissions are checked on every request with ACE.
+- Owner-only actions are checked against the owner.
+- Nearby distance is measured on the server.
+- Every action is rate limited.
+
+## Requirements
+
+- A recent FiveM server artifact.
+- [oxmysql](https://github.com/overextended/oxmysql).
+- OneSync, but only for inviting nearby players. It is on by default on current servers.
+- Game build **3258** or newer to use every icon. Older builds work too: set `Config.Sprites.Max` lower so players only pick icons your build can draw.
+
+<Callout type="info">
+
+New here? Start with [Installation](/nerve_blipcreator/installation).
+
+</Callout>

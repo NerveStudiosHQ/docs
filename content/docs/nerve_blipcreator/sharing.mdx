@@ -1,0 +1,77 @@
+---
+title: "Sharing"
+description: "Share blips with players near you or with a share code, so your crew or gang all see the same blip."
+---
+
+Any player can share their own blips. There are two ways to add people, and you can use both on the same blip.
+
+| | Nearby invite | Share code |
+| --- | --- | --- |
+| Best for | One or two people next to you | A whole crew, gang or business |
+| How they join | Accept the invite in **Requests** | Enter the code under **Join with a share code** |
+| Needs them close by | Yes | No |
+
+Only the people in the group see a shared blip. When the owner edits it, every member's map updates straight away.
+
+## Share with someone near you
+
+1. Stand next to the player.
+2. In **My blips**, click the share button on your blip.
+3. Under **Players near you**, click **Invite** next to their name. Click refresh if they just walked up.
+4. They get a notification and the invite shows in their **Requests** tab.
+5. They click **Accept**, and the blip appears on their map.
+
+Invites expire after `Config.Sharing.InviteTimeout` seconds (60 by default). You are told when someone accepts or declines.
+
+<Callout type="info">
+
+Only players within `Config.Sharing.NearbyDistance` metres (15 by default) appear in the list. The server checks the distance, so it can't be faked.
+
+</Callout>
+
+## Share with a code
+
+1. Click the share button on your blip.
+2. Click **Create share code**. You get a code like `K7P2-QX9M`.
+3. Click the copy button and send it to your crew.
+4. They paste it into **Join with a share code**, at the bottom left of the menu, and press **Enter**.
+
+Everyone who enters the code joins the blip, and only they see it. This makes it ideal for gang turf, crew meet-ups and business locations.
+
+To control who can still join:
+
+- **New code** makes a fresh code. The old one stops working, and people already in the group stay in.
+- **Turn off code** stops anyone new from joining with a code.
+
+## Manage members
+
+The share window lists everyone in the group, with a green dot for players who are online.
+
+- Click **Remove** to take someone out. The blip disappears from their map straight away.
+- **Stop sharing** removes every member and makes the blip private again, saved on your PC.
+- Deleting a shared blip removes it for everyone.
+
+## As a member
+
+Shared blips show in **Shared with me** with the owner's name. You can:
+
+- **Hide** it from your map.
+- **Duplicate** it to keep your own private copy.
+- **Leave** the group with the leave button.
+
+You can't edit someone else's blip. Only the owner can change it.
+
+## What happens behind the scenes
+
+A new blip is private and lives only on your PC. The first time you invite someone or create a code, the blip is saved on the server so the group can see it. It moves from your private blips to your shared blips; it still shows in **My blips**, with a **Shared** label and the member count.
+
+## Limits
+
+| Option | Default | What it limits |
+| --- | --- | --- |
+| `Config.Limits.SharedBlips` | 20 | How many blips one player can share |
+| `Config.Limits.JoinedBlips` | 50 | How many shared blips one player can be in |
+| `Config.Limits.MembersPerBlip` | 50 | How many people can be in one shared blip |
+| `Config.Sharing.MaxInvites` | 5 | Open invites one player can have at once |
+
+To turn sharing off completely, set `Config.Sharing.Enabled = false`. To keep only one of the two methods, use `Config.Sharing.Nearby` or `Config.Sharing.Codes`.

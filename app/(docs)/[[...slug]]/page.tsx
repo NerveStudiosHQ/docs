@@ -62,7 +62,7 @@ export async function generateMetadata(
   // aren't just sixteen different "Overview | Nerve Studios" entries.
   const folder = page.slugs
     .slice(0, -1)
-    .find((slug) => slug.startsWith('nexdev_') || slug.startsWith('nerve_'));
+    .find((slug) => slug.startsWith('nerve_'));
   const title =
     folder
       ? `${page.data.title} · ${folder}`

@@ -1,0 +1,151 @@
+---
+title: "Configuration"
+description: "Every option in the Nerve Studios Blip Creator config.lua, what it does and its default."
+---
+
+All settings live in `config.lua` in the resource folder. Restart the resource after changing it.
+
+<Callout type="info">
+
+If a value is the wrong type or out of range, the script doesn't break. It prints a yellow warning in the server console naming the option, and uses a safe value instead.
+
+</Callout>
+
+## General
+
+| Option | Default | What it does |
+| --- | --- | --- |
+| `Config.Locale` | `'en'` | Language. One of `en`, `de`, `es`, `fr`, `nl`, `pt`, `it`, `pl`, `tr`. See [Languages](/nerve_blipcreator/notifications-and-languages#languages) |
+| `Config.Command` | `'blips'` | Chat command that opens the menu |
+| `Config.Keybind` | `''` | Default key that opens the menu, e.g. `'F7'`. Leave empty for no default key. Players can rebind it in their settings |
+| `Config.Notify` | `'auto'` | Which notification system to use. See [Notifications](/nerve_blipcreator/notifications-and-languages#notifications) |
+| `Config.JoinBandwidth` | `250000` | Bytes per second used to send global blips to a joining player. Only lower it if you have thousands of global blips and slow joins |
+| `Config.Debug` | `false` | Extra console output. Only turn on when support asks |
+
+Key names for `Config.Keybind` are listed in the [FiveM keyboard reference](https://docs.fivem.net/docs/game-references/input-mapper-parameter-ids/keyboard/).
+
+## Access
+
+```lua
+Config.Access = {
+    Ace = 'blipcreator',
+    PersonalForEveryone = true,
+    MaxGroups = 25,
+}
+```
+
+| Option | Default | What it does |
+| --- | --- | --- |
+| `Ace` | `'blipcreator'` | ACE permission for managers. Managers have full access and the **Access** tab. Groups also get `<Ace>.global` and `<Ace>.use` |
+| `PersonalForEveryone` | `true` | `true` lets every player make and share their own blips. `false` limits that to managers and groups with **Personal** turned on |
+| `MaxGroups` | `25` | How many staff groups can be added in the **Access** tab |
+
+See [Global blips and access](/nerve_blipcreator/global-blips-and-access).
+
+## Limits
+
+```lua
+Config.Limits = {
+    PrivateBlips = 50,
+    SharedBlips = 20,
+    JoinedBlips = 50,
+    MembersPerBlip = 50,
+    GlobalBlips = 500,
+    NameLength = 32,
+    Radius = { min = 10, max = 3000 },
+    Area = { min = 10, max = 4000 },
+    Scale = { min = 0.5, max = 1.6 },
+    MinOpacity = 40,
+}
+```
+
+| Option | Default | What it does |
+| --- | --- | --- |
+| `PrivateBlips` | `50` | Private blips a player can keep on their PC |
+| `SharedBlips` | `20` | Blips a player can share with others |
+| `JoinedBlips` | `50` | Shared blips a player can be a member of |
+| `MembersPerBlip` | `50` | Members in one shared blip |
+| `GlobalBlips` | `500` | Global blips on the whole server |
+| `NameLength` | `32` | Longest blip name, 4 to 48 characters |
+| `Radius` | `10` to `3000` | Smallest and largest radius in metres |
+| `Area` | `10` to `4000` | Smallest and largest area width and height in metres |
+| `Scale` | `0.5` to `1.6` | Smallest and largest icon size |
+| `MinOpacity` | `40` | Lowest opacity a blip can have, 0 to 255. Stops invisible blips |
+
+## Sprites
+
+```lua
+Config.Sprites = {
+    Max = 965,
+    GlobalOnly = {},
+    ImageUrl = 'https://docs.fivem.net/blips/{file}',
+}
+```
+
+| Option | Default | What it does |
+| --- | --- | --- |
+| `Max` | `965` | Highest icon ID players can pick. Icons up to 965 need game build 3258 or newer. On an older build, lower this so players don't pick icons that show as blank |
+| `GlobalOnly` | `{}` | Icon IDs only global blips can use, e.g. `{ 60, 61, 137 }` |
+| `ImageUrl` | FiveM docs | Where the icon picker loads its preview images. `{file}`, `{name}` and `{id}` are filled in. See below |
+
+### Hosting icon images yourself
+
+The icon picker loads preview images from the FiveM documentation by default. To host them yourself:
+
+1. Put the icon images in an `html/sprites/` folder inside the resource, named like `radar_level.png`.
+2. Add `'html/sprites/*'` to the `files` list in `fxmanifest.lua`.
+3. Set `ImageUrl = 'sprites/{file}'`.
+
+This only changes the previews in the menu. The blips on the map always use the game's own icons.
+
+## Sharing
+
+```lua
+Config.Sharing = {
+    Enabled = true,
+    Nearby = true,
+    NearbyDistance = 15.0,
+    Codes = true,
+    InviteTimeout = 60,
+    MaxInvites = 5,
+}
+```
+
+| Option | Default | What it does |
+| --- | --- | --- |
+| `Enabled` | `true` | Turns all sharing on or off |
+| `Nearby` | `true` | Lets players invite people standing near them. Needs OneSync |
+| `NearbyDistance` | `15.0` | How close, in metres, a player must be to be invited |
+| `Codes` | `true` | Lets players share with a code |
+| `InviteTimeout` | `60` | Seconds before an invite expires |
+| `MaxInvites` | `5` | Open invites one player can have at once |
+
+## Database
+
+```lua
+Config.Database = {
+    AutoInstall = true,
+    SaveDelay = 3,
+}
+```
+
+| Option | Default | What it does |
+| --- | --- | --- |
+| `AutoInstall` | `true` | Creates the tables on start. Set to `false` if you imported `install/nerve_blipcreator.sql` yourself |
+| `SaveDelay` | `3` | Seconds edits are grouped before they are written to the database. New and deleted blips are saved straight away |
+
+## Security
+
+```lua
+Config.Security = {
+    RateScale = 1.0,
+    KickOnTamper = false,
+    Identifier = 'license',
+}
+```
+
+| Option | Default | What it does |
+| --- | --- | --- |
+| `RateScale` | `1.0` | Multiplies every rate limit. `2.0` allows twice as many requests. Normal players never hit the default limits |
+| `KickOnTamper` | `false` | Kicks players who send requests the real menu can never send, a sign of a mod menu or exploit attempt. They are always logged in the console |
+| `Identifier` | `'license'` | Identifier blips are saved under: `license`, `license2`, `fivem`, `discord` or `steam`. Don't change it after players have shared blips, or they lose access to them |

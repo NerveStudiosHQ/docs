@@ -10,18 +10,15 @@
 
 ## Structure
 
-- Two sections. The main one holds the current `nerve_*` scripts; **NEX.dev
-  scripts** (`content/docs/legacy/`, a Fumadocs root folder with
-  `"root": true`) holds the original `nexdev_*` scripts and their changelog.
-  Old `/nexdev_*` URLs redirect to `/legacy/nexdev_*` in `next.config.mjs`.
+- One section holding the current `nerve_*` scripts. The original
+  `nexdev_*` scripts and their pages were removed.
 - One folder per script, each with `overview`, `installation`,
   `configuration`, `troubleshooting` and `changelog` pages plus any extra
   pages it needs.
 - Shared pages live under `content/docs/general/`; the release overview under
   `content/docs/changelog/`.
 - Page URLs mirror the folder path with no prefix:
-  `content/docs/nerve_garages/installation.mdx` -> `/nerve_garages/installation`,
-  `content/docs/legacy/nexdev_garages/installation.mdx` -> `/legacy/nexdev_garages/installation`.
+  `content/docs/nerve_blipcreator/installation.mdx` -> `/nerve_blipcreator/installation`.
 - Internal links are root-relative and omit the file extension.
 - Adding a page: create the `.mdx` file **and** add its name to the folder's
   `meta.json` `pages` array, or it will not show in the sidebar.

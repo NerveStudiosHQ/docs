@@ -1,0 +1,73 @@
+---
+title: "Troubleshooting"
+description: "Fixes for the most common Nerve Studios Blip Creator problems."
+---
+
+## The menu doesn't open
+
+- **"Your blips are still loading"**: wait a few seconds after joining and try again.
+- **"You do not have access to the blip creator"**: `Config.Access.PersonalForEveryone` is `false` and you aren't a manager or in a group with **Personal** access. See [Global blips and access](/nerve_blipcreator/global-blips-and-access).
+- **Nothing happens at all**: check the server console for errors. Make sure `oxmysql` starts before `nerve_blipcreator` and that the folder is named exactly `nerve_blipcreator`.
+- **The menu is missing or blank**: re-download the script from your purchase. A file was lost when it was unzipped or uploaded.
+
+## I'm an admin but I can't add global blips
+
+1. Check `server.cfg` has `add_ace group.admin blipcreator allow`, or that your group has global access in the **Access** tab.
+2. Check you are actually in that group. In the server console run `test_ace player.<your server id> blipcreator`. It should say `true`.
+3. Reopen the menu. Access is checked every time it opens.
+
+## Groups added in the Access tab don't get access
+
+The resource needs permission to apply them. Add both lines to `server.cfg` and restart:
+
+```cfg
+add_ace resource.nerve_blipcreator command.add_ace allow
+add_ace resource.nerve_blipcreator command.remove_ace allow
+```
+
+When groups are set up but these lines are missing, the server console warns about it on start.
+
+## Nobody shows under "Players near you"
+
+- The other player must be within `Config.Sharing.NearbyDistance` metres (15 by default). Stand closer and click refresh.
+- Your server needs OneSync. It is on by default, but check that `onesync` isn't set to `off` in `server.cfg` or txAdmin.
+- When `Config.Access.PersonalForEveryone` is `false`, only players with access appear.
+
+## A share code doesn't work
+
+- Codes are 8 letters and numbers, e.g. `K7P2-QX9M`. The dash and spaces are optional.
+- The owner may have made a new code or turned the code off. Ask them for the current one.
+- If you see "Slow down a little", you tried too many codes. Wait a minute.
+
+## A blip shows blank or as the wrong icon
+
+Your server's game build is older than the icon. Either set a newer build with `sv_enforceGameBuild` in `server.cfg`, or lower `Config.Sprites.Max` so players can't pick it.
+
+## Icon previews in the menu are empty
+
+The picker loads its previews from the internet by default. If your players can't reach it, host the images yourself. See [Hosting icon images yourself](/nerve_blipcreator/configuration#hosting-icon-images-yourself). The blips on the map aren't affected.
+
+## My private blips are gone
+
+Private blips are saved on the player's own PC for your server. They are lost if:
+
+- the player reinstalls FiveM or deletes its local data
+- they play from a different PC
+
+To keep a blip safe across PCs, share it. Shared blips are saved on the server.
+
+## Notifications don't show or look wrong
+
+Set `Config.Notify` to the system your server uses instead of `'auto'`. If your system isn't listed, use `'custom'` and edit `notify.lua`. See [Notifications](/nerve_blipcreator/notifications-and-languages#notifications).
+
+## Yellow warnings in the console on start
+
+A value in `config.lua` has the wrong type or is out of range. The warning names the option. The script uses a safe value until you fix it.
+
+## "Could not create tables"
+
+Your database user can't create tables. Import `install/nerve_blipcreator.sql` with your database tool, then set `Config.Database.AutoInstall = false`.
+
+## Still stuck?
+
+Turn on `Config.Debug = true`, restart the resource and reproduce the problem. Then open a ticket on [Discord](https://discord.gg/nervestudios) with your server console output. See [Support](/general/support) for what to include.
