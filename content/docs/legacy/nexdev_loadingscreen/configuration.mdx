@@ -1,0 +1,189 @@
+---
+title: "Configuration"
+description: "Everything lives in lua/config.lua. Edit, then restart nexdev_loadingscreen."
+---
+
+Music and asset paths have their own dedicated page — see [Music & assets](/legacy/nexdev_loadingscreen/music).
+
+## Server identity
+
+```lua
+Config.Server = {
+    name    = 'Your Server',
+    tagline = 'Your tagline here.',
+    version = '1.0.0',
+}
+```
+
+Shown in the center hero block when `Config.UI.showServerName` / `showServerTagline` are on, and next to the `versionLabel` string in the bottom dock when `showVersion` is on.
+
+## Theme
+
+Any valid CSS color works — hex, `rgb()`, `rgba()`, `hsl()`. `primary` and `secondary` drive every gradient on screen (music player play button, progress bar, "Enter Server" button, glows). Change those two and the whole UI re-skins.
+
+```lua
+Config.Theme = {
+    primary    = '#ffffff',                    -- main accent
+    secondary  = '#a3a3a3',                    -- gradient companion
+    tertiary   = '#e5e5e5',                    -- subtle highlights (icons, glow tints)
+    text       = '#ffffff',                    -- body text
+    glow       = 'rgba(255, 255, 255, 0.35)',  -- soft glow under cards / buttons
+    cardTint   = 'rgba(30, 30, 30, 0.82)',     -- top color of glass cards
+    cardDeep   = 'rgba(8,  8,  8,  0.92)',     -- bottom color of glass cards
+}
+```
+
+**Two-color re-skin example:**
+
+```lua
+Config.Theme.primary   = '#22d3ee'
+Config.Theme.secondary = '#3b82f6'
+Config.Theme.glow      = 'rgba(34, 211, 238, 0.5)'
+```
+
+Every button, progress-bar fill, icon accent and floating particle re-tints automatically.
+
+## Social links (bottom-left)
+
+`enabled = false` hides a row. `label` is the visible text — rename it to anything (e.g. *Join the Discord*, *Forums*, *Rules*).
+
+```lua
+Config.Links = {
+    { key = 'discord', icon = 'discord', enabled = true,  label = 'Discord', url = 'https://discord.gg/yours' },
+    { key = 'store',   icon = 'store',   enabled = true,  label = 'Store',   url = 'https://yours.tebex.io/' },
+    { key = 'website', icon = 'globe',   enabled = true,  label = 'Website', url = 'https://yours.com' },
+}
+```
+
+**Available icons:** `discord`, `store`, `globe`, `twitter`, `youtube`, `instagram`, `github`, `link`.
+
+Add as many extra rows as you want — the list scrolls if it overflows.
+
+## UI strings
+
+Every static label on screen, in one place — translate or rebrand freely.
+
+```lua
+Config.Strings = {
+    versionLabel = 'Version',
+    loadingLabel = 'Loading the city…',
+    enterButton  = 'Enter Server',
+    createdBy    = 'Created by',
+}
+```
+
+<Callout type="info">
+
+  The "Created by Nerve Studios" watermark in the bottom-right is the author signature and is not configurable. The `createdBy` string above controls the *label* shown next to it.
+
+</Callout>
+
+## Server logo
+
+```lua
+Config.Assets = {
+    serverLogo = './assets/logo.png',
+}
+```
+
+Replace `html/assets/logo.png` with your own image, or change the path to a different asset under `html/`. Paths are relative to the `html/` folder.
+
+## Stats panel (top-left)
+
+The numbers in the top-left are **live** — `server.lua` pushes real player count, max slots (from `sv_maxClients`) and uptime (from when this resource started) to every connecting client. You only decide which rows to show and how often the server broadcasts.
+
+```lua
+Config.Stats = {
+    enabled         = true,
+    showClock       = true,   -- real-world time on the player's machine
+    showUptime      = true,   -- server uptime ("N days N hours")
+    showPlayerCount = true,   -- live count from GetPlayers() + sv_maxClients
+    poll            = 5000,   -- ms between server-side broadcasts
+    timezone        = 'EST',  -- label shown next to the real-world clock
+}
+```
+
+5000 ms is a sane default — fast enough to feel live, slow enough not to spam. Set `showPlayerCount = false` if you'd rather hide the count during launch events.
+
+## Feature carousel (center)
+
+Replace the empty middle with a rotating showcase of your server's features. Each card cycles every `intervalMs`.
+
+```lua
+Config.Features = {
+    enabled    = true,
+    intervalMs = 6500,
+    items = {
+        { icon = 'car',  title = '200+ Vehicles',
+          subtitle = 'Street to supercars',
+          description = "Exclusive rides you won't find elsewhere." },
+        { icon = 'home', title = 'Real Estate',
+          subtitle = 'Buy, sell, decorate',
+          description = 'Own apartments, mansions and businesses across the city.' },
+        -- add as many as you like
+    },
+}
+```
+
+**Available icons:** `car`, `home`, `briefcase`, `users`, `sparkles`, `shield`, `gift`, `gamepad`, `crown`, `zap`, `heart`, `map`.
+
+## Tips (rotating, bottom)
+
+```lua
+Config.Tips = {
+    'Press F1 in-game to open the player menu.',
+    'Join the Discord for giveaways and event announcements.',
+    'Need help? Open a ticket in the #support channel.',
+}
+```
+
+Rotation interval is controlled by `Config.UI.tipIntervalMs` (default `6000`).
+
+## UI toggles
+
+Every section of the screen can be hidden individually.
+
+```lua
+Config.UI = {
+    -- Center hero
+    showServerLogo    = true,
+    showServerName    = true,
+    showServerTagline = true,
+
+    -- Bottom dock
+    showMusicPlayer = true,
+    showTips        = true,
+    showSocialLinks = true,
+    showVersion     = true,
+
+    -- Visual layers
+    showStats       = true,   -- top-left server stats panel
+    showFeatures    = true,   -- center rotating feature cards
+    showParticles   = true,   -- floating ambient particles behind everything
+    showVisualizer  = true,   -- audio bars next to track art in the music player
+
+    -- Music player behavior
+    autoplayMusic = true,
+    initialVolume = 0.5,
+    tipIntervalMs = 6000,
+}
+```
+
+## Behavior
+
+```lua
+Config.ReadyDelay  = 1500   -- ms to wait after the game reports ready before
+                            -- showing the "Enter Server" overlay (or auto-dismissing).
+                            -- A small delay lets the overlay animate in cleanly.
+
+Config.RequireClick = true  -- true:  player clicks "Enter Server" to start
+                            -- false: auto-dismiss the moment the game is ready
+```
+
+## Keyboard shortcuts (during loading)
+
+| Key     | Action             |
+| ------- | ------------------ |
+| `Space` | Play / pause song  |
+| `→`     | Next track         |
+| `←`     | Previous track     |

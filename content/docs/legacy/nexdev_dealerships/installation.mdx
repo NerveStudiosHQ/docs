@@ -1,0 +1,78 @@
+---
+title: "Installation"
+description: "How to install Nerve Studios Dealerships on your FiveM server."
+---
+
+## Requirements
+
+* FiveM server with `lua54` enabled
+* MySQL or MariaDB
+* One of: [`qbx_core`](https://github.com/Qbox-project/qbx_core), [`qb-core`](https://github.com/qbcore-framework/qb-core), or [`es_extended`](https://github.com/esx-framework/esx_core)
+* [`ox_lib`](https://github.com/overextended/ox_lib)
+* [`oxmysql`](https://github.com/overextended/oxmysql)
+
+Everything else is optional and auto-detected — see [Optional integrations](/legacy/nexdev_dealerships/integrations).
+
+## Steps
+
+1. Drop the resource into your server, e.g. `resources/[nerve]/nexdev_dealerships/`.
+
+2. Add it to your `server.cfg` **after** its dependencies:
+
+   ```
+   ensure oxmysql
+   ensure ox_lib
+   ensure qbx_core           # or qb-core / es_extended
+   ensure nexdev_dealerships
+   ```
+
+3. Start your server. The database tables are created automatically on first start — no SQL to run.
+
+4. Grant admin access for the catalog panel. Either:
+
+   ```
+   add_ace group.admin nexdev_dealerships.admin allow
+   ```
+
+   …or rely on the default FiveM admin groups (`group.admin`, `group.superadmin`). Both are accepted out of the box.
+
+5. In-game, run `/dealershipadmin` → **Import** and pick your framework. This loads the bundled vehicle list from `qb-core` / `qbox` / `esx` into the dealership catalog.
+
+That's it — the four default dealerships (PDM, boats, air, trucks) appear on the map.
+
+<Callout type="info">
+
+  Vehicles only show up at a lot once the **catalog** has entries and the lot's **Categories** match those vehicles' categories. Step 5 is what wires those up — don't skip it.
+
+</Callout>
+
+## Manual SQL install (optional)
+
+The resource creates all `nexdev_dealership_*` tables on boot. If you'd rather pre-create them — to inspect the schema, split maintenance windows, or pre-grant DB permissions — run the matching file from `install/`:
+
+| File | When to use |
+|------|-------------|
+| `install/install-qb.sql` | QBCore / Qbox servers |
+| `install/install-esx.sql` | ESX servers |
+| `install/existing.sql` | Seeds the catalog with ~864 stock GTA vehicles. Optional — you can also seed via the admin panel's **Import** tab. |
+
+All statements use `CREATE TABLE IF NOT EXISTS` and are safe to re-run.
+
+## Checking it worked
+
+From F8:
+
+```
+lua print(GetResourceState('nexdev_dealerships'))
+```
+
+Should print `started`. If it prints `missing` or `stopped`, fix `server.cfg` and restart.
+
+To check that the framework was detected, temporarily set `Config.Debug = true` in `shared/config.lua` and restart — boot logs print the detected framework, notify system, target system, and keys system.
+
+## Updating
+
+`shared/config.lua`, `shared/locations.lua`, `shared/locale.lua`, `shared/vehicles.lua`, and every file in `integrations/` are listed under `escrow_ignore` and are preserved across updates. Catalog, settings, sales, loans, employees, stock, orders, and display-vehicle data all live in MySQL and are preserved automatically.
+
+1. Replace the resource files with the new version (keep your edited `shared/` and `integrations/` files).
+2. Restart the server.

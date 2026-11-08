@@ -1,0 +1,47 @@
+---
+title: "Commands"
+description: "All commands are registered via lib.addCommand, so they show up in ox_lib's chat suggestions for the players who can actually use them. Each command's name is configurable from shared/config.lua."
+---
+
+| Command | Who | Configured at | What it does |
+|---------|-----|---------------|--------------|
+| `/dealershipadmin` | Admins (ace `nexdev_dealerships.admin`, `group.admin`, or `group.superadmin`) | `Config.AdminPanel.Command` | Opens the [admin panel](/legacy/nexdev_dealerships/admin-panel) — catalog editor, importer, dealership ownership controls. |
+| `/dealershipmgmt` | Dealership owners and managers (job, owner ID, or ace `nexdev_dealerships.manage`) | `Config.Management.Command` | Opens the [management dashboard](/legacy/nexdev_dealerships/management) for any owned lot the caller has access to. |
+| `/financemenu` | Anyone with active loans (or to read the empty state) | `Config.Financing.Command` | Opens the [financing menu](/legacy/nexdev_dealerships/usage#financing) — active loans, pay early, pay off. |
+| `/sellvehicle` | Any player near a dealership | `Config.SellVehicle.Command`<br />*(currently always `sellvehicle`)* | Opens the [buyback menu](/legacy/nexdev_dealerships/usage#selling-a-vehicle-back) for vehicles you own. |
+
+Set any command name to `''` (empty string) in config to disable the command. The underlying server events still work — useful if you want to call them from your own UI or hotkey.
+
+## Renaming a command
+
+Change the value in `shared/config.lua` and restart `nexdev_dealerships`:
+
+```lua
+Config.Financing.Command  = 'mycarloans'        -- /mycarloans
+Config.Management.Command = 'dealership'        -- /dealership
+Config.AdminPanel.Command = 'vehadmin'          -- /vehadmin
+```
+
+Players have to reconnect for chat suggestions to refresh; the command itself works immediately.
+
+## Granting admin / management access
+
+| Permission | What it unlocks | How to grant |
+|------------|-----------------|--------------|
+| `nexdev_dealerships.admin` | `/dealershipadmin` | `add_ace identifier.steam:<HEX> nexdev_dealerships.admin allow` |
+| `nexdev_dealerships.manage` | `/dealershipmgmt` for **every** owned lot (admin bypass) | `add_ace identifier.steam:<HEX> nexdev_dealerships.manage allow` |
+| (none) | `/dealershipmgmt` for the lot you're the owner of | Set via `/dealershipadmin` → **Set Owner**. |
+| (none) | `/dealershipmgmt` for the lot whose `Owner = 'jobName'` matches your current job | Hire them via the management dashboard's Employees tab, or set their job manually. |
+
+Admins in `group.admin` / `group.superadmin` get `/dealershipadmin` automatically without needing the ace — but they do **not** get `/dealershipmgmt` blanket-access unless they also hold the `nexdev_dealerships.manage` ace.
+
+## Server events (for integrators)
+
+If you want to wire these into your own UI:
+
+| Event | Direction | What it does |
+|-------|:---------:|--------------|
+| `nexdev_dealerships:admin:requestOpen` | client → server | Same as `/dealershipadmin`. Server runs the ace check. |
+| `nexdev_dealerships:management:requestOpen` | client → server | Same as `/dealershipmgmt`. Server runs the per-lot access check. |
+| `nexdev_dealerships:sell:open` | server → client | Opens the buyback UI for a given source. Trigger from your own command if you want to gate buybacks differently. |
+| `nexdev_dealerships:finance:open` | server → client | Opens the financing menu. |

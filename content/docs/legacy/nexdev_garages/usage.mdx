@@ -1,0 +1,65 @@
+---
+title: "Player usage"
+description: "What players see and do: storing, retrieving, and every vehicle action in the garage UI."
+---
+
+## Opening a garage
+
+Walk to a garage marker and press **E** (configurable in
+`config/controls.lua`), or use `ox_target` / `qb-target` / the `ox_lib`
+radial menu if enabled in `config/integrations.lua`.
+
+## Storing a vehicle
+
+Drive into the garage radius and press **E**. The vehicle's fuel, engine,
+body, mods and (optionally) per-panel deformation are saved with it. If the
+garage has a store fee or a capacity limit, both are checked here.
+
+## The garage panel
+
+The panel lists your vehicles with a thumbnail, plate, speed class and status
+chip — parked here, left out, at another garage, or impounded. Search by name
+or plate, and filter by state. Expanding a vehicle shows its fuel, engine and
+body condition, mileage, and every available action:
+
+| Action | What it does |
+|---|---|
+| **Take out** | Spawns the vehicle at a free spawn point. Left-out or destroyed vehicles cost the towing fee (`Retrieval.returnCost`) |
+| **Repair** | Fixes engine, body and deformation for a fee based on missing condition (`Features.repair`) |
+| **Transfer** | Moves the vehicle to another garage (for a fee) or gifts it to a nearby player |
+| **Share** | Grants up to `maxShares` players access to take the vehicle out |
+| **Sell** | Sends a purchase offer to another player. The buyer gets a confirmation popup showing the seller, vehicle, plate and price, and must accept within `Features.sellVehicle.offerTimeoutSeconds` (default 30s). On accept the price is charged to whichever of their cash or bank balance covers it — nothing moves until they say yes, and declining, disconnecting or timing out cancels the sale |
+| **Rename** | Sets a nickname shown instead of the model name (word-filtered) |
+| **Pin** | Pins the vehicle to the top of your list |
+| **Track** | Marks a left-out vehicle on the map. With `Features.trackBlip.live` enabled (default) the blip follows the vehicle in real time — even while someone is driving it — with a GPS route, until the tracker expires or the vehicle is stored |
+
+<Callout type="info">
+
+  Player pickers (transfer, share, sell) only list players within
+  `Transfers.nearbyPlayerRadius` metres (10 by default) — and the same
+  distance is enforced server-side when the action runs. Set it to `false`
+  to allow the whole server.
+
+</Callout>
+
+Financed vehicles show a **Financed** tag and can be blocked from take-out
+and transfer until paid off (`Features.finance`).
+
+## Mileage & servicing
+
+With `Features.mileage` enabled, every vehicle tracks a real odometer —
+distance is measured client-side while the vehicle is actually driven and
+persists with the vehicle. Past the service interval — or when engine/body
+drop below the thresholds — the UI shows a **needs service** hint until the
+vehicle is repaired.
+
+## Going inside
+
+Garages with interiors enabled show a **Go inside** button — a walkable
+showroom displaying the vehicles parked at that garage. Press **E** at the
+exit to leave.
+
+## Impounded vehicles
+
+Impounded vehicles appear in the impound lot's panel with the reason, fee
+and release time — see [Impound](/legacy/nexdev_garages/impound).

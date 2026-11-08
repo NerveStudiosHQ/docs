@@ -1,0 +1,154 @@
+---
+title: "Permissions"
+description: "The layered permission stack for nexdev_scalemenu — defaultPermissions, ACE, identifier whitelist, and Discord roles."
+---
+
+`nexdev_scalemenu` has a tiered permission system. It is **disabled by default**, so out of the box everyone can open and reset their own scale. When you enable it, access is resolved through four layers in order.
+
+## Action names
+
+Every permission grant is expressed in terms of four actions:
+
+| Action | Controls |
+| --- | --- |
+| `openSelf` | Opening the menu for yourself (`/scale`) |
+| `openOther` | Opening the menu for another player (`/scale <id>`) |
+| `resetSelf` | Resetting your own scale (`/resetscale`) |
+| `resetOther` | Resetting another player's scale (`/resetscale <id>`) |
+
+## How resolution works
+
+When `permissions.enabled = false`, every check returns `true` — everyone has every action. When it is `true`, the resolver grants an action if **any** of these layers allows it, checked in order. The first layer to grant wins:
+
+1. **`defaultPermissions`** — a baseline applied to everyone.
+2. **ACE** — FiveM ACE groups.
+3. **Identifier whitelist** — exact player identifiers.
+4. **Discord roles** — live role lookup via a bot token.
+
+If no layer grants the action, it is denied.
+
+<Callout type="info">
+
+  Because the layers are additive, `defaultPermissions` acts as a floor for everyone, and ACE, whitelist, and Discord only ever **add** extra actions on top.
+
+</Callout>
+
+## Enabling the system
+
+```lua
+permissions = {
+    enabled = true,
+
+    defaultPermissions = {
+        openSelf  = true,
+        openOther = false,
+        resetSelf = true,
+        resetOther = false,
+    },
+    -- ace, whitelist, discord below
+},
+```
+
+The defaults above let everyone open and reset their own scale, while reserving `openOther` and `resetOther` for the layers below.
+
+## ACE permissions
+
+Map an ACE object to a set of actions. A player who is ACE-allowed for that object receives those actions.
+
+```lua
+ace = {
+    ["nexdev_scalemenu.admin"] = {
+        openSelf  = true,
+        openOther = true,
+        resetSelf = true,
+        resetOther = true,
+    },
+},
+```
+
+Grant the ACE object to a group in `server.cfg`:
+
+```cfg
+add_ace group.admin nexdev_scalemenu.admin allow
+```
+
+Any player in `group.admin` now has all four actions, including `openOther` and `resetOther`.
+
+## Identifier whitelist
+
+Grant actions to specific players by any identifier prefix they carry: `license`, `steam`, `discord`, `ip`, `fivem`, `live`, or `xbl`. The key is the full identifier.
+
+```lua
+whitelist = {
+    ["license:abcdef1234567890"] = {
+        openSelf  = true,
+        openOther = true,
+        resetSelf = true,
+        resetOther = true,
+    },
+},
+```
+
+<Callout type="info">
+
+  The whitelist is matched against **every** identifier the player carries, so any one of their prefixes can match.
+
+</Callout>
+
+## Discord roles
+
+Discord role permissions are resolved live by querying the Discord API with a bot token. Results are cached per player for `cacheSeconds`.
+
+```lua
+discord = {
+    enabled  = false,
+    botToken = "",
+    guildId  = "",
+    cacheSeconds = 300,
+    roles = {
+        -- ["123456789012345678"] = { openSelf = true, openOther = true, resetSelf = true, resetOther = true },
+    },
+},
+```
+
+| Key | Default | Description |
+| --- | --- | --- |
+| `enabled` | `false` | Turn Discord role checks on or off |
+| `botToken` | `""` | Your Discord bot token |
+| `guildId` | `""` | The guild (server) ID to look players up in |
+| `cacheSeconds` | `300` | How long to cache a player's roles (5 minutes) |
+| `roles` | `{}` | Map of role ID to granted actions |
+
+### Setup
+
+1. Create a Discord application and bot at [discord.com/developers/applications](https://discord.com/developers/applications), then copy the **Bot Token**.
+2. Enable the **Server Members Intent** in the bot's settings.
+3. Invite the bot to your guild with at least the **View Server Members** permission.
+4. Fill in `config.lua`:
+
+   ```lua
+   discord = {
+       enabled  = true,
+       botToken = "your-bot-token-here",
+       guildId  = "your-guild-id",
+       cacheSeconds = 300,
+       roles = {
+           ["123456789012345678"] = {
+               openSelf  = true, openOther  = true,
+               resetSelf = true, resetOther = true,
+           },
+       },
+   },
+   ```
+
+<Callout type="info">
+
+  To copy IDs, enable Developer Mode in Discord. Right-click your server icon for the **guild ID**, and right-click a role in **Server Settings → Roles** for a **role ID**. Roles are checked top-to-bottom, and the first match wins.
+
+</Callout>
+
+<Callout type="warn">
+
+  If the bot token, guild ID, or the **Server Members Intent** is missing or wrong, the Discord lookup returns no roles and the Discord layer simply grants nothing. The other layers still apply. See [Troubleshooting](/legacy/nexdev_scalemenu/troubleshooting).
+
+</Callout>

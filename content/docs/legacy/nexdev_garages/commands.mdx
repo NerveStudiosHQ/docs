@@ -1,0 +1,31 @@
+---
+title: "Commands"
+description: "Every staff and admin command, and where to rename them."
+---
+
+Command names are configurable — `config/commands.lua` for the admin
+commands, `config/impound.lua` for the impound command,
+`config/private-garages.lua` and `config/custom-garages.lua` for their
+respective panels, and `config/features.lua` for the audit log.
+
+| Default | Who | What |
+|---|---|---|
+| `/impound` | Police jobs (per-lot `job` field) | Impound the nearest vehicle — lot, reason, fee, hold timer |
+| `/garagesadmin` | ACE groups in `CustomGarages.allowedGroups` | [In-game garage editor](/legacy/nexdev_garages/garage-editor) |
+| `/privategarages` | Admins + `PrivateGarages.jobRestriction` jobs | [Private garage management](/legacy/nexdev_garages/private-garages) |
+| `/garagelog [plate]` | Admins | Opens the audit log panel — recent garage actions with actor, plate and detail, filterable by plate and action type |
+| `/aplate` | Admins | Change the plate of the current vehicle (updates the database and keys) |
+| `/returnvehicle` | Admins | Force a vehicle back into its garage (e.g. after a crash or exploit) |
+| `/dbdv` | Admins | Delete the closest vehicle from the database |
+| `/setjobvehicle` / `/deletejobvehicle` | Admins | Convert the current vehicle to/from a job vehicle |
+| `/addgangvehicle` / `/deletegangvehicle` | Admins | Convert the current vehicle to/from a gang vehicle |
+
+<Callout type="info">
+
+  Admin checks use ACE permissions — grant the dedicated ACE with
+  `add_ace group.admin nexdev_garages.admin allow` (configurable via `adminAce`
+  in `config/custom-garages.lua`; the generic `command` ACE still works as a
+  fallback), or add your job to the command's `jobRestriction` where
+  supported.
+
+</Callout>
