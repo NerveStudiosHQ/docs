@@ -10,7 +10,7 @@ const docs = defineDocs({
  * Content source for the whole site.
  *
  * `baseUrl` is `/` so page URLs match the folder structure exactly
- * (e.g. `content/docs/nexdev_garages/installation.mdx` -> `/nexdev_garages/installation`).
+ * (e.g. `content/docs/nerve_garages/installation.mdx` -> `/nerve_garages/installation`).
  * Existing links across the docs rely on this.
  */
 export const source = loader({

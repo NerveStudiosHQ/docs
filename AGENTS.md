@@ -10,27 +10,39 @@
 
 ## Structure
 
-- One folder per resource (e.g. `content/docs/nexdev_garages/`), each with an
-  `overview` page plus pages like `installation`, `configuration`,
-  `troubleshooting`.
-- Shared pages live under `content/docs/general/`; release notes under
+- Two sections. The main one holds the current `nerve_*` scripts; **NEX.dev
+  scripts** (`content/docs/legacy/`, a Fumadocs root folder with
+  `"root": true`) holds the original `nexdev_*` scripts and their changelog.
+  Old `/nexdev_*` URLs redirect to `/legacy/nexdev_*` in `next.config.mjs`.
+- One folder per script, each with `overview`, `installation`,
+  `configuration`, `troubleshooting` and `changelog` pages plus any extra
+  pages it needs.
+- Shared pages live under `content/docs/general/`; the release overview under
   `content/docs/changelog/`.
 - Page URLs mirror the folder path with no prefix:
-  `content/docs/nexdev_garages/installation.mdx` -> `/nexdev_garages/installation`.
-- Internal links are root-relative and omit the file extension
-  (e.g. `/nexdev_garages/installation`).
+  `content/docs/nerve_garages/installation.mdx` -> `/nerve_garages/installation`,
+  `content/docs/legacy/nexdev_garages/installation.mdx` -> `/legacy/nexdev_garages/installation`.
+- Internal links are root-relative and omit the file extension.
 - Adding a page: create the `.mdx` file **and** add its name to the folder's
   `meta.json` `pages` array, or it will not show in the sidebar.
-- Adding a script: create the folder, its pages, a `meta.json` with `title`
-  (the readable name, e.g. `"Garages"`, not the `nexdev_` identifier), `icon`
-  (a lucide icon name), and `pages`. Add the folder name to
-  `content/docs/meta.json` under the matching category separator
-  (`---Vehicles---`, `---Jobs and economy---`, `---World---`, `---Player---`,
-  `---Server and interface---`). Then add a `<Script>` for it in the same
-  category on `content/docs/index.mdx`.
-- Site files: `app/` (layouts, routes), `lib/` (content source, nav links,
-  site constants), `components/` (MDX component overrides, home page
-  components, logo, icons), `source.config.ts` (MDX/highlighting options).
+
+## nerve_ scripts are synced from the workspace
+
+`nerve_*` docs are kept in step with the script source by `docs-sync.js` in
+the Nerve Studios workspace (`.claude/skills/nerve/scripts/docs-sync.js`).
+It runs on every feature, fix and release of a script. It owns:
+
+- `<script>/changelog.mdx` (whole file, from the script's `CHANGELOG.md`)
+- the `{/* nerve:config:start */}` block of `<script>/configuration.mdx`
+  (from the script's `shared/config*.lua`)
+- the `{/* nerve:scripts:start */}` block of `index.mdx` and the
+  `{/* nerve:releases:start */}` block of `changelog/overview.mdx`
+- `<script>/meta.json` title, icon and page order, the `nerve_*` entries and
+  category separators in `content/docs/meta.json`, and `nerve-scripts.json`
+
+Never edit those by hand; change the script and re-run the sync. Everything
+else on a `nerve_*` page is hand-written. A page holding a
+`{/* nerve:todo */}` marker is an unwritten stub and must not be merged.
 
 ## Components
 
@@ -51,7 +63,7 @@
 ## Terminology
 
 - Refer to products by their full name: "Nerve Studios Garage", "Nerve Studios Queue", etc.
-- "Resource" or "script" for a FiveM resource; "framework" for QBCore / Qbox / ESX.
+- "Resource" or "script" for a FiveM resource; "framework" for ESX / QBox.
 
 ## Style preferences
 
@@ -65,6 +77,8 @@
 ## Checks
 
 - `npm run build` must pass before pushing; it fails on MDX or type errors.
+- `node ../.claude/skills/nerve/scripts/docs-check.js content/docs` (from the
+  workspace clone) flags stack names, internal paths and unwritten stubs.
 - `npm run check:links` (after a build) verifies every internal link and
   `#anchor` resolves.
 
@@ -80,7 +94,8 @@ does and how to use it — never how it is built.**
   `client/`, `server/` file names) or include UI build/rebuild instructions.
   If UI files are missing, the fix is "re-download from your purchase".
 - Say "the UI ships ready to use — no build step" instead of naming the stack.
-- Fine to mention: user-editable files (`config.lua`, `install/`, SQL files),
+- Fine to mention: user-editable files (`shared/config.lua`, `shared/config_*.lua`,
+  `shared/editable.lua`, `locales/`, `install/`, SQL files),
   public third-party dependencies (`ox_lib`, `oxmysql`, `ox_inventory` paths),
   and generic FiveM platform terms (NUI focus, ACE permissions, convars).
 
@@ -88,8 +103,11 @@ does and how to use it — never how it is built.**
 
 - Brand is Nerve Studios; site lives at `https://docs.nervestudios.net`,
   main site `https://nervestudios.net`, Discord `https://discord.gg/nervestudios`.
-- Script identifiers keep their `nexdev_` names (resource folders, exports,
-  ACE permissions, commands, URLs). Only prose says "Nerve Studios".
+- Current scripts use `nerve_` identifiers; the original scripts keep their
+  `nexdev_` names (resource folders, exports, ACE permissions, commands,
+  URLs). Only prose says "Nerve Studios".
+- Supported frameworks for `nerve_` scripts are ESX and QBox. Never claim
+  QBCore support on a `nerve_` page.
 - Design matches store.nervestudios.net: same tokens (`--bg #0b0a10`, `--float`,
   `--fill-1/2/3`, `--divider`, `--ink/-2/-3`, `--accent #a855f7`, `--accent-hi #c084fc`,
   `--radius 0.75rem`) defined in `app/global.css` and mapped onto the Fumadocs

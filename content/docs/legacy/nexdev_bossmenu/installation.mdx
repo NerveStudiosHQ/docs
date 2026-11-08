@@ -1,0 +1,73 @@
+---
+title: "Installation"
+description: "How to install Nerve Studios Boss Menu on your FiveM server."
+---
+
+## Requirements
+
+| Dependency | Required | Notes |
+| --- | --- | --- |
+| [`ox_lib`](https://github.com/overextended/ox_lib) | yes | Callbacks, text UI, notifications. |
+| [`oxmysql`](https://github.com/overextended/oxmysql) | yes | Database access. |
+| **Framework** | one of | [`qbx_core`](https://github.com/Qbox-project/qbx_core), [`qb-core`](https://github.com/qbcore-framework/qb-core), or [`es_extended`](https://github.com/esx-framework/esx_core) (ESX 1.7+ / Legacy). |
+| **Society backend** | optional | [`Renewed-Banking`](https://github.com/Renewed-Scripts/Renewed-Banking), [`qb-management`](https://github.com/qbcore-framework/qb-management), or [`qb-banking`](https://github.com/qbcore-framework/qb-banking) on QB / Qbox (auto-detected in that order). ESX uses `addon_account_data` natively. |
+| **Target script** | optional | [`ox_target`](https://github.com/overextended/ox_target) or [`qb-target`](https://github.com/qbcore-framework/qb-target) if you want eye-target interaction instead of text UI. |
+
+## Steps
+
+1. Drop the `nexdev_bossmenu/` folder into your `resources/` tree, e.g.:
+
+   ```
+   resources/[assets]/nexdev_bossmenu
+   ```
+
+2. (Optional) Import `install/boss_menu.sql` into your database. **You don't have to** — the resource bootstraps the schema on first boot and migrates the legacy `boss_menu_locations` table automatically.
+
+3. Add it to your `server.cfg`, **after** your framework core and after `ox_lib` / `oxmysql`:
+
+   ```
+   ensure ox_lib
+   ensure oxmysql
+   ensure nexdev_bossmenu
+   ```
+
+4. Edit `config.lua` as needed — see [Configuration](/legacy/nexdev_bossmenu/configuration).
+
+5. Restart the server, log in as an admin, run `/bossmenu_admin`, and place your first marker.
+
+## Society accounts (ESX only)
+
+If you create a new ESX job through `esx_jobsmanager`, the matching `society_<jobname>` row in `addon_account_data` is created for you. For jobs created **before** this resource was installed (or in any non-esx_jobsmanager flow), the bridge **auto-seeds the missing society row** the first time the boss menu touches its balance — you don't have to insert anything by hand.
+
+## Checking it worked
+
+On boot you should see:
+
+```
+[nexdev_bossmenu] Framework: qbx          -- detected core
+[nexdev_bossmenu] Schema ready.           -- DB ready
+[nexdev_bossmenu] Migrated `boss_menu_locations` -> `nexdev_bossmenu`.   -- if 3.x upgrade
+```
+
+The framework line is the most useful one — if it doesn't match the framework you actually run, set `Config.Framework` explicitly. See [Configuration → Framework](/legacy/nexdev_bossmenu/configuration#framework).
+
+From your server console:
+
+```
+state nexdev_bossmenu
+```
+
+Should print `started`.
+
+## Updating
+
+`config.lua` and the `bridge/*.lua` files are listed under `escrow_ignore`, so your settings and any custom framework adapters survive updates.
+
+1. Replace the resource files with the new version (keep your edited `config.lua` and any bridge tweaks).
+2. Restart the resource:
+
+   ```
+   restart nexdev_bossmenu
+   ```
+
+Placed markers live in the database, so they're untouched by updates.

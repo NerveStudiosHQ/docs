@@ -1,0 +1,119 @@
+---
+title: "Configuration"
+description: "Almost everything is editable from the Settings tab in the in-game creator panel, which rewrites settings/general.lua on save. You can also edit the file by hand — both work."
+---
+
+## settings/general.lua
+
+The whole config is one big table at `nexCrafting.Defaults`. The headline knobs:
+
+### Commands
+
+```lua
+settings.commands = {
+    creator = "craftpanel",
+    creatorAlias = "crp",
+}
+```
+
+### Interaction
+
+```lua
+settings.interaction = {
+    drawDistance = 10,
+    interactionDistance = 2,
+    interactionKey = 38,        -- E
+    markerColor = { 255, 255, 255, 100 },
+    markerSize = { 1, 1, 0.5 },
+    markerType = 27,
+    useMarker = true,
+    useTarget = true,           -- ox_target if available
+}
+```
+
+### Crafting
+
+```lua
+settings.crafting = {
+    animations = {
+        crafting = { dict = "mini@repair", anim = "fixing_a_player", duration = 5000 },
+    },
+    skillCheck = { enabled = true, difficulty = "easy", inputs = { "w","a","s","d" } },
+    failureSystem = {
+        enabled = false,
+        baseFailChance = 10,            -- %
+        failChanceReduction = 0.5,      -- per level
+        loseItemsOnFail = true,
+        losePercentOnFail = 50,
+    },
+    xpSystem = {
+        enabled = false,
+        maxLevel = 100,
+        xpPerCraft = 10,
+        xpPerLevel = 100,
+        xpBonusOnLevelUp = 50,
+    },
+    sounds = { craftStart = {...}, craftSuccess = {...}, craftFail = {...} },
+}
+```
+
+### Blips
+
+```lua
+settings.blips = {
+    enabled = false,
+    crafting = { sprite = 566, color = 2, scale = 0.7, display = 4 },
+}
+```
+
+### Permissions
+
+```lua
+settings.permissions = {
+    creatorAccess = {
+        useAcePermission = true,
+        acePermission = "nex.crafting.creator",
+        useFrameworkGroup = true,
+        frameworkGroups = { "admin", "superadmin", "god" },
+    },
+}
+```
+
+A player passes if **either** check passes.
+
+### ox_inventory
+
+```lua
+settings.oxInventory = {
+    imagePath = "nui://ox_inventory/web/images/",
+    benchStash = { enabled = false, slots = 10, weight = 50000 },
+}
+```
+
+`benchStash.enabled = true` gives every bench its own ox_inventory stash — handy for shared materials.
+
+## settings/discord.lua
+
+Only needed if you want to gate any bench by Discord role.
+
+```lua
+Config.Discord = {
+    botToken = "",
+    serverId = "",
+    adminRoles = { "1234567890123456789" },
+}
+```
+
+The bot needs the **GUILD_MEMBERS** privileged intent.
+
+## Bench types & prop models
+
+Defined in `nexCrafting.Defaults.benchTypes` and `nexCrafting.Defaults.propModels`. Six props ship by default (workbench, table, medical bench, wheel bench, and two DLC benches). Add your own by adding an entry — give it a label, model name, image URL, and offset.
+
+## Locales
+
+Strings live in `locales/*.lua` and in `nexCrafting.Defaults.locale`. Copy `locales/en.lua` to a new file (e.g. `de.lua`), translate it, and the script loads it automatically based on your `ox_lib` locale.
+
+## Bench & recipe data
+
+Bench coordinates, access rules, recipe groups, recipes, and ingredients all live in MySQL and are managed entirely from the [Creator panel](/legacy/nexdev_crafting/creator-panel). You don't edit them in `config.lua`.

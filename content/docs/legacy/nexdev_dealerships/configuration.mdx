@@ -1,0 +1,287 @@
+---
+title: "Configuration"
+description: "Two files cover almost everything you'll want to tweak. Both are escrow_ignore'd so they survive updates."
+---
+
+| File | What it controls |
+|------|------------------|
+| `shared/config.lua` | Global feature toggles — framework, interaction mode, notify/target/keys/fuel/garage selectors, financing, stock, sales, sell-back, test drive, preview camera, purchase rules, discord webhook |
+| `shared/locations.lua` | Per-dealership lots — coords, ped/marker, blip, categories sold, job restrictions, ownership — see [Dealership lots](/legacy/nexdev_dealerships/dealerships) |
+
+Vehicle catalog data lives in the database, not in a Lua file, and is managed from `/dealershipadmin` — see [Admin panel](/legacy/nexdev_dealerships/admin-panel).
+
+## Core
+
+```lua
+Config.Framework = 'auto'   -- 'auto' | 'esx' | 'qb' | 'qbox' | 'standalone'
+Config.OldESX    = false    -- legacy ESX (pre-1.2) identifier API
+Config.Locale    = 'en'     -- key into shared/locale.lua
+Config.Debug     = false    -- prints framework detection + key actions on boot
+```
+
+Leave `Framework` on `auto` unless you're running multiple cores side-by-side and want to force one.
+
+## Interaction mode
+
+`Config.Interaction` is the top-level switch between target-script wiring and a proximity textui hint:
+
+```lua
+Config.Interaction = 'auto'   -- 'auto' | 'target' | 'textui'
+```
+
+* `auto` — uses a target script if one is running, else falls back to textui.
+* `target` — forces target wiring (falls back to textui if no supported target is installed).
+* `textui` — forces the proximity `[E]` hint and never wires up target.
+
+If you pick `auto` or `target`, set the script you want under `Config.Target`:
+
+```lua
+Config.Target = {
+    System   = 'auto',      -- 'auto' | 'ox_target' | 'qb-target' | 'qtarget'
+    Distance = 2.5,
+    Icon     = 'fa-solid fa-car',
+    Label    = 'Browse Vehicles',
+}
+```
+
+…and the textui adapter (used when target falls through or `Config.Interaction = 'textui'`):
+
+```lua
+Config.TextUI = {
+    System   = 'auto',      -- 'auto' | 'ox_lib' | 'qb' | 'esx' | 'native'
+    Key      = 38,          -- E
+    KeyLabel = '[E]',
+    Distance = 2.0,
+    Position = 'right-center'  -- ox_lib only
+}
+```
+
+## Notifications, keys, fuel, garage
+
+Each integration has its own selector + a `Config.*Fn` override for one-off behaviour. See [Optional integrations](/legacy/nexdev_dealerships/integrations) for the full list of supported scripts and how to plug in one we don't ship.
+
+```lua
+Config.Notify = { System = 'auto', DefaultDuration = 4000, Position = 'top' }
+Config.Keys   = { System = 'auto' }
+Config.Fuel   = { System = 'none', SpawnLevel = 100 }
+Config.Garage = { DefaultGarage = 'pillboxgarage', State = 1 }   -- 1 = OUT, 0 = parked
+```
+
+## Purchase rules
+
+```lua
+Config.Purchase = {
+    AllowCash         = true,
+    AllowBank         = true,
+    TaxPercent        = 0.0,         -- e.g. 5.5 = 5.5% added on top
+    SocietyPayout     = false,       -- job-locked lots pay into the job's society
+    OwnerSplitPercent = 30,          -- % of every sale paid to the DB owner (0 disables the split)
+    DiscountByJob     = { mechanic = 10 },   -- flat % off if the player's current job matches
+    PlatePrefix       = '',          -- e.g. 'NRV' produces 'NRV12345'
+    PlateLength       = 8,
+    UpperPlate        = true,
+    AllowDuplicate    = false,       -- if false, plate is regenerated until unique
+}
+```
+
+`OwnerSplitPercent` is the portion that goes to the dealership's player owner. The remainder feeds the society balance / dealership bank.
+
+## Test drive
+
+```lua
+Config.TestDrive = {
+    Time               = 120,       -- seconds the test lasts
+    Cooldown           = 30,        -- seconds between tests
+    DisableDamage      = true,
+    DisableWantedLevel = true,
+    ReturnPlayer       = true,      -- teleport back to the ped at end
+    ShowTimer          = true,
+    TimerPosition      = { x = 0.45, y = 0.02 },
+    TempPlate          = 'TESTDRV',
+    DespawnOnExit      = true,
+}
+```
+
+## Financing
+
+When enabled, the purchase UI shows a "Pay in Full" / "Finance" toggle. Players see active loans and can pay early via `/financemenu`.
+
+```lua
+Config.Financing = {
+    Enabled            = true,
+    DownPaymentPercent = 20,
+    InterestPercent    = 10,         -- flat % added to the financed remainder
+    Terms              = { 7, 14, 30, 60 },   -- payment-count options
+    DefaultTerm        = 14,
+    PayMethods         = { 'bank', 'cash' },
+    DefaultPayMethod   = 'bank',
+    Interval = {
+        Unit  = 'real_minutes',      -- 'real_minutes' | 'real_hours' | 'real_days' | 'ingame_days'
+        Value = 60,
+    },
+    GraceMinutes       = 15,
+    LatePolicy         = 'fee',      -- 'accumulate' | 'fee' | 'repossess'
+    LateFeePercent     = 5,
+    RepoAfterMissed    = 3,
+    RepoAction         = 'delete',   -- 'delete' or 'relist'
+    Command            = 'financemenu',
+}
+```
+
+<Callout type="warn">
+
+  Financing needs a stable player identifier and is auto-disabled when `Bridge.Framework == 'standalone'`.
+
+</Callout>
+
+## Stock & restock orders
+
+Owned dealerships sell from a stocked SKU pool. Public lots are unlimited unless you flip `EnforceOnPublic`.
+
+```lua
+Config.Stock = {
+    Enabled         = true,
+    EnforceOnOwned  = true,
+    EnforceOnPublic = false,
+    StartingStock   = 0,
+    LowStockWarn    = 3,
+    Restock = {
+        CostPercent     = 60,        -- restock cost = listed price × this %
+        MinDeliverySecs = 300,       -- 5 min minimum
+        MaxDeliverySecs = 3600,      -- 1 hour cap
+        SecsPerUnit     = 30,        -- delivery time = base + (qty × this)
+        PaidFromBalance = true,      -- debit dealership.bank_balance
+    },
+}
+```
+
+## Direct sales
+
+Lets employees sell to a nearby customer who accepts via a prompt.
+
+```lua
+Config.DirectSales = {
+    Enabled           = true,
+    PromptTimeoutSecs = 30,
+    MaxNearbyDistance = 5.0,
+    AllowFinancePath  = true,
+}
+```
+
+## Sell vehicle (buyback)
+
+Players sell back to a dealership for a fraction of catalog price.
+
+```lua
+Config.SellVehicle = {
+    Enabled             = true,
+    BuybackPercent      = 40,           -- player gets this % of catalog
+    BuybackAccount      = 'bank',
+    OnlyOwnedDealership = false,
+    AddToStock          = true,
+}
+```
+
+## Management & admin panels
+
+```lua
+Config.Management = {
+    Enabled       = true,
+    Command       = 'dealershipmgmt',
+    AcePermission = 'nexdev_dealerships.manage',
+    PageSize      = 25,
+}
+
+Config.AdminPanel = {
+    Enabled       = true,
+    Command       = 'dealershipadmin',
+    AcePermission = 'nexdev_dealerships.admin',
+    Import = {
+        DefaultPrice    = 25000,
+        DefaultCategory = 'sedans',
+    },
+}
+```
+
+## Employees & commission
+
+```lua
+Config.Employees = {
+    Enabled           = true,
+    Roles             = { 'manager', 'employee' },
+    DefaultCommission = 5,
+    MaxCommission     = 50,
+    Permissions = {
+        manager  = { hire = true,  setCommission = true,  seeBalance = true,  withdraw = false },
+        employee = { hire = false, setCommission = false, seeBalance = false, withdraw = false },
+    },
+    SyncFrameworkJob = true,         -- hire = grant framework job; fire = revert to FiredJob
+    RoleGrades = { owner = 4, manager = 3, employee = 1 },
+    FiredJob   = 'unemployed',
+    FiredGrade = 0,
+}
+```
+
+When `SyncFrameworkJob = true`, hiring a player into a dealership with an `Owner = 'jobName'` lot also grants them that job at the matching grade — so they pass job-gated selling checks automatically.
+
+## Showroom preview camera
+
+```lua
+Config.Preview = {
+    CameraDistance = 9.0,
+    CameraHeight   = 2.5,
+    FOV            = 50.0,
+    AutoRotate     = true,
+    RotateSpeed    = 0.15,
+    HidePlayer     = true,
+    LockEngine     = true,
+    DirtLevel      = 0.0,
+}
+```
+
+## Marker (when a lot uses `Interaction = 'marker'`) [#marker-when-a-lot-uses-interaction-marker]
+
+```lua
+Config.Marker = {
+    Type             = 2,                                       -- ThickChevronUp
+    Scale            = { x = 0.6, y = 0.6, z = 0.8 },
+    Colour           = { r = 255, g = 255, b = 255, a = 200 },
+    BobUpAndDown     = true,
+    Rotate           = true,
+    Offset           = { x = 0.0, y = 0.0, z = 1.0 },           -- relative to PedCoordinates
+    DrawDistance     = 25.0,
+    InteractDistance = 2.0,
+}
+```
+
+## Discord webhook logging
+
+```lua
+Config.Logs = {
+    Enabled       = false,
+    Webhook       = '',
+    BotName       = 'Nerve Studios Dealerships',
+    Avatar        = '',
+    LogPurchases  = true,
+    LogTestDrives = false,
+}
+```
+
+## Locales
+
+Strings live in `shared/locale.lua`. Copy the `["en"]` table to a new locale key (e.g. `["de"]`), translate it, set `Config.Locale = 'de'`, and restart.
+
+## Function overrides
+
+Set any of these to a function to bypass the System-based dispatch:
+
+```lua
+Config.NotifyFn(title, message, kind, duration)
+Config.KeyFn(vehicle, plate, model)
+Config.FuelFn(vehicle, level)
+Config.PlateFn() -- return a plate string
+Config.CanPurchaseFn(source, dealershipKey, vehicle) -- return true | false, 'reason'
+Config.GiveVehicleFn(source, player, model, plate, ctx) -- ctx = { garage, state, dealership }
+```
+
+Useful when your script's API differs from any of the bundled adapters, or when you want to gate purchases on something custom (e.g. an in-game licence item).

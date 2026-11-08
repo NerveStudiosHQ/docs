@@ -1,0 +1,78 @@
+---
+title: "Music & assets"
+description: "The loading screen ships with a built-in music player. Players can play/pause, skip, and adjust volume right on the screen, and an optional per-track video can play full-screen as the background while a song is on."
+---
+
+## Folder layout
+
+```
+nexdev_loadingscreen/
+└── html/
+    └── assets/
+        ├── audio/      ← drop your .mp3 files here
+        ├── images/     ← drop cover art here
+        ├── videos/     ← (optional) drop video backgrounds here
+        └── logo.png    ← server logo for the center hero
+```
+
+Paths in `config.lua` are relative to `html/`, so a file at `html/assets/audio/track.mp3` is referenced as `./assets/audio/track.mp3`.
+
+<Callout type="warn">
+
+  Files in `html/assets/**/*` are already covered by the `files {}` glob in `fxmanifest.lua` — no manifest edit needed. Just drop files in and `restart nexdev_loadingscreen`.
+
+</Callout>
+
+## Adding tracks
+
+```lua
+Config.Songs = {
+    {
+        name   = 'Track Name',
+        artist = 'Artist',
+        song   = './assets/audio/track.mp3',
+        image  = './assets/images/cover.png',
+        video  = 'https://your-cdn/background.mp4',  -- optional
+    },
+    {
+        name   = 'Second Track',
+        artist = 'Artist',
+        song   = './assets/audio/second.mp3',
+        image  = './assets/images/second.jpg',
+        -- video omitted = no full-screen video background for this track
+    },
+}
+```
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `name` | yes | Track title shown in the player |
+| `artist` | yes | Artist name shown under the title |
+| `song` | yes | `.mp3` path under `html/` (or a remote URL if you'd rather not bundle audio) |
+| `image` | yes | Cover art shown to the left of the title — `.png`, `.jpg` and `.webp` all work |
+| `video` | no | A remote URL **or** a local `./assets/videos/foo.mp4`. When present, plays full-screen as the background while this track is on |
+
+The player cycles through `Config.Songs` in order. `←` and `→` step through them; the **Next** button on the music player does the same.
+
+## Player behavior
+
+These live under `Config.UI` — see [Configuration → UI toggles](/legacy/nexdev_loadingscreen/configuration#ui-toggles):
+
+```lua
+Config.UI.showMusicPlayer = true   -- hide the whole player
+Config.UI.showVisualizer  = true   -- hide just the animated bars next to cover art
+Config.UI.autoplayMusic   = true   -- start playing the first track automatically
+Config.UI.initialVolume   = 0.5    -- 0.0 to 1.0
+```
+
+## Server logo
+
+```lua
+Config.Assets.serverLogo = './assets/logo.png'
+```
+
+Replace `html/assets/logo.png` with your own image, or point this at any file under `html/`. Hidden entirely if `Config.UI.showServerLogo = false`.
+
+## Licensing reminder
+
+Make sure you have the right to host any audio or video you bundle with the resource. Streaming a copyrighted track on every player's loading screen is still a public performance — own the rights, license it, or use royalty-free music.

@@ -1,0 +1,55 @@
+---
+title: "Commands"
+description: "Every nexdev_scalemenu command — opening and resetting scales for yourself and others, and the permissions each requires."
+---
+
+`nexdev_scalemenu` registers two commands. Both can be toggled and renamed in `config.lua`, and both respect the [permission stack](/legacy/nexdev_scalemenu/permissions) when it is enabled.
+
+## Reference
+
+| Command | Description | Permission required |
+| --- | --- | --- |
+| `/scale` | Open the menu for yourself | `openSelf` |
+| `/scale <id>` | Open the menu for another player | `openOther` |
+| `/resetscale` | Reset your own scale to default | `resetSelf` |
+| `/resetscale <id>` | Reset another player's scale to default | `resetOther` |
+
+<Callout type="info">
+
+  When `permissions.enabled = false`, all four actions are granted to everyone, so every command works for all players. When it is enabled, the command silently does nothing for a player who lacks the required action.
+
+</Callout>
+
+## Details
+
+### `/scale`
+
+Opens the scale menu for yourself. The menu loads your stored scale (if any) and shows a live preview. Nothing persists until you confirm.
+
+### `/scale <id>`
+
+Opens the menu for the player with the given server `id`. Requires the `openOther` action. The target's stored scale is loaded so the menu opens on their current values.
+
+### `/resetscale`
+
+Resets your scale back to default (`1.0 / 1.0`), clears your stored row, and syncs the reset to all players.
+
+### `/resetscale <id>`
+
+Resets the scale of the player with the given server `id`. Requires the `resetOther` action.
+
+## Renaming commands
+
+Command names come from `config.lua`. Change the `command` value (without the slash) or set `enabled = false` to remove a command entirely.
+
+```lua
+commands = {
+    openMenu   = { enabled = true, command = "scale" },
+    resetScale = { enabled = true, command = "resetscale" },
+},
+```
+
+| Key | Maps to | Default |
+| --- | --- | --- |
+| `openMenu.command` | `/scale` and `/scale <id>` | `scale` |
+| `resetScale.command` | `/resetscale` and `/resetscale <id>` | `resetscale` |

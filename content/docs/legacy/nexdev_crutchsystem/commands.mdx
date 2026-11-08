@@ -1,0 +1,54 @@
+---
+title: "Commands"
+description: "Command names are configurable via Config.Commands in config.lua. Setting a value to false or '' skips registering that command entirely."
+---
+
+## Player
+
+There are no required player commands — the crutch item is used through the inventory and the medic NPC is interacted with via `ox_target` or `ox_lib` textUI.
+
+## Admin
+
+All admin commands are gated by the `group.admin` ACE. Grant it like any other ace:
+
+```
+add_ace group.admin command.addcrutch    allow
+add_ace group.admin command.removecrutch allow
+add_ace group.admin command.crutchadmin  allow
+```
+
+| Default | Description |
+| --- | --- |
+| `/addcrutch <id> [seconds]` | Force-equip a crutch on a player. `seconds` defaults to `Config.ForceDuration` (10 minutes). |
+| `/removecrutch <id>` | Clear a player's force lock and unequip immediately. |
+| `/crutchadmin` | Opens the admin panel. The server-side `nexdev_crutchsystem:admin:list` callback rejects non-admins. |
+
+`<id>` is the FiveM server ID. Look it up with `getplayerlist` in the server console, or from txAdmin.
+
+## Examples
+
+Force a crutch onto player 42 for 10 minutes (the default):
+
+```
+addcrutch 42
+```
+
+Force a crutch onto player 42 for exactly 30 minutes:
+
+```
+addcrutch 42 1800
+```
+
+Clear player 42's force lock and unequip the crutch:
+
+```
+removecrutch 42
+```
+
+Open the admin panel:
+
+```
+crutchadmin
+```
+
+The admin panel shows every currently-forced player with the source label (e.g. `EMS`, or whatever you pass to `ForceCrutch`), seconds remaining, and a one-click clear button. The same data is available via the [`ListForced()`](/legacy/nexdev_crutchsystem/exports) export if you want to surface it in your own UI.

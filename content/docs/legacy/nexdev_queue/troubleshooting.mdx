@@ -1,0 +1,46 @@
+---
+title: "Troubleshooting"
+description: "Filter your server console for [nexdev_queue] — most issues print a clear error there. If you're not sure, flip Config.Server.DebugMode = true temporarily, restart, and try again."
+---
+
+## Common issues
+
+| Problem | Fix |
+| ------- | --- |
+| Bot is offline / queue never loads roles | The token is wrong, or the bot was kicked from your guild. Reset the token in the [Discord Developer Portal](https://discord.com/developers/applications) and paste the new one into `Config.Server.DiscordBotToken`. |
+| Everyone is queued as `Standard` with priority 0 | **Server Members Intent** is OFF. Turn it on in the bot's settings (see [Discord setup, step 2](/legacy/nexdev_queue/discord-setup#2-enable-the-right-intents)) and restart the resource. |
+| Whitelist is on and **everyone** is being kicked | Same as above — without Server Members Intent the bot can't see role memberships, so no one passes the whitelist. |
+| Players bypass the queue when they shouldn't | A role ID in `Config.Permissions.BypassRoles` is too broad (e.g. `@everyone`'s ID, or a "Member" role everyone holds). Remove it. |
+| The live waitlist embed never shows up | `EnableLiveFeed = false`, the channel ID is wrong, or the bot is missing **View Channel / Send Messages** in that channel. |
+| The live feed posts but never updates | The bot doesn't have **Manage Messages** in the channel — it can't edit its own message, so it stops trying. |
+| Wrong tier shown on the card | `Config.Tiers` is order-dependent. The **first** entry whose role the player holds wins. Reorder so the highest tier is at the top. |
+| Priority isn't ordering correctly | Check that the role IDs in `Config.Permissions.PriorityLevels` are **keys** (`["123"] = 5000`), not array entries. The numbers add up across roles — a player with multiple priority roles will outrank a single high-tier role. |
+| Server feels full but I have `ReservedSlots = 2` set | That is the point — those 2 slots are kept open for staff with `BypassRoles`. Lower the number to free them for regular players. |
+| Players get stuck at "Connecting" after their position hits #1 | Increase `Config.Server.HaltDuration` so the slot stays reserved longer while they load. Common on heavily-modded servers. |
+| `Config.Interface.Theme = "neon"` does nothing | `"neon"` isn't a built-in theme. Use one of: `classic`, `banner`, `factset`, `boardingpass`, `compactbar`, `minimal`, `centered`, `cards`. |
+| Banner / icon doesn't load | Image host is rate-limiting or the URL 404s. Try the URL in a browser — if it doesn't load there, it won't load on the card. |
+| Two queues are fighting / players get kicked instantly | Another queue resource (e.g. `connectqueue`) is also running. Stop one of them. |
+| Token got pasted into a screenshot | Reset it immediately in the Discord Developer Portal and update `config.lua`. |
+
+## Diagnostic checklist
+
+If something's not working, walk through this in order:
+
+1. **Is the resource started?** `ensure nexdev_queue` should be in `server.cfg` and you should see a `[nexdev_queue] Boot OK` line on boot.
+2. **Is the bot online in your guild?** If it's offline, the token is wrong.
+3. **Is Server Members Intent ON?** In the Developer Portal → Bot page.
+4. **Are the IDs right?** Guild ID, channel ID, role IDs — all are 17–19 digit numbers, copied with Developer Mode in Discord.
+5. **Did you restart the resource after editing the config?** Most settings need a restart. (Themes don't — see [Themes](/legacy/nexdev_queue/themes#hot-swap-at-runtime).)
+6. **Is `DebugMode` on?** Turn it on for the test, off again in production.
+
+## Before opening a support ticket
+
+Please include:
+
+1. The behavior you're seeing vs. what you expected.
+2. Whether the bot shows online in your Discord.
+3. The `[nexdev_queue]` lines from your server console (with `DebugMode` on).
+4. Your `Config.Server` block with the **token redacted** (replace it with `***`).
+5. Whether you have another queue resource running.
+
+See [Support & contact](/general/support) for how to reach us. **Never paste your bot token in a ticket** — redact it first.

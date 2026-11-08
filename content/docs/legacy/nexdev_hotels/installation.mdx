@@ -1,0 +1,68 @@
+---
+title: "Installation"
+description: "How to install Nerve Studios Hotels on your FiveM server."
+---
+
+## Requirements
+
+* FiveM server with `lua54` enabled
+* MySQL or MariaDB
+* One of: [`qbx_core`](https://github.com/Qbox-project/qbx_core), [`qb-core`](https://github.com/qbcore-framework/qb-core), [`es_extended`](https://github.com/esx-framework/esx_core), or [`ox_core`](https://github.com/overextended/ox_core)
+* [`oxmysql`](https://github.com/overextended/oxmysql), [`ox_lib`](https://github.com/overextended/ox_lib), [`ox_inventory`](https://github.com/overextended/ox_inventory)
+* [`ox_target`](https://github.com/overextended/ox_target) (optional — only if you want eye-target interactions)
+
+## Steps
+
+1. Drop the resource into your server, e.g. `resources/[nerve]/nexdev_hotels/`.
+
+2. Add it to your `server.cfg` **after** its dependencies:
+
+   ```
+   ensure oxmysql
+   ensure ox_lib
+   ensure ox_inventory
+   ensure ox_target          # optional
+   ensure qbx_core           # or qb-core / es_extended / ox_core
+   ensure nexdev_hotels
+   ```
+
+3. Open `config.lua` and set:
+   * `Config.Framework` — `'qbox'`, `'qbcore'`, `'esx'`, or `'ox'`
+   * `Config.AdminGroups` — who can run `/hoteladmin` (default `{ 'admin' }`)
+
+4. Start your server. The database tables are created automatically — no SQL to run.
+
+That's it. Hop in-game, run `/hoteladmin`, and start adding hotels.
+
+## Pre-configured hotels
+
+If you own one of these popular MLOs/IPLs, we ship a ready-made SQL import that creates the hotel and all its rooms for you. Just run the matching file against your database:
+
+```
+mysql -u <user> -p <database> < resources/[nerve]/nexdev_hotels/imports/01_opium_nights_hotel.sql
+```
+
+| Import file | Hotel | Rooms | Where to buy the MLO/IPL |
+| ----------- | ----- | -----:| ------------------------ |
+| `01_opium_nights_hotel.sql` | Opium Nights Hotel | 78 | [tstudio3d.com — Opium Nights](https://shop.tstudio3d.com/package/6403112) |
+| `02_richards_cortez_motel.sql` | Richards Cortez Motel | 24 | [Richards Maps — Cortez Hotel](https://richards-maps-for-fivem.tebex.io/package/5921145) |
+| `03_v_hotel.sql` | V Hotel | 3 | [tstudio3d.com — V Hotel](https://shop.tstudio3d.com/package/5986945) |
+
+<Callout type="warn">
+
+  You need to actually own and stream the matching MLO/IPL on your server. The SQL only sets up the hotel data — it doesn't ship the interior itself. Players will fall through the map if the interior isn't loaded.
+
+</Callout>
+
+You can run any import twice — it won't create duplicates.
+
+## Building your own hotels
+
+You don't need an MLO. Stand anywhere, run `/hoteladmin`, click **+ New Hotel**, and follow the steps in [Admin panel](/legacy/nexdev_hotels/admin-panel). Players see new hotels and rooms instantly — no restart needed.
+
+## Updating
+
+`config.lua` is preserved when you replace the resource — your settings won't be wiped. Hotels and rentals are stored in the database, so they're preserved too.
+
+1. Replace the resource files with the new version.
+2. Restart the server.

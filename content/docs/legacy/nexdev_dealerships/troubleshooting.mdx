@@ -1,0 +1,44 @@
+---
+title: "Troubleshooting"
+description: "Set Config.Debug = true in shared/config.lua and restart to print the detected framework, target system, textui system, notify system, and keys system on boot. That alone solves most of the reports we get."
+---
+
+Check the **F8** console (client) and your **server console**, filtered for `[nexdev_dealerships]`. Most issues print a clear error there.
+
+## Common issues
+
+| Problem | Fix |
+|---------|-----|
+| Dealership browser is empty | The catalog has no vehicles in the lot's categories. Open `/dealershipadmin` → **Import** and import from your framework, or add models manually. |
+| Lots don't show up after editing `shared/locations.lua` | You restarted the wrong resource. Use `restart nexdev_dealerships` (or `refresh ; ensure nexdev_dealerships`). Make sure each entry's **key** (`['pdm']`) is unique. |
+| Vehicle is bought but doesn't show in the player's garage | Wrong garage script wiring. The resource writes to `owned_vehicles` (ESX) or `player_vehicles` (QB/Qbox) — your garage script must read from that. If you use a non-standard schema, set `Config.GiveVehicleFn`. See [Integrations → Garage](/legacy/nexdev_dealerships/integrations#garage-persistence). |
+| Keys don't work after purchase | `Config.Keys.System` doesn't match the keys script you actually have running. Set `Config.Debug = true` and re-check on boot. For unsupported scripts, set `Config.KeyFn`. |
+| Money is charged but the vehicle never spawns | The framework's vehicle insert failed. Check the server console for the SQL error. Common cause: missing columns in `owned_vehicles` / `player_vehicles` — the resource only writes the standard columns; if your garage script added required columns, add a `Config.GiveVehicleFn` to fill them. |
+| `/dealershipadmin` does nothing when typed | You don't have permission. Add it with `add_ace identifier.steam:<HEX> nexdev_dealerships.admin allow`, or grant `group.admin` via `add_principal`. |
+| `/dealershipmgmt` does nothing | You don't own a dealership and aren't an admin. Set yourself as the owner of a lot via `/dealershipadmin` → **Set Owner**, or add the management ace. |
+| Catalog edits don't propagate to other players | The sync event didn't fire. Check the F8 console on the other player for receive errors. Make sure all clients are on the same resource version. |
+| Test drive HUD timer is mis-positioned | Tweak `Config.TestDrive.TimerPosition` (normalized 0.0–1.0 screen coords). |
+| Test drive ends instantly | The vehicle spawn failed at `TestCoordinates` — pick coords that are above ground level and clear of obstructions. |
+| Showroom preview is on top of the ped | `PreviewCoords` is too close to `PedCoordinates`. Move it somewhere private — most operators use a rooftop or an interior. |
+| Player has the vehicle but can't see it on the map | Garage script issue — they likely have to retrieve it from `DefaultGarage`. Or set `Config.Garage.State = 0` to spawn it parked. |
+| Stock never goes down for a public lot | `Config.Stock.EnforceOnPublic = false` by default — public lots are unlimited. Flip it to `true` to enforce stock everywhere. |
+| Restock orders never fulfil | The `CreateThread` worker that ticks orders runs once per minute. Wait a minute. If it never fires, the script crashed on boot — check the server console. |
+| Financing payments don't auto-debit | Players need to be online (or recently online) for installments to fire. If `Config.Financing.Enabled = true` and a real framework is detected, the worker runs every minute. Check the console for `[nexdev_dealerships]` errors. |
+| Repossession deletes a vehicle the player just paid off | A race between manual pay-off and the auto-debit. Set a slightly longer `Config.Financing.GraceMinutes`. |
+| Owner cut doesn't pay out | Owner identifier in `nexdev_dealership_settings.owner_identifier` is wrong or unset. Re-run `/dealershipadmin` → **Set Owner** with the player's steam identifier visible while they're online. |
+| Discord webhook isn't firing | `Config.Logs.Enabled = true` and `Config.Logs.Webhook` set? Some networks block outbound from FiveM — test with `curl` from the server box. |
+| `[ESX]` players can't be detected | If you're on legacy ESX (pre-1.2), set `Config.OldESX = true`. |
+| Display vehicles spawn but won't accept paint | Vanilla colour indexes are integers 0–159. RGB takes `{ r, g, b }`. If you pass both, RGB wins. |
+
+## Before opening a support ticket
+
+Please include:
+
+1. Your framework (`'esx'`, `'qb'`, `'qbox'`) and FiveM artifact build number.
+2. Whether it's a fresh install or after a config change.
+3. Boot log with `Config.Debug = true`, filtered for `[nexdev_dealerships]`.
+4. Server console output when the issue happens, filtered for `[nexdev_dealerships]`.
+5. F8 console output on the affected player.
+6. Which dealership key the issue happens at, and whether it's owned or public.
+
+See [Support & contact](/general/support) for how to reach us.

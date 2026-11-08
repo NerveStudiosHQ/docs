@@ -1,0 +1,102 @@
+---
+title: "Garage locations"
+description: "Define public, job and gang garages in config/garages.lua — or skip the file entirely and use the in-game editor."
+---
+
+Static locations live in one file per garage type — `config/public-garages.lua`,
+`config/job-garages.lua`, `config/gang-garages.lua` and
+`config/impound-locations.lua` — with shared blip and marker defaults in
+`config/garage-defaults.lua`. Every garage and impound name must be **unique**
+across all files.
+
+<Callout type="info">
+
+  You can also create and edit garages entirely in-game with
+  [`/garagesadmin`](/legacy/nexdev_garages/garage-editor) — no config editing or restart
+  required.
+
+</Callout>
+
+## Entry fields
+
+Each location supports:
+
+| Field | Type | Purpose |
+|---|---|---|
+| `coords` | `vector3` | Interaction point |
+| `spawn` | `vector4` or `{ vector4, ... }` | Vehicle spawn point(s) — with a list, the first free one is used |
+| `distance` | number | Interaction radius |
+| `type` | `"car"` \| `"air"` \| `"sea"` | Vehicle category the garage accepts |
+| `vehicleClasses` | `{ "D", "C" }` | Optional speed tiers; omit to allow all classes |
+| `job` / `gang` | `{ "name", ... }` | Restrict to jobs or gangs (job, gang and impound garages) |
+| `blip` | `{ id, color, scale }` | Map blip; omit to use the section default |
+| `hideBlip` | boolean | Hide this garage's blip |
+| `markers` / `hideMarkers` | table / boolean | Ground marker style |
+| `maxVehicles` / `storeFee` | number | Per-garage capacity and parking fee (see `config/features.lua`) |
+
+## Public garages
+
+`Nex.Config.PublicGarages` ships with car garages across the map plus boat
+and air garages. Section-level toggles:
+
+* `uniqueLocations` — vehicles are only retrievable from the garage they're
+  parked at (turn off for "any garage" retrieval)
+* `interiors` — enables the walk-in showroom ("Go inside")
+* `showBlips` / `uniqueBlips` — blip visibility and naming
+
+<Callout type="warn">
+
+  If you rename the default `Legion Square` garage, also change the
+  `garage_id` default in your vehicles table — stored vehicles reference
+  garages by name.
+
+</Callout>
+
+## Job garages
+
+Job garages come in two flavours, set per location with `vehiclesType`:
+
+* **`"owned"`** — members store and retrieve their own vehicles here (a
+  personal garage gated by job)
+* **`"spawner"`** — a fleet menu that spawns fresh vehicles from a configured
+  list
+
+Spawner entries support:
+
+```lua
+vehicles = {
+  [1] = {
+    model = "police",     -- spawn code
+    plate = "PD",         -- plate prefix; false = fully random
+    minJobGrade = 0,      -- rank lock
+    nickname = "Police car",
+    livery = 1,
+    extras = { 1, 2 },
+    maxMods = true,       -- max engine/brakes/transmission/suspension/armor + turbo
+  },
+}
+```
+
+Set `showLiveriesExtrasMenu = true` on the location to let players pick a
+livery and extras before spawning.
+
+<Callout type="warn">
+
+  Plate prefixes generate random suffixes — never configure a prefix that
+  could collide with plates already in your database.
+
+</Callout>
+
+## Gang garages
+
+`Nex.Config.GangGarages` works like job garages but gates by gang. Gangs
+resolve automatically on QBCore/Qbox; on ESX, wire your gang system into
+`bridge/client.lua` + `bridge/server.lua` and set
+`customESXIntegration = true`.
+
+## Garage interiors
+
+`config/interior.lua` configures the walk-in showroom: the IPL shell, the
+entrance, a short entry cutscene, and up to eleven display positions filled
+with the vehicles parked at that garage. Disable interiors per garage type
+(`interiors = false` in that type's location file) if you don't want them.

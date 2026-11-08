@@ -1,0 +1,32 @@
+{
+  "title": "NEX.dev scripts",
+  "description": "Original nexdev_ scripts",
+  "icon": "Archive",
+  "root": true,
+  "pages": [
+    "index",
+    "---Vehicles---",
+    "nexdev_dealerships",
+    "nexdev_garages",
+    "---Jobs and economy---",
+    "nexdev_bossmenu",
+    "nexdev_crafting",
+    "nexdev_donatorsystem",
+    "nexdev_itemwhitelist",
+    "---World---",
+    "nexdev_djsystem",
+    "nexdev_elevators",
+    "nexdev_hotels",
+    "---Player---",
+    "nexdev_animpos",
+    "nexdev_crutchsystem",
+    "nexdev_scalemenu",
+    "---Server and interface---",
+    "nexdev_loadingscreen",
+    "nexdev_queue",
+    "nexdev_uipack",
+    "nexdev_watermark",
+    "---Changelog---",
+    "...changelog"
+  ]
+}

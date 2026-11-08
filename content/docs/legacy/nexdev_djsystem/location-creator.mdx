@@ -1,0 +1,98 @@
+---
+title: "Booth manager"
+description: "Build and edit booths in the in-game booth manager — place everything from where you stand, tune the audio, set access, and save without a restart."
+---
+
+Build and edit booths in the in-game booth manager. Run `/djbooths`.
+
+Requires `nexdev_djsystem.creator` or `nexdev_djsystem.admin`. See [Permissions](/legacy/nexdev_djsystem/permissions).
+
+<Callout type="info">
+
+  Everything the manager writes is the same shape you can hand-write in `config/locations.lua`. See [Booth locations](/legacy/nexdev_djsystem/locations) for what each field means.
+
+</Callout>
+
+## The list
+
+Opening the manager shows every booth the server knows about — both the ones from `config/locations.lua` and the ones saved in the database. From here you can add a new booth, edit an existing one, teleport to it, or delete it.
+
+Config booths are marked. You can edit one, but saving writes a **database copy that overrides the file entry** from then on. Delete that copy to fall back to the config entry. Config booths themselves are never deleted in-game — remove them from `config/locations.lua`.
+
+## Identity
+
+The booth ID and display name.
+
+| Field | Rules |
+| --- | --- |
+| ID | 3–48 characters, lowercase letters, digits, `_` and `-`. Unique. This is the sync key — changing it makes a different booth. |
+| Name | Up to 64 characters. Shown on the blip, in the panel and in notifications. |
+
+## Placing things in the world
+
+Anywhere you see **Add from my position** or a placement button, the panel hands control back to the game so you can stand where you want the thing and confirm. Four things are placed this way:
+
+| What | Places |
+| --- | --- |
+| Anchor | The booth's interaction point. |
+| Booth prop | The prop itself, with its heading. |
+| Sound points | Each audible zone. |
+| Effect emitters | Each light, laser, smoke or spark source. |
+
+<Callout type="info">
+
+  Walk to where you want it and confirm. You're standing in the room — trust your ears and eyes over the coordinates.
+
+</Callout>
+
+Pick **no prop** for an MLO that already contains a DJ booth. The interaction still registers; a box zone is placed at the anchor instead.
+
+## Audio
+
+| Control | Does |
+| --- | --- |
+| Curve | Linear, quadratic or exponential falloff. |
+| Audible range | Default radius for this booth's sound points. |
+| Default volume | Where the master volume starts. |
+| Volume ceiling | The loudest a DJ may push this booth. |
+| In a vehicle | Volume multiplier for a listener sealed inside a car. |
+| Indoor boost | Volume multiplier when the listener shares an interior with the booth. |
+
+Sound points are listed underneath with their own radius each, so a big main floor and a small side bar can coexist. The loudest point a listener is inside wins.
+
+## Access
+
+Access mode, job and gang lists, identifier list, ACE principal, and the per-action tiers. See [Permissions](/legacy/nexdev_djsystem/permissions) for what each mode and tier means.
+
+<Callout type="warn">
+
+  The job, gang, identifier and ACE fields are **server-side access control** and are stripped from the booth list before it reaches any client. The manager cannot show you what an existing booth has — those fields open blank, and **anything left blank is saved blank**.
+
+  If you're editing a job-gated booth, re-enter the job list before you save, or you'll clear it. The access mode and the per-action tiers do survive.
+
+</Callout>
+
+## Effects
+
+The lighting preset for the booth, plus the individual effect emitters and their types (light, laser, smoke, spark, any).
+
+## Blip
+
+Whether the booth shows on the map, and its sprite, colour and scale. IDs are in the [FiveM blip reference](https://docs.fivem.net/docs/game-references/blips/).
+
+## Saving
+
+Saving pushes the booth to everyone immediately — no restart, no `/djreload`.
+
+Everything is re-checked on the server against your actual permissions and re-validated against the same rules a config booth goes through. An invalid booth — a bad access mode, too many sound points, a radius over the cap — is rejected outright rather than quietly corrected, so a mistake fails loudly instead of publishing a broken venue.
+
+## Limits
+
+| Limit | Value |
+| --- | --- |
+| Database booths | 100 |
+| Sound points per booth | 12 |
+| Effect emitters per booth | 24 |
+| Lights per rig | 12 |
+| Lasers per rig | 16 |
+| Maximum audible radius | 120 m |
