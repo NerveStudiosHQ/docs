@@ -1,37 +1,12 @@
 'use client';
 
-import { useEffect, useState, type ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useNotebookLayout } from 'fumadocs-ui/layouts/notebook';
 import { ArrowUpRight, PanelLeft } from 'lucide-react';
 import { DiscordIcon } from '@/components/icons';
 import { site } from '@/lib/site';
-
-/** Becomes the floating island past this many pixels; drops back only near the very top so it never flickers. */
-const ISLAND_AT = 8;
-const FLAT_AT = 2;
-
-function useIsland() {
-  const [island, setIsland] = useState(false);
-  useEffect(() => {
-    let frame = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const y = window.scrollY;
-        setIsland((on) => (on ? y > FLAT_AT : y > ISLAND_AT));
-      });
-    };
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener('scroll', onScroll);
-    };
-  }, []);
-  return island;
-}
 
 const nav = [
   { label: 'Docs', href: '/' },
@@ -49,14 +24,13 @@ const groupBtn =
   'inline-flex size-9 items-center justify-center rounded-lg text-ink-2 transition-colors hover:bg-fill-1 hover:text-ink [&_svg]:size-[1.125rem]';
 
 /**
- * Docs header, styled like the store header: transparent bar at the top of the page that turns
- * into a floating rounded island once the page scrolls. Search, sidebar and theme controls come
- * from the Fumadocs layout slots, so search, the mobile drawer and sidebar collapse keep working.
+ * Docs header: a solid bar pinned to the top that looks the same at every scroll position.
+ * Search, sidebar and theme controls come from the Fumadocs layout slots, so search, the
+ * mobile drawer and sidebar collapse keep working.
  */
 export function SiteHeader(props: ComponentProps<'header'>) {
   const { slots, props: layout } = useNotebookLayout();
   const pathname = usePathname();
-  const island = useIsland();
   const collapsible = layout.sidebar.collapsible ?? true;
 
   const isActive = (href: string) =>
@@ -66,12 +40,11 @@ export function SiteHeader(props: ComponentProps<'header'>) {
     <header
       id="nd-subnav"
       {...props}
-      className="pointer-events-none sticky top-(--fd-docs-row-1) z-30 flex h-20 min-w-0 items-center px-3 [grid-area:header] layout:[--fd-header-height:--spacing(20)] md:px-5"
+      className="sticky top-(--fd-docs-row-1) z-30 flex h-20 min-w-0 items-center border-b border-divider bg-bg px-3 [grid-area:header] layout:[--fd-header-height:--spacing(20)] md:px-5"
     >
       <nav
         aria-label="Main"
-        data-island={island ? '' : undefined}
-        className="nd-island pointer-events-auto grid h-15 w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-4 xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
+        className="grid h-15 w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-4 xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
       >
         <div className="flex min-w-0 items-center justify-self-start">
           <Link href="/" className="flex h-12 min-w-0 items-center gap-3" aria-label={`${site.name} docs home`}>

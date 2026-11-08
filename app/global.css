@@ -33,8 +33,6 @@
   --radius: 0.75rem;
   --radius-inner: 0.5rem;
 
-  --island-bg: #fffffff2;
-  --island-shadow: 0 0.75rem 2.5rem #1a10301f;
 
   --color-fd-background: var(--bg);
   --color-fd-foreground: var(--ink);
@@ -76,8 +74,6 @@
   --ink-2: #a8a3b5;
   --ink-3: #78738a;
 
-  --island-bg: #15131bf2;
-  --island-shadow: 0 0.75rem 2.5rem #000000b3;
 
   /* Opaque equivalents of --fill-1/2/3 over --bg, for surfaces that overlap other content. */
   --color-fd-background: var(--bg);
@@ -232,25 +228,6 @@ strong, b {
 /* Purple rule that fades out to the right, under page headers. */
 .nd-rule {
   background: linear-gradient(to right, rgba(168, 85, 247, 0.6), rgba(196, 161, 255, 0.12) 40%, transparent);
-}
-
-/* ---------------------------------------------------------------------------
-   Header: transparent bar that becomes a floating island on scroll (components/site-header.tsx).
---------------------------------------------------------------------------- */
-.nd-island {
-  border-radius: calc(var(--radius) + 0.5625rem);
-  transition: height 300ms cubic-bezier(0.2, 0, 0, 1), padding 300ms cubic-bezier(0.2, 0, 0, 1),
-    background-color 300ms cubic-bezier(0.2, 0, 0, 1), box-shadow 300ms cubic-bezier(0.2, 0, 0, 1);
-}
-.nd-island[data-island] {
-  padding-inline: 0.75rem 0.5625rem;
-  background: var(--island-bg);
-  -webkit-backdrop-filter: blur(24px);
-  backdrop-filter: blur(24px);
-  box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.25), var(--island-shadow);
-}
-@media (prefers-reduced-motion: reduce) {
-  .nd-island { transition: none; }
 }
 
 /* Search field: store search input look, purple focus ring. */
