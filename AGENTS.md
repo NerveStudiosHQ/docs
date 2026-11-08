@@ -90,21 +90,23 @@ does and how to use it — never how it is built.**
   main site `https://nervestudios.net`, Discord `https://discord.gg/nervestudios`.
 - Script identifiers keep their `nexdev_` names (resource folders, exports,
   ACE permissions, commands, URLs). Only prose says "Nerve Studios".
-- Colors: neutral near-black (`#0a0a0a`) / white base with logo purples — `#a855f7`
-  (core), `#b77cff` (dark-mode primary), `#d8b4fe` (highlight), `#7e22ce`
-  (light-mode primary), `#4c1d95` (deep). Defined in `app/global.css` as
-  overrides on top of the Fumadocs `black` preset. Purple for links, active items and focus.
-- Type is Space Grotesk (same as the store and nervestudios.net); code uses Geist Mono.
-- Dark mode has a fixed reactbits Aurora + Particles backdrop (`components/site-background.tsx`,
-  vendored in `components/reactbits/`); styles for cards, chips and the home `<DocsHero />`
-  live at the bottom of `app/global.css`. Fumadocs also puts `data-card` on heading anchors,
-  so card styles target `[data-card][class*="bg-fd-card"]` only.
-- Header logo is `public/logo/nerve-logo.png` (mark) plus the name as live text
-  (`components/logo.tsx`). `nerve-wordmark*.png` are kept for other uses.
-  The layout stays 1400px wide; on desktop a fixed `.header-strip` (app/layout.tsx)
-  paints the header bar full width behind the real header.
-  Favicons are `app/icon.png` (glow tile, rounded) and
-  `app/apple-icon.png`.
+- Design matches store.nervestudios.net: same tokens (`--bg #0b0a10`, `--float`,
+  `--fill-1/2/3`, `--divider`, `--ink/-2/-3`, `--accent #a855f7`, `--accent-hi #c084fc`,
+  `--radius 0.75rem`) defined in `app/global.css` and mapped onto the Fumadocs
+  `--color-fd-*` variables. Dark is the default theme; light keeps the same structure.
+  Store utilities `.btn`, `.btn-primary`, `.btn-ghost`, `.pill`, `.surface-card` and
+  `.text-gradient` are ported there too.
+- Flat background only: no grids, glows, aurora or particles.
+- Type is Plus Jakarta Sans (same as the store); code uses Geist Mono.
+- Header is `components/site-header.tsx`, passed as the notebook layout's `header`
+  slot: logo mark + name + tagline, centered links, search and an icon group. It turns
+  into a floating island on scroll (`.nd-island` in `app/global.css`). It reuses the
+  Fumadocs search, sidebar and theme slots, so keep those when editing it.
+  Footer is `components/site-footer.tsx`.
+- Fumadocs also puts `data-card` on heading anchors, so card styles target
+  `[data-card][class*="bg-fd-card"]` only.
+- Logo mark is `public/logo/nerve-logo.png`; `nerve-wordmark*.png` are kept for
+  other uses. Favicons are `app/icon.png` (glow tile, rounded) and `app/apple-icon.png`.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

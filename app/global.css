@@ -2,13 +2,130 @@
 @import 'fumadocs-ui/css/black.css';
 @import 'fumadocs-ui/css/preset.css';
 
-@theme inline {
-  --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+/* ---------------------------------------------------------------------------
+   Nerve Studios design tokens, same names and values as store.nervestudios.net.
+   Dark is the default theme. Light keeps the same structure with inverted ink.
+--------------------------------------------------------------------------- */
+:root {
+  --fd-layout-width: 1400px;
+
+  --accent: #9333ea;
+  --accent-hi: #7e22ce;
+  --accent-ink: #ffffff;
+  --accent-dim: #a855f71a;
+  --accent-soft: #a855f738;
+  --accent-glow: #a855f74d;
+
+  --fill-1: #7c3aed08;
+  --fill-2: #7c3aed0f;
+  --fill-3: #7c3aed1c;
+  --divider: #4c1d951f;
+
+  --bg: #fcfbff;
+  --float: #ffffff;
+  --float-shadow: 0 0.75rem 2rem #1a103014;
+
+  --ink: #17141f;
+  --ink-2: #57526a;
+  --ink-3: #807a93;
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --radius: 0.75rem;
+  --radius-inner: 0.5rem;
+
+  --island-bg: #fffffff2;
+  --island-shadow: 0 0.75rem 2.5rem #1a10301f;
+
+  --color-fd-background: var(--bg);
+  --color-fd-foreground: var(--ink);
+  --color-fd-muted: #f4f1fa;
+  --color-fd-muted-foreground: var(--ink-2);
+  --color-fd-popover: var(--float);
+  --color-fd-popover-foreground: var(--ink);
+  --color-fd-card: #f9f7fd;
+  --color-fd-card-foreground: var(--ink);
+  --color-fd-border: var(--divider);
+  --color-fd-primary: #7e22ce;
+  --color-fd-primary-foreground: #ffffff;
+  --color-fd-secondary: #f4f1fa;
+  --color-fd-secondary-foreground: var(--ink);
+  --color-fd-accent: #ede8f6;
+  --color-fd-accent-foreground: var(--ink);
+  --color-fd-ring: #a855f7;
+  --color-fd-overlay: #0b0a1033;
 }
 
+.dark {
+  --accent: #a855f7;
+  --accent-hi: #c084fc;
+  --accent-ink: #ffffff;
+  --accent-dim: #a855f724;
+  --accent-soft: #a855f738;
+  --accent-glow: #a855f773;
+
+  --fill-1: #b78cff0a;
+  --fill-2: #b78cff12;
+  --fill-3: #b78cff1f;
+  --divider: #c4a1ff1a;
+
+  --bg: #0b0a10;
+  --float: #15131b;
+  --float-shadow: 0 0.75rem 2rem #0009;
+
+  --ink: #ededed;
+  --ink-2: #a8a3b5;
+  --ink-3: #78738a;
+
+  --island-bg: #15131bf2;
+  --island-shadow: 0 0.75rem 2.5rem #000000b3;
+
+  /* Opaque equivalents of --fill-1/2/3 over --bg, for surfaces that overlap other content. */
+  --color-fd-background: var(--bg);
+  --color-fd-foreground: var(--ink);
+  --color-fd-muted: #171321;
+  --color-fd-muted-foreground: var(--ink-2);
+  --color-fd-popover: var(--float);
+  --color-fd-popover-foreground: var(--ink);
+  --color-fd-card: #120f19;
+  --color-fd-card-foreground: var(--ink);
+  --color-fd-border: var(--divider);
+  --color-fd-primary: #a855f7;
+  --color-fd-primary-foreground: #ffffff;
+  --color-fd-secondary: #171321;
+  --color-fd-secondary-foreground: var(--ink);
+  --color-fd-accent: #201a2d;
+  --color-fd-accent-foreground: var(--ink);
+  --color-fd-ring: #a855f7;
+  --color-fd-overlay: #0b0a10d9;
+}
+
+@theme inline {
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+
+  --color-bg: var(--bg);
+  --color-float: var(--float);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-fill-1: var(--fill-1);
+  --color-fill-2: var(--fill-2);
+  --color-fill-3: var(--fill-3);
+  --color-divider: var(--divider);
+  --color-accent: var(--accent);
+  --color-accent-hi: var(--accent-hi);
+  --color-accent-dim: var(--accent-dim);
+  --color-accent-soft: var(--accent-soft);
+  --shadow-float: var(--float-shadow);
+}
+
+/* ---------------------------------------------------------------------------
+   Base: one flat canvas, no decorative backgrounds.
+--------------------------------------------------------------------------- */
 html {
   scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--fill-3) var(--bg);
 }
 
 html > body[data-scroll-locked] {
@@ -16,76 +133,296 @@ html > body[data-scroll-locked] {
   --removed-body-scroll-bar-size: 0px !important;
 }
 
-:root {
-  --fd-layout-width: 1400px;
-}
-
-/*
- * Nerve Studios palette, layered over the `black` preset. Surfaces stay
- * neutral; the logo purples (#a855f7 core, #b77cff / #7e22ce primary,
- * #d8b4fe highlight) are kept for links, active states and focus only.
- */
-:root {
-  --color-fd-background: #ffffff;
-  --color-fd-foreground: #0a0a0a;
-  --color-fd-muted: #f5f5f5;
-  --color-fd-muted-foreground: #666666;
-  --color-fd-popover: #ffffff;
-  --color-fd-popover-foreground: #0a0a0a;
-  --color-fd-card: #ffffff;
-  --color-fd-card-foreground: #0a0a0a;
-  --color-fd-border: #ebebeb;
-  --color-fd-primary: #7e22ce;
-  --color-fd-primary-foreground: #ffffff;
-  --color-fd-secondary: #f5f5f5;
-  --color-fd-secondary-foreground: #0a0a0a;
-  --color-fd-accent: #f2f2f2;
-  --color-fd-accent-foreground: #0a0a0a;
-  --color-fd-ring: #a855f7;
-}
-
-.dark {
-  --color-fd-background: #0a0a0a;
-  --color-fd-foreground: #ededed;
-  --color-fd-muted: #161616;
-  --color-fd-muted-foreground: #8f8f8f;
-  --color-fd-popover: #111111;
-  --color-fd-popover-foreground: #ededed;
-  --color-fd-card: #0f0f0f;
-  --color-fd-card-foreground: #ededed;
-  --color-fd-border: #222222;
-  --color-fd-primary: #b77cff;
-  --color-fd-primary-foreground: #0a0a0a;
-  --color-fd-secondary: #161616;
-  --color-fd-secondary-foreground: #ededed;
-  --color-fd-accent: #1a1a1a;
-  --color-fd-accent-foreground: #ededed;
-  --color-fd-ring: #a855f7;
-}
-
 body {
+  background: var(--bg);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
-  background: rgba(168, 85, 247, 0.22);
+  background: rgba(168, 85, 247, 0.35);
+}
+.dark ::selection {
+  color: #ffffff;
 }
 
-/* Page headings: tighter, calmer hierarchy. */
-h1 {
+h1, h2, h3, h4 {
   letter-spacing: -0.025em;
 }
 
+strong, b {
+  font-weight: 700;
+}
+
+/* ---------------------------------------------------------------------------
+   Store components (ported from store.nervestudios.net globals.css).
+   :where() keeps them at zero specificity so utilities still win.
+--------------------------------------------------------------------------- */
+@layer utilities {
+  :where(.btn) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    height: 2.75rem;
+    padding: 0 1.25rem;
+    border-radius: var(--radius);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+    color: var(--ink);
+    background: var(--fill-1);
+    box-shadow: inset 0 0 0 1px var(--divider);
+    transition: background-color 0.15s var(--ease), color 0.15s var(--ease), transform 0.15s var(--ease), box-shadow 0.15s var(--ease);
+  }
+  :where(.btn:hover) { background: var(--fill-2); }
+  :where(.btn:active) { transform: scale(0.97); }
+  :where(.btn-primary) {
+    color: var(--accent-ink);
+    background: #a855f7;
+    box-shadow: 0 0 0 1px #c084fc33 inset, 0 0.5rem 1.75rem -0.5rem var(--accent-glow);
+  }
+  :where(.btn-primary:hover) {
+    background: #c084fc;
+    box-shadow: 0 0 0 1px #d8b4fe55 inset, 0 0.75rem 2.25rem -0.5rem var(--accent-glow);
+  }
+  :where(.btn-ghost) { color: var(--ink); background: var(--fill-1); box-shadow: inset 0 0 0 1px var(--divider); }
+  :where(.btn-ghost:hover) { background: var(--fill-2); }
+
+  :where(.pill) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+    height: 1.375rem;
+    padding: 0 0.5rem;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--ink-2);
+    background: var(--fill-2);
+    box-shadow: inset 0 0 0 1px var(--divider);
+  }
+  :where(.pill[data-tone="accent"]) { color: var(--accent-hi); background: var(--accent-dim); box-shadow: inset 0 0 0 1px var(--accent-soft); }
+
+  :where(.surface-card) {
+    background: var(--fill-1);
+    box-shadow: inset 0 0 0 1px var(--divider);
+    border-radius: var(--radius);
+    transition: box-shadow 0.2s var(--ease), background-color 0.2s var(--ease);
+  }
+  :where(.surface-card:hover) { box-shadow: inset 0 0 0 1px var(--accent-soft); }
+
+  :where(.text-gradient) {
+    color: transparent;
+    background: linear-gradient(100deg, #7e22ce 0%, #9333ea 45%, #a855f7 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+  :where(.dark .text-gradient) {
+    background-image: linear-gradient(100deg, #e9d5ff 0%, #c084fc 35%, #a855f7 70%, #7c3aed 100%);
+  }
+}
+
+/* Purple rule that fades out to the right, under page headers. */
+.nd-rule {
+  background: linear-gradient(to right, rgba(168, 85, 247, 0.6), rgba(196, 161, 255, 0.12) 40%, transparent);
+}
+
+/* ---------------------------------------------------------------------------
+   Header: transparent bar that becomes a floating island on scroll (components/site-header.tsx).
+--------------------------------------------------------------------------- */
+.nd-island {
+  border-radius: calc(var(--radius) + 0.5625rem);
+  transition: height 300ms cubic-bezier(0.2, 0, 0, 1), padding 300ms cubic-bezier(0.2, 0, 0, 1),
+    background-color 300ms cubic-bezier(0.2, 0, 0, 1), box-shadow 300ms cubic-bezier(0.2, 0, 0, 1);
+}
+.nd-island[data-island] {
+  height: 3.75rem;
+  padding-inline: 0.75rem 0.5625rem;
+  background: var(--island-bg);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.25), var(--island-shadow);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nd-island { transition: none; }
+}
+
+/* Search field: store search input look, purple focus ring. */
+.nd-search {
+  height: 2.625rem;
+  gap: 0.625rem;
+  padding-inline: 0.75rem 0.5rem;
+  border-radius: var(--radius);
+  border-color: var(--divider);
+  background: var(--fill-1);
+  color: var(--ink-3);
+  transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s, color 0.15s;
+}
+.nd-search:hover {
+  background: var(--fill-2);
+  color: var(--ink-2);
+}
+.nd-search:focus-visible {
+  outline: none;
+  border-color: rgba(168, 85, 247, 0.5);
+  background: var(--fill-2);
+  box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.12);
+}
+.nd-search:hover > svg,
+.nd-search:focus-visible > svg {
+  color: var(--accent-hi);
+}
+.nd-search kbd {
+  display: inline-flex;
+  align-items: center;
+  height: 1.25rem;
+  border-color: var(--divider);
+  background: var(--fill-1);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--ink-3);
+}
+
+/* ---------------------------------------------------------------------------
+   Sidebar: rows like the store catalogue sidebar.
+--------------------------------------------------------------------------- */
+:is(#nd-sidebar, #nd-sidebar-mobile) a[data-active],
+:is(#nd-sidebar, #nd-sidebar-mobile) button[data-state] {
+  border-radius: var(--radius);
+  font-weight: 500;
+  color: var(--ink-2);
+}
+:is(#nd-sidebar, #nd-sidebar-mobile) a[data-active]:hover,
+:is(#nd-sidebar, #nd-sidebar-mobile) button[data-state]:hover {
+  background: var(--fill-1);
+  color: var(--ink);
+}
+:is(#nd-sidebar, #nd-sidebar-mobile) a[data-active="true"],
+:is(#nd-sidebar, #nd-sidebar-mobile) a[data-active="true"]:hover {
+  background: var(--accent-dim);
+  box-shadow: inset 0 0 0 1px rgba(168, 85, 247, 0.3);
+  color: var(--ink);
+}
+:is(#nd-sidebar, #nd-sidebar-mobile) a[data-active="true"]::before {
+  display: none;
+}
+:is(#nd-sidebar, #nd-sidebar-mobile) a[data-active] > svg,
+:is(#nd-sidebar, #nd-sidebar-mobile) button[data-state] > svg:first-child:not(:only-child) {
+  color: var(--ink-3);
+  transition: color 0.15s;
+}
+:is(#nd-sidebar, #nd-sidebar-mobile) a[data-active="true"] > svg,
+:is(#nd-sidebar, #nd-sidebar-mobile) a[data-active]:hover > svg,
+:is(#nd-sidebar, #nd-sidebar-mobile) button[data-state]:hover > svg:first-child:not(:only-child) {
+  color: var(--accent-hi);
+}
+
+/* Section labels (the ---Category--- separators). */
+:is(#nd-sidebar, #nd-sidebar-mobile) p {
+  margin-bottom: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* Nested page guide line. */
+:is(#nd-sidebar, #nd-sidebar-mobile) [class*="before:bg-fd-border"]::before {
+  background: var(--divider);
+}
+
+/* ---------------------------------------------------------------------------
+   Page header: breadcrumb pill with purple chevrons, bold title, purple fading rule.
+--------------------------------------------------------------------------- */
+.nd-crumbs {
+  align-self: flex-start;
+  width: fit-content;
+  max-width: 100%;
+  flex-wrap: wrap;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--divider);
+  border-radius: 999px;
+  background: var(--fill-1);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ink-3);
+}
+.nd-crumbs > svg {
+  width: 0.75rem;
+  height: 0.75rem;
+  color: var(--accent);
+}
+.nd-crumbs a:hover {
+  opacity: 1;
+  color: var(--ink);
+}
+.nd-crumbs > :last-child {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.nd-page-header {
+  position: relative;
+  padding-bottom: 1.75rem;
+  margin-bottom: 2rem;
+}
+.nd-page-header::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 1px;
+  background: linear-gradient(to right, rgba(168, 85, 247, 0.6), rgba(196, 161, 255, 0.12) 40%, transparent);
+}
+.nd-page-header h1 {
+  font-size: clamp(2rem, 1.6rem + 1.5vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+}
+.nd-page-header p {
+  margin: 0.875rem 0 0;
+  max-width: 42rem;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+/* Keep the article column centered when the sidebar is collapsed. */
+#nd-page > * {
+  margin-inline: auto;
+  width: 100%;
+}
+
+/* ---------------------------------------------------------------------------
+   Content.
+--------------------------------------------------------------------------- */
+.prose {
+  --tw-prose-headings: var(--ink);
+  --tw-prose-bold: var(--ink);
+  --tw-prose-links: var(--accent-hi);
+}
+
 .prose :is(h2, h3, h4) {
-  letter-spacing: -0.015em;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--ink);
   scroll-margin-top: 6rem;
 }
 
 .prose h2 {
-  font-size: 1.375rem;
+  font-size: 1.5rem;
   margin-top: 2.25em;
   padding-top: 1.5em;
-  border-top: 1px solid var(--color-fd-border);
+  border-top: 1px solid var(--divider);
 }
 
 .prose > h2:first-child {
@@ -95,229 +432,129 @@ h1 {
 }
 
 .prose h3 {
-  font-size: 1.125rem;
+  font-size: 1.1875rem;
 }
 
-/* Inline code: a quiet tint instead of a boxed chip. */
-.prose :not(pre) > code:not(.not-prose *) {
-  padding: 0.15em 0.4em;
-  border: 0;
-  border-radius: 6px;
-  font-size: 0.85em;
-  background: var(--color-fd-muted);
+.prose strong {
+  color: var(--ink);
 }
 
-.dark .prose :not(pre) > code:not(.not-prose *) {
-  background: #1c1c1c;
-}
-
-/* Links: plain text with a thin accent underline that firms up on hover. */
+/* Links: purple-hi with a soft underline that firms up on hover. */
 .prose a:not([data-card]) {
+  color: var(--accent-hi);
+  font-weight: 500;
   text-decoration-thickness: 1px;
   text-underline-offset: 4px;
-  text-decoration-color: color-mix(in oklab, var(--color-fd-primary) 45%, transparent);
+  text-decoration-color: color-mix(in oklab, var(--accent-hi) 40%, transparent);
   transition: text-decoration-color 0.15s, color 0.15s;
 }
-
 .prose a:not([data-card]):hover {
   opacity: 1;
-  color: var(--color-fd-primary);
-  text-decoration-color: var(--color-fd-primary);
+  text-decoration-color: var(--accent-hi);
+}
+/* Heading self-links keep the heading colour. */
+.prose :is(h1, h2, h3, h4, h5, h6) a:not([data-card]) {
+  color: inherit;
+  font-weight: inherit;
+  text-decoration: none;
 }
 
-/* Code blocks and cards: flat surfaces, hairline borders, no shadows. */
-.prose figure.shiki,
-.prose [data-card] {
+/* Inline code: flat fill chip with a hairline. */
+.prose :not(pre) > code:not(.not-prose *) {
+  padding: 0.15em 0.4em;
+  border: 1px solid var(--divider);
+  border-radius: 0.375rem;
+  font-size: 0.85em;
+  background: var(--fill-2);
+  color: var(--ink);
+}
+
+/* Code blocks: --float surface, divider hairline, 0.75rem radius, no shadow. */
+figure.shiki:not([class*="bg-fd-secondary"]) {
+  border-radius: var(--radius);
+  border-color: var(--divider);
+  background: var(--fill-1);
+  box-shadow: none;
+}
+.dark figure.shiki:not([class*="bg-fd-secondary"]) {
+  background: var(--float);
+}
+figure.shiki > div:first-child:not(:last-child) {
+  border-color: var(--divider);
+}
+
+/* Callouts: fill surface, divider border, no shadow. */
+[style*="--callout-color"] {
+  border-radius: var(--radius);
+  border-color: var(--divider);
+  background: var(--fill-1);
   box-shadow: none;
 }
 
-.prose [data-card] {
-  border-radius: 10px;
-  transition: border-color 0.15s, background-color 0.15s;
+/* Cards (Fumadocs also sets data-card on heading anchors, so match the card class only). */
+[data-card][class*="bg-fd-card"] {
+  border-radius: var(--radius);
+  border-color: var(--divider);
+  background: var(--fill-1);
+  transition: border-color 0.2s var(--ease), background-color 0.2s var(--ease);
 }
-
-.prose [data-card]:hover {
-  background: var(--color-fd-muted);
-  border-color: color-mix(in oklab, var(--color-fd-primary) 35%, var(--color-fd-border));
+a[data-card][class*="bg-fd-card"]:hover {
+  background: var(--fill-2);
+  border-color: var(--accent-soft);
 }
-
-.prose [data-card] > .not-prose:first-child {
-  box-shadow: none;
+[data-card][class*="bg-fd-card"] > div:first-child {
   border: 0;
-  background: transparent;
-  padding: 0;
-  color: var(--color-fd-primary);
+  border-radius: var(--radius-inner);
+  background: var(--accent-dim);
+  color: var(--accent-hi);
+  box-shadow: none;
+}
+[data-card][class*="bg-fd-card"] h3 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* Tabs and tables. */
+.prose div[class*="bg-fd-card"][class*="rounded-xl"]:not([data-card]) {
+  border-radius: var(--radius);
+  border-color: var(--divider);
 }
 
 .prose table {
   font-size: 0.875rem;
 }
-
+.prose :is(th, td) {
+  border-color: var(--divider);
+}
 .prose thead th {
-  font-weight: 500;
-  color: var(--color-fd-muted-foreground);
+  font-weight: 600;
+  color: var(--ink);
 }
 
-/* ---------------------------------------------------------------------------
-   Shared Nerve Studios look (matches the store and nervestudios.net).
---------------------------------------------------------------------------- */
-
-@keyframes bg-fade {
-  from { opacity: 0; }
+/* "On this page": active entry in purple-hi, inline code as plain text. */
+#nd-toc a[data-active="true"] {
+  color: var(--accent-hi);
 }
-
-/* One soft violet light from the top edge, with a thin lit rim. Static fallback under the aurora. */
-.site-light {
-  background:
-    radial-gradient(ellipse 45% 55% at 50% 0%, rgba(168, 85, 247, 0.13), transparent 70%),
-    radial-gradient(ellipse 22% 30% at 50% 0%, rgba(216, 180, 254, 0.07), transparent 70%);
-}
-.site-light::before {
-  content: "";
-  position: absolute;
-  inset: 0 15% auto;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(183, 124, 255, 0.55), transparent);
-}
-
-/* Fine film grain so dark gradients never band. */
-.site-grain {
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27160%27 height=%27160%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.9%27 numOctaves=%273%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url(%23n)%27/%3E%3C/svg%3E");
-  background-size: 160px 160px;
-}
-
-/* In dark mode the fixed aurora layer provides the backdrop. */
-.dark body {
-  background: transparent;
-}
-.dark {
-  background-color: var(--color-fd-background);
-}
-
-/* Small violet pill label. */
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  height: 1.75rem;
-  padding: 0 0.75rem;
-  border-radius: 999px;
-  border: 1px solid rgba(168, 85, 247, 0.3);
-  background: rgba(168, 85, 247, 0.08);
-  color: #7e22ce;
-  font-size: 0.8125rem;
-  font-weight: 500;
-}
-.dark .chip { color: #b77cff; }
-
-.text-gradient {
-  background: linear-gradient(90deg, #7e22ce, #a855f7, #c084fc);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-.dark .text-gradient {
-  background-image: linear-gradient(90deg, #ffffff, #e9d5ff, #b77cff);
-}
-
-/* Docs home intro panel. */
-.docs-hero {
-  background: color-mix(in oklab, var(--color-fd-card) 80%, transparent);
-  box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.08), 0 30px 80px -40px rgba(168, 85, 247, 0.45);
-  backdrop-filter: blur(6px);
-}
-
-.hero-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  height: 2.75rem;
-  padding: 0 1.25rem;
-  border-radius: 0.75rem;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  text-decoration: none;
-  transition: background-color 250ms, border-color 250ms, color 250ms, box-shadow 250ms, transform 250ms;
-}
-.hero-btn:active { transform: scale(0.97); }
-.hero-btn-primary {
-  background: var(--color-fd-foreground);
-  color: var(--color-fd-background);
-  box-shadow: 0 0 30px rgba(168, 85, 247, 0.25);
-}
-.hero-btn-primary:hover { box-shadow: 0 0 40px rgba(168, 85, 247, 0.45); }
-.hero-btn-outline {
-  border: 1px solid var(--color-fd-border);
-  color: var(--color-fd-foreground);
-  background: color-mix(in oklab, var(--color-fd-foreground) 3%, transparent);
-}
-.hero-btn-outline:hover {
-  border-color: rgba(168, 85, 247, 0.45);
-  background: rgba(168, 85, 247, 0.1);
-}
-
-/* Cards: same soft panel + violet hover glow as the store. */
-[data-card][class*="bg-fd-card"] {
-  border-radius: 1rem;
-  padding: 1.25rem;
-  background: color-mix(in oklab, var(--color-fd-card) 80%, transparent);
-  backdrop-filter: blur(6px);
-  transition: border-color 300ms, box-shadow 300ms, transform 300ms;
-}
-a[data-card][class*="bg-fd-card"]:hover {
-  background: color-mix(in oklab, var(--color-fd-card) 80%, transparent);
-  border-color: rgba(168, 85, 247, 0.4);
-  box-shadow: 0 24px 60px -30px rgba(168, 85, 247, 0.55);
-  transform: translateY(-2px);
-}
-[data-card][class*="bg-fd-card"] > div:first-child {
-  border-radius: 0.625rem;
-  border-color: rgba(168, 85, 247, 0.25);
-  background: rgba(168, 85, 247, 0.1);
-  color: #a855f7;
-  box-shadow: none;
-}
-.dark [data-card][class*="bg-fd-card"] > div:first-child { color: #b77cff; }
-[data-card][class*="bg-fd-card"] h3 { font-size: 0.95rem; font-weight: 600; }
-
-@media (prefers-reduced-motion: reduce) {
-  a[data-card][class*="bg-fd-card"]:hover { transform: none; }
-}
-
-/*
- * Header: the layout is capped at --fd-layout-width, so the real header box is too.
- * On desktop its background moves to a full-width strip (.header-strip in app/layout.tsx)
- * that sits right behind it, so the bar always spans the whole screen.
- */
-@media (min-width: 1024px) {
-  header[class*="grid-area:header"] {
-    background: transparent !important;
-    backdrop-filter: none !important;
-    border-bottom-color: transparent !important;
-  }
-}
-.header-strip {
-  position: fixed;
-  inset: 0 0 auto 0;
-  height: 3.5rem;
-  z-index: 9;
-  pointer-events: none;
-  background: color-mix(in oklab, var(--color-fd-background) 80%, transparent);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--color-fd-border);
-}
-
-/* Keep the article column centered when the sidebar is collapsed (otherwise it hugs the left edge). */
-#nd-page > * {
-  margin-inline: auto;
-  width: 100%;
-}
-
-/* Inline code inside "On this page" reads as plain text, not boxed fragments. */
 #nd-toc code {
   padding: 0;
   border: 0;
   background: none;
   font-size: 0.92em;
+}
+
+/* Previous / next footer cards. */
+#nd-page a[class*="rounded-xl"][class*="border"] {
+  border-color: var(--divider);
+  border-radius: var(--radius);
+}
+#nd-page a[class*="rounded-xl"][class*="border"]:hover {
+  border-color: var(--accent-soft);
+  background: var(--fill-1);
+}
+
+/* The breadcrumb hugs its content instead of spanning the column. */
+#nd-page > .nd-crumbs {
+  width: fit-content;
+  margin-inline: 0 auto;
 }

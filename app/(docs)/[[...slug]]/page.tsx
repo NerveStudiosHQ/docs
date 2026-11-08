@@ -24,15 +24,15 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
     <DocsPage
       toc={page.data.toc}
       full={page.data.full}
-      breadcrumb={{ enabled: !isHome }}
+      breadcrumb={{ enabled: !isHome, className: 'nd-crumbs' }}
     >
       {isHome ? (
         <DocsHero />
       ) : (
-        <>
+        <header className="nd-page-header">
           <DocsTitle>{page.data.title}</DocsTitle>
           <DocsDescription>{page.data.description}</DocsDescription>
-        </>
+        </header>
       )}
       <DocsBody>
         <MDX

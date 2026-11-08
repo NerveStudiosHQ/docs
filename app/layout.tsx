@@ -1,13 +1,13 @@
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import type { Metadata, Viewport } from 'next';
-import { Space_Grotesk, Geist_Mono } from 'next/font/google';
-import { SiteBackground } from '@/components/site-background';
+import { Plus_Jakarta_Sans, Geist_Mono } from 'next/font/google';
 import { site } from '@/lib/site';
 import './global.css';
 
-const spaceGrotesk = Space_Grotesk({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  variable: '--font-space-grotesk',
+  variable: '--font-jakarta',
+  display: 'swap',
 });
 
 const geistMono = Geist_Mono({
@@ -30,8 +30,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
+    { media: '(prefers-color-scheme: light)', color: '#fcfbff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0b0a10' },
   ],
 };
 
@@ -39,13 +39,11 @@ export default function Layout({ children }: LayoutProps<'/'>) {
   return (
     <html
       lang="en"
-      className={`${spaceGrotesk.variable} ${geistMono.variable} font-sans`}
+      className={`${jakarta.variable} ${geistMono.variable} font-sans`}
       suppressHydrationWarning
     >
       <body className="flex flex-col min-h-screen">
-        <SiteBackground />
-        <div aria-hidden className="header-strip hidden lg:block" />
-        <RootProvider>{children}</RootProvider>
+        <RootProvider theme={{ defaultTheme: 'dark' }}>{children}</RootProvider>
       </body>
     </html>
   );
