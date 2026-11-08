@@ -125,7 +125,8 @@ does and how to use it — never how it is built.**
 - Fumadocs also puts `data-card` on heading anchors, so card styles target
   `[data-card][class*="bg-fd-card"]` only.
 - Logo mark is `public/logo/nerve-logo.png`; `nerve-wordmark*.png` are kept for
-  other uses. Favicons are `app/icon.png` (glow tile, rounded) and `app/apple-icon.png`.
+  other uses. Favicons are `app/icon.png` and `app/apple-icon.png`, copied from nervestudios.net so
+  both sites share one icon; recopy from that repo's `app/` when it changes.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
