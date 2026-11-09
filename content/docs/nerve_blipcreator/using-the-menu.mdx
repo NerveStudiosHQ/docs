@@ -3,13 +3,13 @@ title: "Using the menu"
 description: "Create, edit, place, preview, hide and duplicate blips from the Nerve Studios Blip Creator menu."
 ---
 
-Open the menu with `/blips`, or the key you set in `Config.Keybind`. Players can also bind their own key in **Settings → Key Bindings → FiveM**. Press **Esc** to close it.
+Open the menu with `/blips`. Press **Esc** to close it.
 
-The menu opens in the middle of your screen, with categories on the left.
+The command name comes from `Command` in `shared/config.lua`. If you set a default key in `Keybind`, players can change it under **Settings > Key Bindings > FiveM**.
 
 ## Categories
 
-Pick a category on the left.
+The side bar on the left rests as a slim strip of icons, so the blip list gets the room. Point at it and it opens over the list with the category names.
 
 | Category | What's in it |
 | --- | --- |
@@ -18,19 +18,19 @@ Pick a category on the left.
 | **Groups** | Your blip groups. Open one to see and add its blips. See [Blip groups](/nerve_blipcreator/blip-groups) |
 | **Global blips** | Server blips every player sees. Only staff with global access can change them |
 | **Requests** | Blip and group invites waiting for your answer |
-| **Access** | Managers only. Choose which staff groups can place global blips |
+| **Access** | Full-access admins only. Choose which ACE groups can use the blip creator. See [Global blips and access](/nerve_blipcreator/global-blips-and-access) |
 
-Each list has a search box and a filter menu next to it. The filter shows **All**, only **Point**, **Radius** or **Area** blips, or only **Hidden** ones.
+Each list has a search box and a filter. The filter shows **All**, only **Point**, **Radius** or **Area** blips, or only **Hidden** ones.
 
 ## Create a blip
 
-1. Go to **My blips** and click **New blip** at the top right.
+1. Go to **My blips** and click **New blip**.
 2. Pick a **Type**:
    - **Point** is a single icon.
    - **Radius** is a filled circle.
    - **Area** is a filled rectangle you can resize and rotate.
 3. Type a **Name**. This is what shows in the map legend.
-4. Click **Change** next to **Icon** and pick one of 956 icons. Search by name or ID, or filter by category. Radius and area blips can also show an icon in the middle; turn it off with **Centre icon**.
+4. Click **Change** next to **Icon** and pick one of the map icons. Search by name or ID, or filter by category. Radius and area blips can also show an icon in the middle; turn it off with **Centre icon**.
 5. Pick a **Colour**.
 6. Set the **Location** (see below).
 7. Set the size: **Radius** for circles, or **Width**, **Height** and **Rotation** for areas.
@@ -62,7 +62,7 @@ Click **Preview on map** in the editor to see the blip on the pause map before s
 
 ## Edit or delete
 
-Click a blip you own to edit it. Every blip also has a **⋯** button with these options:
+Click a blip you own to edit it. Every blip also has a menu button with these options:
 
 | Option | What it does |
 | --- | --- |
@@ -75,11 +75,11 @@ Click a blip you own to edit it. Every blip also has a **⋯** button with these
 
 ## Hide a blip
 
-Open the **⋯** menu on any blip and click **Hide from my map**. This works on your blips, shared blips and global blips, and only affects you. Hidden blips stay in the list, dimmed, so you can show them again later. Use the **Hidden** filter to see just those.
+Open the menu on any blip and click **Hide from my map**. This works on your blips, shared blips, group blips and global blips, and only affects you. Hidden blips stay in the list, dimmed, so you can show them again later. Use the **Hidden** filter to see just those. A hidden blip stays hidden when you share it or make it private again.
 
 ## Duplicate a blip
 
-Open the **⋯** menu, click **Duplicate** and choose where the copy goes:
+Open the menu on a blip, click **Duplicate** and choose where the copy goes:
 
 - **At my position**
 - **At my waypoint**
@@ -90,4 +90,6 @@ The copy is a new private blip in **My blips**. Staff with global access can tur
 
 ## Limits
 
-Each player can keep up to `Config.Limits.PrivateBlips` private blips (50 by default). The counter next to **New blip** shows how many you have. See [Configuration](/nerve_blipcreator/configuration#limits) for all limits.
+Each player can keep up to `Limits.PrivateBlips` private blips (50 by default). The counter next to **New blip** shows how many you have.
+
+If you lower a limit, nothing is deleted. Players keep every blip they already have, and can't add new ones until they are under the limit. See [Configuration](/nerve_blipcreator/configuration#config) for every limit.

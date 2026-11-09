@@ -1,20 +1,47 @@
 ---
 title: "Changelog"
-description: "Release history for Nerve Studios Blip Creator."
+description: "Release history for Blip Creator."
 ---
 
-## 1.0.0
+{/* Generated from CHANGELOG.md by docs-sync.js. Edit that file, not this page. */}
 
-First release.
+## 1.0.1 (2026-11-08) [#v1-0-1]
 
-- Private blips saved on each player's PC
-- Shared blips with nearby invites and share codes
-- Blip groups where every member sees and adds group blips
-- Admin-only global blips
-- Access tab for staff groups
-- Point, radius and area blips with 956 icons and 41 colours
-- Map picker, waypoint and current position placement, with a preview on the map
-- Hide and one-click duplicate for any blip
-- Support for 11 notification systems plus custom notifications
-- Nine languages
-- Exports for global blips
+#### Upgrade steps
+
+1. Copy your values from the old `config.lua` into the new `shared/config.lua`, then delete the old `config.lua`. The option names are the same, except `Config.Locale` and `Config.Notify`, which are gone.
+2. The language now comes from ox_lib. Set it in your `server.cfg` with `setr ox:locale de` (or your language code).
+3. Notifications are now set in `shared/editable.lua`. They use ox_lib by default, and the file has ready examples for lation_ui, okokNotify, brutal_notify, wasabi_notify, t-notify, mythic_notify, pNotify, qbx_core, ESX and the GTA feed.
+4. ox_lib and OneSync are now required. Start ox_lib before this script in your `server.cfg`.
+5. The `install/` folder is now called `sql/`. The tables are still created and updated on start, so there is nothing to run by hand.
+
+#### Added
+- Hover navigation: the menu's side bar rests as a slim strip of icons and opens over the list when you point at it, so the blip list gets more room.
+- Configurable menu logo with the new `Ui.Logo` option: a square logo in the folded side bar that unfolds into a wide logo when it opens. Use your own images or set `Ui.Logo = false` to hide it.
+
+#### Security
+- Fixed security issues in blip sharing and group invites.
+
+#### Fixed
+- Lowering `Limits.PrivateBlips` no longer deletes a player's saved blips; they all stay, and only new ones are blocked until the player is under the limit. Blips that no longer fit other stricter settings (sizes, a smaller icon range) are skipped instead of deleted, and come back when those settings are loosened.
+- Turning a shared blip back into a private one no longer loses the blip if saving it fails.
+- Hidden blips stay hidden after you share them or make them private again.
+- The menu command and key binding are ready as soon as you join, and the key binding shows in the game's key settings before your blips have loaded.
+- Lowering the global or joined blip limits no longer hides blips that already exist; the limits apply when new blips are created or joined.
+- Edits made while your blips are still loading are no longer lost.
+- Blip changes are no longer lost when a database save fails, or when the server stops right after a change.
+- ACE permissions you added yourself in `server.cfg` are never removed by the access panel.
+- Group blips no longer disappear for some members after an edit.
+- Shared blips and the global blip list can no longer go over their limits when several players act at the same moment.
+- Adding a blip to a group no longer reports success when it was not saved.
+- The console stays quiet unless `Debug` is on, apart from warnings and errors.
+
+#### Changed
+- Settings moved to `shared/config.lua`, with a comment on every option.
+- New `Ui.Accent` option sets the menu's highlight colour to match your server, white by default. Text and icons on the accent turn dark or light on their own, so any colour stays readable.
+- Translations use ox_lib's language setting.
+- Notifications go through `Editable.Notify` in `shared/editable.lua`.
+
+## 1.0.0 [#v1-0-0]
+
+- First release.

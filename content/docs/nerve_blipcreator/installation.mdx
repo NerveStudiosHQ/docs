@@ -1,89 +1,98 @@
 ---
 title: "Installation"
-description: "Install Nerve Studios Blip Creator, set up the admin permission and open the menu for the first time."
+description: "Install Nerve Studios Blip Creator, give your admins access and open the menu for the first time."
 ---
 
 ## Requirements
 
-- A recent FiveM server artifact
-- [oxmysql](https://github.com/overextended/oxmysql), started before this resource
-- OneSync, if you want players to invite people near them (on by default on current servers)
+- [ox_lib](https://github.com/overextended/ox_lib/releases)
+- [oxmysql](https://github.com/overextended/oxmysql/releases)
+- OneSync (on by default on current servers)
 
-No framework is needed. The script works on ESX, Qbox or a server with no framework at all.
+No framework is needed. The script works on ESX, QBox or a server with no framework at all.
 
-## Step 1 — Add the resource [#step-1-add-the-resource]
+## Step 1: add the resource [#step-1-add-the-resource]
 
-1. Download the script from your purchase and unzip it.
+1. Download `nerve_blipcreator` from your [Cfx.re Portal](https://portal.cfx.re/assets/granted-assets).
 2. Make sure the folder is named exactly `nerve_blipcreator`.
 3. Put it in your `resources` folder, for example `resources/[nerve]/nerve_blipcreator`.
 
 <Callout type="warn">
 
-Don't rename the folder. Exports, the database tables and the menu all use the name `nerve_blipcreator`.
+Don't rename the folder. Other scripts reach the exports by the name `nerve_blipcreator`.
 
 </Callout>
 
-## Step 2 — Add it to server.cfg [#step-2-add-it-to-server-cfg]
+## Step 2: add it to server.cfg [#step-2-add-it-to-server-cfg]
 
-Add these lines to `server.cfg` **after** `ensure oxmysql`:
+Add these lines to `server.cfg`, **after** oxmysql and ox_lib:
 
 ```cfg
+ensure oxmysql
+ensure ox_lib
+ensure nerve_blipcreator
+
 add_ace group.admin blipcreator allow
-add_principal identifier.license:YOUR_LICENSE group.admin
 
 add_ace resource.nerve_blipcreator command.add_ace allow
 add_ace resource.nerve_blipcreator command.remove_ace allow
-
-ensure nerve_blipcreator
 ```
 
 What each line does:
 
-- `add_ace group.admin blipcreator allow` makes everyone in `group.admin` a **manager**. Managers can do everything, including the **Access** tab.
-- `add_principal identifier.license:... group.admin` puts you in that group. Replace `YOUR_LICENSE` with your license identifier. You can find it in txAdmin under the player's identifiers. Skip this line if your framework already puts you in `group.admin`.
-- The two `resource.nerve_blipcreator` lines let the script give access to the staff groups you add in the **Access** tab. Without them, groups you add there get no access.
+- The `ensure` lines start the requirements first, then the script.
+- `add_ace group.admin blipcreator allow` gives everyone in `group.admin` full access: personal blips, global blips and the **Access** tab. ESX and QBox put their admins in `group.admin`. On a standalone server, add yourself with `add_principal identifier.license:YOUR_LICENSE group.admin`.
+- The two `resource.nerve_blipcreator` lines let the script grant access to the staff groups you add in the **Access** tab. You only need them if you use that tab.
+
+See [Global blips and access](/nerve_blipcreator/global-blips-and-access) for every permission.
+
+## Step 3: database [#step-3-database]
+
+Nothing to do. The tables are created on the first start and updated on later starts.
+
+If your database user can't create tables, import `sql/nerve_blipcreator.sql` yourself, then set `Database.AutoInstall = false` in `shared/config.lua`.
+
+## Step 4: language [#step-4-language]
+
+The script uses ox_lib's language. English is the default. For another language, add this to `server.cfg`:
+
+```cfg
+setr ox:locale de
+```
+
+Included: `en`, `de`, `es`, `fr`, `it`, `nl`, `pl`, `pt` and `tr`. See [Notifications and languages](/nerve_blipcreator/notifications-and-languages).
+
+## Step 5: start and test [#step-5-start-and-test]
+
+1. Restart your server.
+2. Join and type `/blips`.
+3. Click **New blip**, give it a name and click **Create blip**. It appears on your map straight away.
 
 <Callout type="info">
 
-ESX and Qbox already add admins to `group.admin` when they join, so most servers only need the first line and the two `resource.` lines.
+The console stays silent on a good start. A yellow warning means a value in `shared/config.lua` was typed wrong; the script uses that option's default and names it so you can fix it.
 
 </Callout>
 
-## Step 3 — Database [#step-3-database]
-
-You don't need to do anything. The tables are created automatically the first time the resource starts.
-
-If your database user can't create tables, import `install/nerve_blipcreator.sql` yourself. Then set `Config.Database.AutoInstall = false` in `config.lua`.
-
-## Step 4 — Configure [#step-4-configure]
-
-Open `config.lua` in the resource folder. Every option is explained right there. The defaults work for most servers, but these are worth checking:
-
-- `Config.Locale` sets the language.
-- `Config.Command` and `Config.Keybind` set how players open the menu.
-- `Config.Notify` sets which notification system to use.
-- `Config.Access.PersonalForEveryone` decides whether every player can make their own blips or only staff.
-
-See [Configuration](/nerve_blipcreator/configuration) for every option.
-
-## Step 5 — Start and test [#step-5-start-and-test]
-
-1. Restart your server, or run `refresh` then `ensure nerve_blipcreator` in the console.
-2. Check the console for a line like `loaded 0 global blips and 0 access groups`.
-3. Join the server and type `/blips`.
-4. Click **New blip**, give it a name and click **Create blip**. It appears on your map straight away.
-
-<Callout type="info">
-
-If the console shows a yellow warning about `config.lua`, a value was typed wrong. The script uses a safe default for that option and tells you which one to fix.
-
-</Callout>
+Then look through [Configuration](/nerve_blipcreator/configuration) for the options worth changing, such as the command, a default key and the menu colour.
 
 ## Updating
 
-1. Back up `config.lua`, `notify.lua` and any locale files you changed.
-2. Replace the resource folder with the new version.
+1. Back up `shared/config.lua`, `shared/editable.lua` and any locale files you changed.
+2. Replace the resource folder with the new version from your Cfx.re Portal.
 3. Copy your changes back.
-4. Restart the resource.
+4. Restart the server.
 
-Your blips are kept. Private blips are stored on each player's PC, and shared and global blips are in your database.
+Your blips are kept. Private blips are stored on each player's PC, and shared, group and global blips are in your database.
+
+## Upgrading from 1.0.0 [#upgrading-from-1-0-0]
+
+Version 1.0.1 moves the settings and adds two requirements. Do these steps once when you update from 1.0.0:
+
+1. Copy your values from the old `config.lua` into the new `shared/config.lua`, then delete the old `config.lua`. The option names are the same, except `Config.Locale` and `Config.Notify`, which are gone.
+2. The language now comes from ox_lib. Set it in your `server.cfg` with `setr ox:locale de` (or your language code).
+3. Notifications are now set in `shared/editable.lua`. They use ox_lib by default, and the file has ready examples for the common notification resources. See [Notifications](/nerve_blipcreator/notifications-and-languages#notifications).
+4. ox_lib and OneSync are now required. Start ox_lib before this script in your `server.cfg`.
+5. The `install/` folder is now called `sql/`. The tables are still created and updated on start, so there is nothing to run by hand.
+
+Your existing blips, groups and access settings carry over.
