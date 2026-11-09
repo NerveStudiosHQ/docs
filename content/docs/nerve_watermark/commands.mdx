@@ -1,0 +1,58 @@
+---
+title: "Commands and player settings"
+description: "The Nerve Studios Watermark chat commands, the player settings panel, the position editor and Photo Mode."
+---
+
+## Commands
+
+| Command | Alias | What it does |
+| --- | --- | --- |
+| `/watermark` | `/wm` | Opens the watermark settings panel |
+| `/togglewatermark` | `/togwm` | Turns Photo Mode on or off |
+
+Every player can use both. Change the names under `commands` in `shared/config.lua`. The first name in each list is the command and the rest are aliases. Add more aliases, or set a command to `false` to turn it off:
+
+```lua
+commands = {
+    settings  = { 'watermark', 'wm', 'logo' },
+    photoMode = false,
+},
+```
+
+The Photo Mode command is also not registered when `player.photoMode` is `false`.
+
+## Settings panel [#settings-panel]
+
+`/watermark` opens a panel with five sections:
+
+| Section | What the player can do |
+| --- | --- |
+| **Logo** | Pick one of the logos you offer |
+| **Placement** | Pick top left, top centre or top right, drag the logo on a small preview of the screen, or open the position editor |
+| **Motion** | Turn the animation on or off and pick a style |
+| **Look** | Show or hide the watermark, and change its size and opacity |
+| **Photo Mode** | Start or stop Photo Mode |
+
+Changes preview live on the player's screen. **Save** keeps them, **Cancel** or Escape closes the panel and throws them away, and **Reset all** puts everything back to your defaults. Anything you locked under `player` in `shared/config.lua` shows as **Set by server**.
+
+Settings are saved on the player's own computer for your server, so they stay after reconnecting and server restarts. To reset every player at once, see [Resetting everyone's settings](/nerve_watermark/configuration#resetting-everyones-settings).
+
+## Position editor [#position-editor]
+
+Opened from the **Placement** section with **Fine-tune on screen**:
+
+- Drag the watermark to move it, and drag a corner to resize it.
+- Arrow keys nudge it. Hold Shift to move it further.
+- It snaps to a grid and to guides at the screen centre and edges. Players can switch snapping off in the editor.
+- Enter applies the new position and Escape cancels it.
+
+Players can only place the watermark inside the area set by `limits.bounds`. With `player.changePosition = false`, they cannot move it at all.
+
+## Photo Mode [#photo-mode]
+
+Photo Mode hides the watermark for screenshots and clips. It starts from `/togglewatermark` or from the **Photo Mode** section of the panel, and closes the panel when it starts.
+
+- With `photoMode.duration` above `0` and `photoMode.autoRestore = true`, the watermark comes back on its own after that many seconds (60 by default).
+- With `duration = 0` or `autoRestore = false`, it stays hidden until the player runs the command again or stops it in the panel.
+
+Photo Mode is not saved. It ends when the player leaves the server. Turn it off for everyone with `player.photoMode = false`.
