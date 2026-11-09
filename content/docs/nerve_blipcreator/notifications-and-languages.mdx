@@ -1,68 +1,67 @@
 ---
 title: "Notifications and languages"
-description: "Use your server's notification system with Nerve Studios Blip Creator, and change or translate its text."
+description: "Use your server's notification system with Nerve Studios Blip Creator through shared/editable.lua, and change or translate its text."
 ---
 
 ## Notifications
 
-Nerve Studios Blip Creator works with the notification systems most servers already run. Set `Config.Notify` in `config.lua`.
+Every notification the script shows goes through one function, `Editable.Notify`, in `shared/editable.lua`. It uses ox_lib notifications by default, so most servers don't need to change anything.
 
-| Value | Uses |
-| --- | --- |
-| `'auto'` | The first supported system running on your server (default) |
-| `'lation_ui'` | lation_ui |
-| `'ox_lib'` | ox_lib |
-| `'okokNotify'` | okokNotify |
-| `'brutal_notify'` | Brutal Notify |
-| `'wasabi_notify'` | Wasabi Notify |
-| `'t-notify'` | t-notify |
-| `'mythic_notify'` | mythic_notify |
-| `'pNotify'` | pNotify |
-| `'qbx_core'` | Qbox notifications |
-| `'qb-core'` | qb-core notifications |
-| `'es_extended'` | ESX notifications |
-| `'native'` | The GTA feed above the minimap, with no extra resource |
-| `'custom'` | Your own code, see below |
-
-With `'auto'`, the script checks in this order and uses the first one that is started:
-
-`lation_ui`, `ox_lib`, `okokNotify`, `brutal_notify`, `wasabi_notify`, `t-notify`, `mythic_notify`, `pNotify`, `qbx_core`, `qb-core`, `es_extended`.
-
-If none of them are running, it uses the GTA feed.
-
-<Callout type="info">
-
-If you pick a system that isn't started, or it throws an error, the script falls back to the GTA feed so players still see the message.
-
-</Callout>
-
-### Using your own notifications
-
-1. Set `Config.Notify = 'custom'`.
-2. Open `notify.lua` in the resource folder.
-3. Replace the body of the `custom` function with your own call:
-
-```lua
-Notify['custom'] = function(title, text, kind)
-    exports['my_notify']:Send(title, text, kind)
+```lua title="shared/editable.lua"
+function Editable.Notify(message, kind)
+    lib.notify({ title = locale('title'), description = message, type = kind })
 end
 ```
 
-`kind` is `'success'`, `'error'` or `'inform'`. Map it to whatever your system expects.
+| Argument | What it is |
+| --- | --- |
+| `message` | The text to show, already translated |
+| `kind` | `'success'`, `'error'` or `'inform'` |
 
-You can also tweak how any of the built-in systems are called in the same file, for example to change how long notifications stay on screen.
+### Use another notification system
+
+The file has ready examples below the ox_lib line for lation_ui, okokNotify, brutal_notify, wasabi_notify, t-notify, mythic_notify, pNotify, qbx_core, ESX and the GTA feed above the minimap.
+
+1. Open `shared/editable.lua`.
+2. Delete the `lib.notify(...)` line.
+3. Remove the `--` in front of the example for your system.
+4. Restart the resource.
+
+For example, to use okokNotify:
+
+```lua
+function Editable.Notify(message, kind)
+    exports.okokNotify:Alert(locale('title'), message, 5000, kind == 'inform' and 'info' or kind)
+end
+```
+
+### Use your own code
+
+Replace the body with any call your server uses. Map `kind` to whatever your system expects:
+
+```lua
+function Editable.Notify(message, kind)
+    exports['my_notify']:Send(message, kind)
+end
+```
+
+<Callout type="info">
+
+If your notification code throws an error, the message is shown in the GTA feed instead, so players never miss it. `shared/editable.lua` is kept readable in your download, so you can change it at any time.
+
+</Callout>
 
 ## Languages
 
-Nine languages are included: English (`en`), German (`de`), Spanish (`es`), French (`fr`), Dutch (`nl`), Portuguese (`pt`), Italian (`it`), Polish (`pl`) and Turkish (`tr`).
+The script uses ox_lib's language setting. Nine languages are included: English (`en`), German (`de`), Spanish (`es`), French (`fr`), Italian (`it`), Dutch (`nl`), Polish (`pl`), Portuguese (`pt`) and Turkish (`tr`).
 
-Set the language in `config.lua`:
+Set the language in `server.cfg`:
 
-```lua
-Config.Locale = 'de'
+```cfg
+setr ox:locale de
 ```
 
-This changes the menu and every notification.
+This changes the menu and every notification. It is the same setting your other ox_lib resources use.
 
 ### Changing the text
 
@@ -74,8 +73,6 @@ All text lives in the `locales/` folder, one file per language. To change a word
 
 ### Adding a language
 
-1. Copy `locales/en.json` to a new file named after the language code, e.g. `locales/sv.json`.
+1. Copy `locales/en.json` to a new file named after the language code, for example `locales/sv.json`.
 2. Translate the values. Leave the keys on the left as they are.
-3. Set `Config.Locale = 'sv'`.
-
-Any text missing from your file falls back to English, so you can translate it bit by bit.
+3. Set `setr ox:locale sv` in `server.cfg` and restart the server.
