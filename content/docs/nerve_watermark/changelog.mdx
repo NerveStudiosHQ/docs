@@ -1,0 +1,25 @@
+---
+title: "Changelog"
+description: "Release history for Watermark."
+---
+
+{/* Generated from CHANGELOG.md by docs-sync.js. Edit that file, not this page. */}
+
+## 1.0.0 (2026-11-09) [#v1-0-0]
+
+#### Added
+- Server console shows on start whether the script is up to date, with a download link when a new version is out (`set nerve:versioncheck false` turns it off).
+- Animated server watermark that works on ESX, QBox or standalone, with ox_lib as the only requirement.
+- Any number of logos in `shared/config_logos.lua`, from png, jpg, webp, gif or svg files in `images/` or from an https link, with a default logo for new players.
+- Animations: sway, bounce or both together, with configurable speed, strength and smooth fade in and out.
+- Placement presets for top left, top centre and top right, a small preview of your screen where the logo can be dragged or dropped on a preset, plus a full-screen editor with drag, corner resize, grid snapping and alignment guides.
+- Player settings panel (`/watermark` or `/wm`) to pick a logo, position, size, opacity and animation, with save, reset and cancel.
+- Photo Mode (`/togglewatermark` or `/togwm`) hides the watermark for screenshots and brings it back on its own after a set time, or when the player turns it off.
+- Watermark hides itself while the pause menu or map is open.
+- On ultrawide monitors the watermark stays inside a centred 16:9 area.
+- Control over what players may change, including whether they may switch the watermark off, with limits for size, opacity and where the watermark may be dragged.
+- `settingsVersion` option to reset every player's saved settings after a big change.
+- Panel accent colour set from config to match your server, white by default. Text and icons on the accent turn dark or light on their own, so any colour stays readable.
+- Your server's logo at the bottom of the panel's side menu: a square mark that unfolds into the full logo as the menu opens, set with `ui.logo` (or `ui.logo = false` to hide it).
+- `Editable.CanUseLogo` hook to offer some logos only to certain players, and `Editable.Notify` to use your own notifications.
+- Exports for other resources: `SetVisible`, `IsVisible`, `TogglePhotoMode`, `OpenSettings` and `CloseSettings`.

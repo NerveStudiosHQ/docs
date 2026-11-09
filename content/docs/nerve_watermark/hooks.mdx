@@ -1,0 +1,49 @@
+---
+title: "Hooks"
+description: "Use your own notifications and limit logos to some players with the hooks in Nerve Studios Watermark's shared/editable.lua."
+---
+
+`shared/editable.lua` holds two functions you can change to fit your server. They run on the player's own game. If one of them errors, the watermark keeps working and one warning is printed to the F8 console.
+
+## Editable.Notify [#editablenotify]
+
+Shows the notifications for saving, resetting and Photo Mode. It uses ox_lib notifications by default. Replace the body to use your own notification resource:
+
+```lua
+function Editable.Notify(message, kind)
+    -- message is already translated
+    -- kind is 'success', 'error' or 'inform'
+    exports['my_notify']:Send(message, kind)
+end
+```
+
+It is only called when `notify.enabled` is `true` in `shared/config.lua`. Set that to `false` for no notifications at all.
+
+## Editable.CanUseLogo [#editablecanuselogo]
+
+Decides whether a player may see and pick a logo. Return `false` to hide a logo from that player. It gets the logo entry from `shared/config_logos.lua`, with its `id`, `label`, `description` and `image`.
+
+It is checked when the watermark loads and each time the settings panel opens. On ESX and QBox it is checked again when the player's character loads and when their job changes.
+
+A player whose saved logo is not allowed sees the default logo instead, and gets their own back as soon as it is allowed again.
+
+Example: a police logo only for players with the police job. Keep the lines that match your framework. On ESX, fetch the shared object once, above the function, not on every check:
+
+```lua
+-- local ESX = exports.es_extended:getSharedObject()       -- ESX
+
+function Editable.CanUseLogo(logo)
+    if logo.id == 'police' then
+        local job = exports.qbx_core:GetPlayerData().job       -- QBox
+        -- local job = ESX.GetPlayerData().job                 -- ESX
+        return job ~= nil and job.name == 'police'
+    end
+    return true
+end
+```
+
+<Callout type="warn">
+
+This only changes what the player sees on their own screen. It is not a security check, so don't use it to protect anything of value.
+
+</Callout>

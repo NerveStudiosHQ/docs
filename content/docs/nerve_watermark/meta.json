@@ -1,0 +1,15 @@
+{
+  "title": "Watermark",
+  "icon": "Stamp",
+  "pages": [
+    "overview",
+    "installation",
+    "configuration",
+    "logos",
+    "commands",
+    "exports",
+    "hooks",
+    "troubleshooting",
+    "changelog"
+  ]
+}

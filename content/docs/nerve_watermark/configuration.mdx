@@ -1,0 +1,184 @@
+---
+title: "Configuration"
+description: "Every option in Watermark's config files."
+---
+
+All options live in `shared/config.lua`, and the logos in `shared/config_logos.lua`. Each option has a comment explaining what it does. Restart the resource after changing either file.
+
+<Callout type="info">
+
+If a value has the wrong type or is out of range, the script doesn't break. It prints one warning in the F8 console naming the option, and uses the default instead. Options you remove also fall back to their defaults.
+
+</Callout>
+
+## Change these first [#change-these-first]
+
+- **`ui.accent`** is the colour of the buttons, toggles and highlights in the settings panel and editor. It is white by default. Set your server's colour as a hex code, for example `'#a855f7'`. Text on the accent turns dark or light on its own, so any colour stays readable.
+- **`ui.logo`** is the logo in the panel's side menu. Point `mark` and `wordmark` at your own images, or set `ui.logo = false` to hide it.
+- **`defaultLogo`** is the logo new players see. Add your logos first, see [Logos](/nerve_watermark/logos).
+- **`appearance`** is where the watermark starts and how big and solid it is. Sizes and distances are in pixels on a 1080p screen and scale with the player's resolution, so the watermark looks the same from 720p to 4K.
+- **`player`** decides what players may change. Set an option to `false` to lock it to your default. Locked options show as **Set by server** in the panel. With `player.toggleVisibility = false`, players can't switch the watermark off, though they can still use Photo Mode unless `player.photoMode = false`.
+- **`limits`** sets the smallest and largest size and opacity players can choose, and with `bounds` the part of the screen they may drag the watermark into.
+
+Your defaults are what every new player starts with. Players can then change anything you have not locked under `player`, within the `limits` you set.
+
+## Resetting everyone's settings [#resetting-everyones-settings]
+
+After a big change, such as a new logo set or a new default placement, you may want every player to start from your new defaults. Raise `settingsVersion` by one (for example from `1` to `2`) and restart the resource. Each player's saved settings are cleared the next time the watermark loads for them.
+
+A single player can reset their own settings with **Reset all** in the settings panel.
+
+## All options [#all-options]
+
+{/* nerve:config:start */}
+{/* Generated from the script's config files. Edit those, not this block. */}
+
+### `shared/config.lua` [#config]
+
+```lua title="shared/config.lua"
+return {
+    debug = false,                      -- Print troubleshooting messages to the F8 console
+    settingsVersion = 1,                -- Raise by one to wipe every player's saved watermark settings back to the defaults below
+
+    -- Panel look
+    ui = {
+        accent = '#ffffff',             -- Accent colour for buttons, toggles and highlights (hex, e.g. '#a855f7' for purple)
+        logo = {                        -- Logo at the bottom of the panel's side menu (set logo = false to hide it)
+            mark     = 'images/nerve-mark.png',     -- Square icon shown while the menu is closed: a file in images/ or an https:// link
+            wordmark = 'images/nerve-wordmark.png', -- Wider logo shown while the menu is open, same rules (remove it to keep just the mark)
+        },
+    },
+
+    -- Visibility
+    visibility = {
+        enabledByDefault = true,        -- Show the watermark to players who have never changed their settings
+        hideInPauseMenu  = true,        -- Fade the watermark out while the pause menu or map is open (false = always shown)
+        safeArea         = true,        -- On ultrawide monitors, keep the watermark inside a centred 16:9 area (false = use the screen edges)
+    },
+
+    -- Logos
+    logos       = lib.load('shared.config_logos'), -- Logos players can choose from: listed in shared/config_logos.lua
+    defaultLogo = 'example',            -- Id of the logo new players see (if not found: the first logo with default = true, then the first logo)
+
+    -- Default placement and look (players can change these unless locked under player below)
+    appearance = {
+        position = 'top-right',         -- Starting corner: 'top-left', 'top-center' or 'top-right'
+        scale    = 1.0,                 -- Size multiplier (1.0 = height below; kept between limits.minScale and limits.maxScale)
+        opacity  = 0.9,                 -- 0.0 (invisible) to 1.0 (solid); kept between limits.minOpacity and limits.maxOpacity
+        height   = 64,                  -- Logo height in pixels on a 1080p screen at scale 1.0; width follows the image's shape
+        padding  = {
+            top  = 28,                  -- Gap from the top edge in pixels at 1080p
+            side = 36,                  -- Gap from the left or right edge in pixels at 1080p (not used by 'top-center')
+        },
+    },
+
+    -- Animation
+    animation = {
+        enabled        = true,          -- Animate the watermark by default (false = static for new players)
+        style          = 'sway',        -- 'none', 'sway' (gentle rotation), 'bounce' (up and down) or 'sway_bounce' (both)
+        speed          = 4.0,           -- Seconds per full animation cycle (higher = slower)
+        intensity      = 1.0,           -- Multiplier for how far it sways and bounces (0.5 = half, 2.0 = double)
+        swayDegrees    = 3.0,           -- How far it tilts each way in degrees, at intensity 1.0
+        bounceDistance = 6,             -- How far it rises in pixels at 1080p, at intensity 1.0
+        fadeIn         = 600,           -- Milliseconds to fade in when shown again (0 = instant)
+        fadeOut        = 400,           -- Milliseconds to fade out when hidden (0 = instant)
+        easing         = 'ease-in-out', -- Motion curve: 'linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out' or 'cubic-bezier(0.4, 0, 0.2, 1)'
+    },
+
+    -- What players may change in their settings panel (false = locked to the defaults above)
+    player = {
+        changeLogo       = true,        -- Pick a different logo from the list
+        changePosition   = true,        -- Pick a corner or drag the watermark anywhere in the editor
+        changeScale      = true,        -- Make the watermark bigger or smaller
+        changeOpacity    = true,        -- Make the watermark more or less transparent
+        toggleAnimation  = true,        -- Turn the animation on or off
+        chooseAnimation  = true,        -- Pick a different animation style
+        toggleVisibility = true,        -- Switch the watermark off with "Show watermark" (false = always shown; Photo Mode is set by photoMode)
+        photoMode        = true,        -- Use Photo Mode to hide the watermark for screenshots
+    },
+
+    -- Limits for player settings
+    limits = {
+        minScale   = 0.5,               -- Smallest size multiplier a player can choose
+        maxScale   = 2.5,               -- Largest size multiplier a player can choose
+        minOpacity = 0.2,               -- Most transparent a player can make it (0.0 to 1.0)
+        maxOpacity = 1.0,               -- Most solid a player can make it (0.0 to 1.0)
+        bounds = {
+            minX = 0.0,                 -- Leftmost point a dragged watermark may sit, as a fraction of the screen width (0.0 = left edge)
+            maxX = 1.0,                 -- Rightmost point, as a fraction of the screen width (1.0 = right edge)
+            minY = 0.0,                 -- Highest point, as a fraction of the screen height (0.0 = top edge)
+            maxY = 1.0,                 -- Lowest point, as a fraction of the screen height (1.0 = bottom edge)
+        },
+    },
+
+    -- Position editor
+    editor = {
+        grid = {
+            enabled = true,             -- Snap to a grid while dragging (players can still switch it off in the editor)
+            size    = 16,               -- Grid cell size in pixels at 1080p
+        },
+        guides       = true,            -- Show alignment guides at the screen centre and edges while dragging
+        snapDistance = 10,              -- How close in pixels at 1080p the watermark must get to a guide to snap to it (0 = no snapping)
+    },
+
+    -- Photo Mode
+    photoMode = {
+        duration    = 60,               -- Seconds the watermark stays hidden before it comes back (0 = until the player turns it off)
+        autoRestore = true,             -- Bring the watermark back after duration (false = until the player turns it off)
+    },
+
+    -- Notifications
+    notify = {
+        enabled = true,                 -- Show a notification when settings are saved or Photo Mode changes (false = silent)
+    },
+
+    -- Chat commands (the first name is the command, the rest are aliases)
+    commands = {
+        settings  = { 'watermark', 'wm' },             -- Open the watermark settings panel (set to false to disable)
+        photoMode = { 'togglewatermark', 'togwm' },    -- Turn Photo Mode on or off (set to false to disable)
+    },
+}
+```
+
+### `shared/config_logos.lua` [#config-logos]
+
+```lua title="shared/config_logos.lua"
+--[[
+    Logos players can choose from. Read by `logos` in shared/config.lua.
+
+    Add as many as you like. One entry looks like:
+
+        {
+            id          = 'example',                 -- Unique name, letters, numbers, - and _ only (required)
+            label       = 'Example',                 -- Name shown in the settings panel (optional, defaults to the id)
+            description = 'Default server mark',     -- Short line under the name (optional, defaults to none)
+            image       = 'images/nerve-wordmark.png',      -- File in this resource's images/ folder, or a full https:// link (required)
+            default     = true,                      -- Use this logo for new players if defaultLogo is not set or not found (optional)
+        },
+
+    Images: put png, jpg, jpeg, webp, gif or svg files in the images/ folder and
+    write the path as 'images/<file name>'. A transparent png or svg looks best.
+    Entries with a missing id, a repeated id or an unsupported image are skipped
+    with a warning in the F8 console.
+
+    To show a logo only to some players (a job or a VIP mark), see
+    Editable.CanUseLogo in shared/editable.lua.
+]]
+
+return {
+    {
+        id          = 'example',
+        label       = 'Nerve Studios',
+        description = 'Wordmark',
+        image       = 'images/nerve-wordmark.png',
+        default     = true,
+    },
+    {
+        id          = 'example-mark',
+        label       = 'Nerve',
+        description = 'Monogram',
+        image       = 'images/nerve-mark.png',
+    },
+}
+```
+{/* nerve:config:end */}
