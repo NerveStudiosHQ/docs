@@ -4,7 +4,7 @@
     "icon": "MapPin",
     "category": "Server Utilities",
     "description": "Standalone blip creator: private blips, shared group blips and admin global blips",
-    "version": "1.0.1",
-    "date": "2026-11-08"
+    "version": "1.0.2",
+    "date": "2026-11-09"
   }
 }
