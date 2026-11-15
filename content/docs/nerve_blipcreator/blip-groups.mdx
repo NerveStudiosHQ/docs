@@ -7,20 +7,21 @@ A blip group is a small team, like a gang, crew, company or group of friends. Ev
 
 | | Default | Option |
 | --- | --- | --- |
-| Players in one group, including the owner | 10 | `Config.Groups.MaxMembers` |
-| Groups one player can create | 3 | `Config.Groups.MaxOwned` |
-| Groups one player can be in | 5 | `Config.Groups.MaxJoined` |
-| Blips in one group | 50 | `Config.Groups.MaxBlips` |
+| Players in one group, including the owner | 10 | `Groups.MaxMembers` |
+| Groups one player can create | 3 | `Groups.MaxOwned` |
+| Groups one player can be in, including their own | 5 | `Groups.MaxJoined` |
+| Blips in one group | 50 | `Groups.MaxBlips` |
+| Longest group name | 24 | `Groups.NameLength` |
 
 <Callout type="info">
 
-Groups are different from [sharing a single blip](/nerve_blipcreator/sharing). Sharing gives people one of your blips. A group is a shared space where every member can add blips for the whole group.
+Blip groups are made by players and have nothing to do with ACE groups like `group.admin`. Groups are also different from [sharing a single blip](/nerve_blipcreator/sharing): sharing gives people one of your blips, while a group is a space where every member can add blips for the whole group.
 
 </Callout>
 
 ## Create a group
 
-1. Open the menu and click **Groups** on the left.
+1. Open the menu and click **Groups** in the side bar.
 2. Click **New group**.
 3. Type a name and click **Create group**.
 
@@ -28,14 +29,14 @@ You are the owner. The group opens straight away.
 
 ## Invite players
 
-Only the owner can invite people.
+Only the owner can invite people, and the player must be standing near you.
 
 1. Open the group and click **Members**.
-2. Type the player's server ID and click **Invite**, or click **Invite** next to someone under the nearby list.
+2. Under **Invite a player**, type the player's server ID and press **Enter**.
 3. The player gets a notification, and the invite shows in their **Requests**.
 4. They click **Accept** and join the group.
 
-Invites expire after `Config.Sharing.InviteTimeout` seconds (60 by default). You can't invite someone if the group is full or they are already in the maximum number of groups.
+Invites expire after `Sharing.InviteTimeout` seconds (60 by default). The player must be within `Sharing.NearbyDistance` metres when you invite them. You can't invite someone if the group is full or they are already in the maximum number of groups.
 
 ## Add blips to a group
 
@@ -51,18 +52,18 @@ Every member sees the new blip on their map straight away. The list shows who ad
 | --- | --- | --- |
 | See every group blip | Yes | Yes |
 | Add blips | Yes | Yes |
-| Edit or delete their own blips | Yes | Yes |
+| Edit or delete the blips they added | Yes | Yes |
 | Edit or delete anyone's blips | Yes | No |
 | Invite and remove members | Yes | No |
 | Rename the group | Yes | No |
 | Delete the group | Yes | No |
 | Leave the group | No, delete it instead | Yes |
 
-Every member can also hide any group blip from their own map, or duplicate it into their private blips, from the **⋯** menu.
+Every member can also hide any group blip from their own map, or duplicate it into their private blips, from the blip's menu.
 
 ## Manage the group
 
-From the **⋯** menu on a group, or next to **Members** inside it:
+From the group's menu, or next to **Members** inside it:
 
 - **Rename group** changes the name for everyone.
 - **Delete group** removes the group and all of its blips for every member.
@@ -70,19 +71,8 @@ From the **⋯** menu on a group, or next to **Members** inside it:
 
 To remove someone, open **Members** and click **Remove** next to their name. Their map updates straight away. Blips they added stay in the group.
 
-## Security
-
-The server checks every group action, so players can't get into groups they weren't invited to or change blips they don't own.
-
-- **Membership is checked on every action** on the server: viewing, adding, editing and deleting group blips.
-- **Invites can't be faked.** A player can only join with an invite the server sent to them. Invites can't be reused, shared with someone else, or used after they expire.
-- **Owner-only actions are checked.** Inviting, removing members, renaming and deleting all verify that you own the group.
-- **Edit rights are checked.** Editing or deleting a blip checks that you added it or own the group.
-- **Limits are enforced on the server**, including when several players act at the same time.
-- **Removal is instant.** A player who leaves or is removed loses the group's blips straight away.
-- **Clean input.** Group and blip names are cleaned of colour codes and formatting, and every blip field is validated.
-- **Rate limits.** Every action is rate limited.
-
 ## Turning groups off
 
-Set `Config.Groups.Enabled = false` in `config.lua`. The **Groups** category disappears from the menu, and existing groups stay saved in the database in case you turn it back on.
+Set `Groups.Enabled = false` in `shared/config.lua`. The **Groups** category disappears from the menu, and existing groups stay saved in the database in case you turn it back on.
+
+Group invites use the nearby invite, so they also stop working when `Sharing.Enabled` or `Sharing.Nearby` is `false`.

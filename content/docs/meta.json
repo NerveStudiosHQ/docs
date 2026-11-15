@@ -5,9 +5,8 @@
     "index",
     "...general",
     "---Server Utilities---",
-    "nerve_watermark",
-    "---World---",
     "nerve_blipcreator",
+    "nerve_watermark",
     "---Changelog---",
     "...changelog"
   ]

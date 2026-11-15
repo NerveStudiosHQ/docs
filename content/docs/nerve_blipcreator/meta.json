@@ -4,11 +4,11 @@
   "pages": [
     "overview",
     "installation",
+    "configuration",
     "using-the-menu",
     "sharing",
     "blip-groups",
     "global-blips-and-access",
-    "configuration",
     "notifications-and-languages",
     "exports",
     "troubleshooting",

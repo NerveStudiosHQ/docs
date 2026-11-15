@@ -2,10 +2,10 @@
   "nerve_blipcreator": {
     "title": "Blip Creator",
     "icon": "MapPin",
-    "category": "World",
-    "description": "Private, shared and global map blips with a full in-game editor, share codes for crews and admin-only server blips.",
-    "version": "1.0.0",
-    "date": null
+    "category": "Server Utilities",
+    "description": "Standalone blip creator: private blips, shared group blips and admin global blips",
+    "version": "1.0.2",
+    "date": "2026-11-09"
   },
   "nerve_watermark": {
     "title": "Watermark",
