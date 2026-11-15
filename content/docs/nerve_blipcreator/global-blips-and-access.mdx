@@ -1,62 +1,88 @@
 ---
 title: "Global blips and access"
-description: "Add server-wide blips every player sees, and choose which staff groups are allowed to."
+description: "Give admins access with ACE permissions, add server-wide blips every player sees, and choose which staff groups may."
 ---
 
 Global blips are visible to every player on the server, for things like the city hall, hospitals, jobs or event areas. Only staff with global access can add, edit or delete them. Players can still hide a global blip from their own map.
 
-## Who can do what
+Who can do what is set with ACE permissions, in `server.cfg` or from the **Access** tab in the menu.
 
-| | Private and shared blips | Global blips | Access tab |
+## Permissions
+
+| ACE | Gives |
+| --- | --- |
+| `blipcreator` | Full access: personal blips, global blips and the **Access** tab |
+| `blipcreator.global` | Create, edit and delete global blips |
+| `blipcreator.use` | Create and share personal blips. Only needed when `Access.PersonalForEveryone = false` |
+
+The names follow `Access.Ace` in `shared/config.lua`. With `Ace = 'mapblips'` they become `mapblips`, `mapblips.global` and `mapblips.use`. Change it if `blipcreator` clashes with another resource.
+
+| | Private, shared and group blips | Global blips | Access tab |
 | --- | --- | --- | --- |
-| Every player | Yes | Sees them | No |
-| Group with **Global** access | Yes | Add, edit, delete | No |
-| Manager (`blipcreator` ACE) | Yes | Add, edit, delete | Yes |
+| Every player (default) | Yes | Sees them | No |
+| `blipcreator.global` | Yes | Add, edit, delete | No |
+| `blipcreator` (full access) | Yes | Add, edit, delete | Yes |
 
-## Managers
+## Give access in server.cfg
 
-A manager has full access, including the **Access** tab. Make a group a manager in `server.cfg`:
+Full access for your admins:
 
 ```cfg
 add_ace group.admin blipcreator allow
 ```
 
-The permission name comes from `Config.Access.Ace`. Change it there if `blipcreator` clashes with another resource.
-
-## Give staff groups access from the menu
-
-Managers can give other staff groups access without touching `server.cfg`:
-
-1. Open the menu and click **Access** on the left.
-2. Type the group name, for example `mod` for `group.mod`.
-3. Turn on **Global** to let them place global blips.
-4. Click **Add group**.
-
-Changes apply straight away, with no restart. Turn a toggle off or click the bin to take access away again.
-
-<Callout type="warn">
-
-This needs the two `resource.nerve_blipcreator` lines from [Installation](/nerve_blipcreator/installation#step-2-add-it-to-server-cfg). Without them the group is saved, but its members don't get access.
-
-</Callout>
-
-The **Personal** toggle only matters when `Config.Access.PersonalForEveryone = false`. In that mode, only managers and groups with **Personal** turned on can make and share their own blips.
-
-## Give access in server.cfg instead
-
-You can also grant the same permissions with ACE:
+Global blips for moderators, and personal blips for VIPs when `PersonalForEveryone` is `false`:
 
 ```cfg
 add_ace group.mod blipcreator.global allow
 add_ace group.vip blipcreator.use allow
 ```
 
-- `blipcreator.global` lets the group place global blips.
-- `blipcreator.use` lets the group make and share their own blips. You only need this when `PersonalForEveryone` is `false`.
+ESX and QBox put their staff in groups like `group.admin` when they join. On a standalone server, add players to a group yourself:
+
+```cfg
+add_principal identifier.license:YOUR_LICENSE group.admin
+```
+
+## Give access from the menu
+
+Admins with full access can grant the same permissions to ACE groups without touching `server.cfg`:
+
+1. Open the menu and click **Access** in the side bar.
+2. Type the group name, for example `mod` for `group.mod`.
+3. Turn on **Global** to let them place global blips, and **Personal** to let them make their own blips.
+4. Click **Add group**.
+
+Changes are saved and apply straight away, with no restart. Turn a toggle off or remove the group to take access away again. `Access.MaxGroups` caps how many groups the tab can hold (25 by default).
+
+<Callout type="warn">
+
+The **Access** tab needs these two lines in `server.cfg`. Without them, the groups are saved but their members get no access, and the server console warns you on start.
+
+```cfg
+add_ace resource.nerve_blipcreator command.add_ace allow
+add_ace resource.nerve_blipcreator command.remove_ace allow
+```
+
+</Callout>
+
+Permissions you wrote in `server.cfg` yourself are never removed by the **Access** tab. The **Personal** toggle only matters when `Access.PersonalForEveryone = false`.
+
+## Personal blips for staff only
+
+By default every player can make, share and group their own blips. To limit that to staff, set this in `shared/config.lua`:
+
+```lua
+Access = {
+    PersonalForEveryone = false,
+},
+```
+
+Then only players with `blipcreator`, `blipcreator.use`, or a group with **Personal** turned on in the **Access** tab can open the menu to make their own blips. Everyone still sees global blips.
 
 ## Add a global blip
 
-1. Click **Global blips** on the left, then **New global blip**.
+1. Click **Global blips** in the side bar, then **New global blip**.
 2. Fill in the editor the same way as a normal blip (see [Using the menu](/nerve_blipcreator/using-the-menu#create-a-blip)).
 3. Click **Create blip**. Every player sees it straight away.
 
@@ -64,20 +90,20 @@ Staff with global access can also turn on **Global blip** in the editor when cre
 
 ## Global-only icons
 
-You can reserve icons for global blips so players can't use them on their own blips, such as police or hospital icons:
+You can reserve icons for global blips so players can't use them on their own blips, such as police or hospital icons. In `shared/config.lua`:
 
 ```lua
-Config.Sprites = {
+Sprites = {
     GlobalOnly = { 60, 61, 137 },
-}
+},
 ```
 
-Find icon IDs in the icon picker; they show when you hover an icon.
+Find icon IDs in the icon picker by searching or hovering an icon.
 
 ## Limits
 
-`Config.Limits.GlobalBlips` caps how many global blips the server can have (500 by default).
+`Limits.GlobalBlips` caps how many global blips the server can have (500 by default). Lowering it never hides global blips that already exist; it only stops new ones.
 
-## Adding global blips from other resources
+## From other resources
 
 Other resources can add and manage global blips with exports. See [Exports](/nerve_blipcreator/exports).

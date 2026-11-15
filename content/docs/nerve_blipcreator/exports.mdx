@@ -3,6 +3,8 @@ title: "Exports"
 description: "Add and manage global blips from other resources, check a player's access and open the menu."
 ---
 
+Other resources can manage global blips, check what a player may do, and open the menu. Global blips made with exports behave exactly like ones made in the menu: every player sees them, and admins can edit them in **Global blips**.
+
 ## Server exports
 
 ### CreateGlobalBlip
@@ -11,11 +13,15 @@ Adds a global blip every player sees. Returns the new blip's ID, or `nil` and an
 
 ```lua
 local id, err = exports.nerve_blipcreator:CreateGlobalBlip({
-    label = 'Bean Machine',
-    sprite = 536,
-    colour = 17,
-    coords = vector3(-628.0, 239.0, 81.0),
+    label = 'City Hall',
+    coords = vector3(-544.9, -204.4, 38.2),
+    sprite = 419,
+    colour = 0,
 })
+
+if not id then
+    print('could not create the blip: ' .. err)
+end
 ```
 
 | Field | Default | Description |
@@ -23,18 +29,18 @@ local id, err = exports.nerve_blipcreator:CreateGlobalBlip({
 | `label` | required | Blip name |
 | `coords` | required | `vector3` position. You can also pass `x`, `y` and `z` |
 | `kind` | `1` | `1` point, `2` radius, `3` area |
-| `sprite` | `1` | Icon ID |
+| `sprite` | `1` | Icon ID. Icons in `Sprites.GlobalOnly` are allowed here |
 | `colour` | `0` | GTA blip colour ID |
 | `display` | `3` | `1` map only, `2` minimap only, `3` both |
-| `radius` | | Radius in metres, for `kind = 2` |
-| `width`, `height` | | Size in metres, for `kind = 3` |
+| `radius` | required for `kind = 2` | Radius in metres |
+| `width`, `height` | required for `kind = 3` | Size in metres |
 | `rotation` | `0` | Rotation in degrees, for `kind = 3` |
 | `scale` | `1.0` | Icon size |
 | `alpha` | `255` | Opacity, 0 to 255 |
 | `short` | `false` | Only show on the minimap when nearby |
 | `icon` | `true` | Show an icon in the middle of radius and area blips |
 
-Values are validated and clamped the same way as in the menu. A radius blip:
+Values are checked against the same limits as the menu: sizes, icon size and opacity are kept inside the ranges in `shared/config.lua`, and names are cleaned of colour codes. A radius blip:
 
 ```lua
 exports.nerve_blipcreator:CreateGlobalBlip({
@@ -52,12 +58,12 @@ exports.nerve_blipcreator:CreateGlobalBlip({
 Changes some fields of a global blip. Fields you leave out keep their current value. Returns `true`, or `false` and an error code.
 
 ```lua
-exports.nerve_blipcreator:UpdateGlobalBlip(id, { colour = 5, label = 'Bean Machine (open)' })
+exports.nerve_blipcreator:UpdateGlobalBlip(id, { colour = 5, label = 'City Hall (open)' })
 ```
 
 ### DeleteGlobalBlip
 
-Removes a global blip for everyone. Returns `true` or `false`.
+Removes a global blip for everyone. Returns `true`, or `false` (with `not_found` when no global blip has that ID).
 
 ```lua
 exports.nerve_blipcreator:DeleteGlobalBlip(id)
@@ -65,7 +71,7 @@ exports.nerve_blipcreator:DeleteGlobalBlip(id)
 
 ### GetGlobalBlips
 
-Returns a list of every global blip with its ID, fields and `coords`.
+Returns a list of every global blip, sorted by ID. Each entry has `id`, `coords` (a `vector3`) and the fields from the table above.
 
 ```lua
 for _, blip in ipairs(exports.nerve_blipcreator:GetGlobalBlips()) do
@@ -75,7 +81,14 @@ end
 
 ### CanUse
 
-Returns what a player is allowed to do: `{ manage, global, personal, any }`.
+Returns what a player is allowed to do, as a table of booleans.
+
+| Key | `true` when the player |
+| --- | --- |
+| `manage` | Has full access (`blipcreator`) |
+| `global` | Can create and edit global blips |
+| `personal` | Can make their own blips |
+| `any` | Can open the menu at all |
 
 ```lua
 local access = exports.nerve_blipcreator:CanUse(source)
@@ -88,11 +101,11 @@ end
 
 | Code | Meaning |
 | --- | --- |
-| `invalid` | A field has the wrong type |
+| `invalid` | A field is missing or has the wrong type |
 | `invalid_label` | The name is empty after cleaning |
 | `invalid_sprite` | The icon ID isn't allowed |
 | `invalid_coords` | The position is outside the map |
-| `limit_global` | `Config.Limits.GlobalBlips` is reached |
+| `limit_global` | `Limits.GlobalBlips` is reached |
 | `not_found` | No global blip with that ID |
 | `db_error` | The database didn't accept the change |
 
@@ -100,7 +113,7 @@ end
 
 ### openMenu
 
-Opens the menu for the local player, for example from a phone app, radial menu or target option.
+Opens the menu for the local player, for example from a phone app, radial menu or target option. It does the same as typing `/blips`, including the access check.
 
 ```lua
 exports.nerve_blipcreator:openMenu()
@@ -108,4 +121,4 @@ exports.nerve_blipcreator:openMenu()
 
 ## Console command
 
-`blipcreator_stats` prints the number of players, global blips, cached blips and access groups, and whether any writes are waiting. It only works from the server console.
+`blipcreator_stats` prints the number of players, global blips, cached blips and access groups, and whether any saves are waiting. It only works from the server console.
