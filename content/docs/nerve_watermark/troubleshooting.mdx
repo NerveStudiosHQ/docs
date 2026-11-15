@@ -1,0 +1,68 @@
+---
+title: "Troubleshooting"
+description: "Fixes for the most common Nerve Studios Watermark problems, with the exact console warnings."
+---
+
+Most problems show up as a warning in the **F8 console** of a player's game, because the watermark runs there. Each warning is printed once and names the option or logo entry to fix.
+
+## The watermark doesn't show at all [#the-watermark-doesnt-show-at-all]
+
+- **`no valid logos in shared/config_logos.lua; the watermark stays off`**: every logo entry was skipped. Fix the warnings printed above it, then restart the resource.
+- **"No watermark logos are set up on this server"** when typing `/watermark`: same cause. Add at least one valid logo, see [Logos](/nerve_watermark/logos).
+- **New players don't see it**: check that `visibility.enabledByDefault` is `true`.
+- **One player doesn't see it**: they may have switched off **Show watermark** in the **Look** section, or Photo Mode is on. Run `/togglewatermark` or open `/watermark` to check.
+- **It disappears in the pause menu**: that is `visibility.hideInPauseMenu`. Set it to `false` to keep it shown.
+- **Nothing happens at all**: check the server console when the resource starts. Make sure ox_lib starts before `nerve_watermark` and the folder is named exactly `nerve_watermark`.
+
+## A logo doesn't show [#a-logo-doesnt-show]
+
+Look in the F8 console for one of these:
+
+- **`config_logos.lua entry 2 ('myserver') image must be images/<file>.png|jpg|jpeg|webp|gif|svg (letters, numbers, - _ . only) or an https:// link; skipped`**: the `image` value is not allowed. Common causes are a file in a subfolder of `images/`, a space in the file name, an unsupported format, or an `http://` link instead of `https://`.
+- **`config_logos.lua entry 2 ('myserver') image images/myserver.png was not found in the resource`**: the file is not in `images/`, or the spelling or capitals of the file name don't match. Restart the resource after adding a file.
+- **`config_logos.lua entry 2 repeats the id 'myserver'; skipped`**: two logos have the same `id`. Give each one its own.
+- **`config_logos.lua entry 2 has a missing or invalid id (letters, numbers, - and _ only); skipped`**: add an `id`, or remove spaces and other characters from it.
+
+If there is no warning, check that `Editable.CanUseLogo` does not return `false` for that logo. See [Hooks](/nerve_watermark/hooks#editablecanuselogo).
+
+## New players get the wrong logo [#new-players-get-the-wrong-logo]
+
+**`config defaultLogo 'myserver' is not in the logo list; using another logo`**: `defaultLogo` doesn't match any valid logo `id`. Check the spelling, and check that the logo itself wasn't skipped by one of the warnings above.
+
+## The panel logo is missing [#the-panel-logo-is-missing]
+
+**`config ui.logo.mark image images/mylogo.png was not found in the resource`** or **`config ui.logo.mark must be images/<file>.png|jpg|jpeg|webp|gif|svg or an https:// link; not shown`**: fix the path in `ui.logo`. The same rules apply as for watermark logos. Without a valid `mark`, the side menu shows no logo.
+
+## Other warnings that name an option [#other-warnings]
+
+Warnings such as **`config ui.accent must be a hex colour like '#a855f7'; using #ffffff`** or **`config appearance.scale = 3 is outside the player limits; using 2.5`** mean a value in `shared/config.lua` has the wrong type or is out of range. The script uses the value shown until you fix it.
+
+**`shared/config.lua could not be loaded (...); using the built-in defaults`** means the file has a typo, such as a missing comma or bracket. The text in brackets says where. Every option uses its default until you fix it.
+
+## The cursor is stuck on screen [#the-cursor-is-stuck-on-screen]
+
+Press Escape to close the settings panel or the position editor. The cursor is also released when the resource stops or restarts. If the panel never appears or looks broken, the UI files are missing or damaged: download the resource again from your Cfx.re Portal.
+
+## Settings don't save [#settings-dont-save]
+
+- Changes only stick after pressing **Save**. **Cancel** or Escape throws them away.
+- Options locked under `player` always use your defaults, and values outside `limits` are kept inside them.
+- Raising `settingsVersion` clears every player's saved settings once.
+
+## The watermark comes back during Photo Mode [#photo-mode-ends-early]
+
+Photo Mode lasts `photoMode.duration` seconds (60 by default). Set `photoMode.autoRestore = false` or `duration = 0` to keep it hidden until the player turns it off.
+
+## A command doesn't work [#a-command-doesnt-work]
+
+- Check the names under `commands` in `shared/config.lua`. A command set to `false` is not registered.
+- **`config commands.photoMode has no valid command names; command disabled`**: every name in that list was invalid. Command names may contain letters, numbers, `-` and `_` only, with no spaces.
+- `/togglewatermark` is not registered when `player.photoMode` is `false`.
+
+## "Could not check for updates" in the server console [#could-not-check-for-updates]
+
+The server couldn't reach the version list. This doesn't affect the watermark. Turn the check off with `set nerve:versioncheck false` in `server.cfg`.
+
+## Still stuck? [#still-stuck]
+
+Set `debug = true` in `shared/config.lua`, restart the resource, and reproduce the problem. Then open a ticket on [Discord](https://discord.gg/nervestudios) with the F8 console output. See [Support](/general/support) for what to include.

@@ -6,5 +6,13 @@
     "description": "Standalone blip creator: private blips, shared group blips and admin global blips",
     "version": "1.0.2",
     "date": "2026-11-09"
+  },
+  "nerve_watermark": {
+    "title": "Watermark",
+    "icon": "Stamp",
+    "category": "Server Utilities",
+    "description": "Animated, player-customizable server watermark with logo variants, a drag-and-resize editor and Photo Mode",
+    "version": "1.0.0",
+    "date": "2026-11-09"
   }
 }

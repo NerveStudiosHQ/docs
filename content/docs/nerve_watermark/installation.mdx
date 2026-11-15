@@ -1,0 +1,99 @@
+---
+title: "Installation"
+description: "Install Nerve Studios Watermark, add your logo and check it on screen."
+---
+
+## Requirements
+
+- [ox_lib](https://github.com/overextended/ox_lib/releases), started before this resource
+- No framework is needed. The script works on ESX, QBox or a standalone server.
+- No database. There is no SQL to run.
+
+## Step 1: Add the resource [#step-1-add-the-resource]
+
+1. Download `nerve_watermark` from your Cfx.re Portal and unzip it.
+2. Make sure the folder is named exactly `nerve_watermark`.
+3. Put it in your `resources` folder, for example `resources/[nerve]/nerve_watermark`.
+
+<Callout type="warn">
+
+Don't rename the folder. Other resources call the exports by the name `nerve_watermark`.
+
+</Callout>
+
+## Step 2: Add it to server.cfg [#step-2-add-it-to-server-cfg]
+
+Add it to `server.cfg` **after** ox_lib:
+
+```cfg
+ensure ox_lib
+ensure nerve_watermark
+```
+
+## Step 3: Add your logo [#step-3-add-your-logo]
+
+The script ships with two example logos, so the watermark shows straight away. To use your own:
+
+1. Put your logo in the resource's `images/` folder, for example `images/myserver.png`. A transparent png or svg looks best.
+2. Add it to `shared/config_logos.lua`:
+
+   ```lua
+   {
+       id    = 'myserver',
+       label = 'My Server',
+       image = 'images/myserver.png',
+   },
+   ```
+
+3. Set `defaultLogo = 'myserver'` in `shared/config.lua`.
+
+See [Logos](/nerve_watermark/logos) for every logo option and the rules for image paths.
+
+## Step 4: Configure [#step-4-configure]
+
+Open `shared/config.lua`. Every option has a comment that explains it. The defaults work for most servers, but these are worth checking:
+
+- `ui.accent` sets the colour of the settings panel to match your server.
+- `ui.logo` sets the logo in the panel's side menu. It shows the example logo until you change it.
+- `appearance.position` sets the corner new players start in.
+- `player` decides what players may change.
+
+See [Configuration](/nerve_watermark/configuration) for every option.
+
+## Step 5: Start and test [#step-5-start-and-test]
+
+1. Restart your server, or run `ensure nerve_watermark` in the console.
+2. Join the server. The watermark appears in the top right corner.
+3. Type `/watermark` to open the settings panel.
+4. Type `/togglewatermark` to try Photo Mode.
+
+<Callout type="info">
+
+If the F8 console shows a warning that names a config option, a value was typed wrong. The script uses the default for that option until you fix it.
+
+</Callout>
+
+## Version check
+
+On start, the server console says whether the script is up to date, with a download link when a new version is out. To turn it off, add this to `server.cfg`:
+
+```cfg
+set nerve:versioncheck false
+```
+
+## Translations
+
+All player-facing text is in `locales/en.json`. To translate it, copy the file to your language code (for example `locales/de.json`), translate the values, and set ox_lib's language in `server.cfg`:
+
+```cfg
+setr ox:locale de
+```
+
+## Updating
+
+1. Back up `shared/config.lua`, `shared/config_logos.lua`, `shared/editable.lua`, your `images/` and any locale files you changed.
+2. Replace the resource folder with the new version.
+3. Copy your changes back.
+4. Restart the resource.
+
+Players keep their saved settings, unless the release notes ask you to raise `settingsVersion`.

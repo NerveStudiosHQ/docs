@@ -1,0 +1,61 @@
+---
+title: "Overview"
+description: "Nerve Studios Watermark puts your server's logo on every player's screen, animated, and lets each player place, size and style it for themselves."
+---
+
+Nerve Studios Watermark shows your server's logo in a corner of every player's screen. It sways or bounces gently, fades out while the pause menu is open, and stays put on ultrawide monitors. Each player can pick a logo, move it, resize it and change how it moves from a settings panel, within the limits you set. Photo Mode hides it for clean screenshots and clips.
+
+It runs on ESX, QBox or a standalone server with only ox_lib installed. The settings panel ships ready to use, with no build step.
+
+<Cards>
+  <Card title="Installation" icon="Rocket" href="/nerve_watermark/installation">
+    Get it running in five minutes
+  </Card>
+  <Card title="Logos" icon="Image" href="/nerve_watermark/logos">
+    Add your own logos and pick the default
+  </Card>
+  <Card title="Commands and settings" icon="Terminal" href="/nerve_watermark/commands">
+    The settings panel, position editor and Photo Mode
+  </Card>
+  <Card title="Exports" icon="Code" href="/nerve_watermark/exports">
+    Hide the watermark from your own scripts
+  </Card>
+</Cards>
+
+## Features
+
+- **Any number of logos.** Use png, jpg, jpeg, webp, gif or svg files from the resource's `images/` folder, or an `https://` link.
+- **A default logo** for new players, and logos you only offer to some players, such as a job mark or a VIP mark.
+- **Animations:** sway, bounce, or both together, with configurable speed, strength, motion curve and fade in and out.
+- **Placement presets** for top left, top centre and top right.
+- **Position editor.** Players drag the watermark anywhere, resize it from the corners, nudge it with the arrow keys, and snap it to a grid and alignment guides.
+- **Player settings panel** to pick a logo, position, size, opacity and animation, with a live preview, **Save**, **Cancel** and **Reset all**.
+- **Photo Mode** hides the watermark and brings it back on its own after a set time, or when the player turns it off.
+- **Hides in the pause menu.** The watermark fades out while the pause menu or map is open.
+- **Ultrawide safe.** On 21:9 and wider monitors the watermark stays inside a centred 16:9 area.
+- **You decide what players may change**, with limits for size, opacity and where the watermark may be dragged.
+- **One option to reset everyone's saved settings** after a big change.
+- **Your accent colour** on the panel and editor, and your own logo in its side menu.
+- **Exports** so other resources can hide the watermark, toggle Photo Mode or open the settings.
+- **Translatable.** Every player-facing text is in the locale file.
+
+## Requirements
+
+| Requirement | Notes |
+| --- | --- |
+| [ox_lib](https://github.com/overextended/ox_lib/releases) | The only dependency |
+| Framework | None needed. Works on ESX, QBox or a standalone server |
+
+There is no database and no SQL to run.
+
+## Performance
+
+- The watermark runs on each player's game. The server only checks once per start whether a newer version is out.
+- About 0.00 ms in the client resmon while idle.
+- The console stays silent unless `debug = true`, apart from warnings about config mistakes you need to fix.
+
+<Callout type="info">
+
+New here? Start with [Installation](/nerve_watermark/installation).
+
+</Callout>

@@ -1,0 +1,57 @@
+---
+title: "Logos"
+description: "Add your own logos to Nerve Studios Watermark, choose the default, and offer some logos only to certain players."
+---
+
+Logos live in `shared/config_logos.lua`. Add as many as you like. Players pick one in the **Logo** section of the settings panel, unless you set `player.changeLogo = false`.
+
+## Adding a logo [#adding-a-logo]
+
+1. Put the image in the resource's `images/` folder. Supported formats are **png, jpg, jpeg, webp, gif and svg**. A transparent png or svg looks best.
+2. Add an entry to `shared/config_logos.lua`:
+
+   ```lua
+   {
+       id          = 'myserver',             -- Unique name: letters, numbers, - and _ only (required)
+       label       = 'My Server',            -- Name shown in the settings panel (optional, defaults to the id)
+       description = 'Main server logo',     -- Short line under the name (optional)
+       image       = 'images/myserver.png',  -- File in images/, or a full https:// link (required)
+       default     = true,                   -- Use for new players if defaultLogo is not set or not found (optional)
+   },
+   ```
+
+3. To make it the logo new players see, set `defaultLogo = 'myserver'` in `shared/config.lua`.
+4. Restart the resource with `ensure nerve_watermark`.
+
+No rebuild is needed. Edit the file, then restart the resource.
+
+## Rules for the image [#rules-for-the-image]
+
+- A local file is written as `images/<file name>`, directly in the `images/` folder. Subfolders are not supported.
+- File names may contain letters, numbers, `-`, `_` and `.` only. No spaces.
+- An online image must be a full `https://` link. Plain `http://` links are not accepted.
+- The logo's height is set by `appearance.height` (64 pixels at 1080p by default). The width follows the image's shape, so wide wordmarks and square marks both work.
+
+Entries with a missing id, a repeated id or an unsupported image are skipped with a warning in the F8 console. A local file that cannot be found also gives a warning.
+
+## Which logo new players see [#default-logo]
+
+1. The logo named in `defaultLogo` in `shared/config.lua`.
+2. If that is not found, the first logo with `default = true`.
+3. If there is none, the first logo in the list.
+
+If no logo is valid, the watermark stays off and `/watermark` tells the player that no logos are set up.
+
+## Logos for some players only [#logos-for-some-players-only]
+
+To offer a logo only to certain players, such as a police mark for the police job, use the `Editable.CanUseLogo` hook in `shared/editable.lua`. See [Hooks](/nerve_watermark/hooks#editablecanuselogo).
+
+## The panel logo [#the-panel-logo]
+
+The logo at the bottom of the settings panel's side menu is set separately, with `ui.logo` in `shared/config.lua`:
+
+- `mark` is the square icon shown while the menu is closed.
+- `wordmark` is the wider logo shown while the menu is open. Remove it to keep just the mark.
+- Set `ui.logo = false` to hide it.
+
+Both follow the same image rules as the watermark logos.

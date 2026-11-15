@@ -1,0 +1,63 @@
+---
+title: "Exports"
+description: "Client exports other resources can call to hide Nerve Studios Watermark, toggle Photo Mode or open its settings."
+---
+
+Other resources can control the watermark on the player's own game. All exports are **client side**: call them from a client script.
+
+| Export | Returns | What it does |
+| --- | --- | --- |
+| `SetVisible(visible)` | `true`, or `false` if `visible` is not a boolean | Hides (`false`) or shows (`true`) the watermark |
+| `IsVisible()` | `boolean` | Whether the watermark is on screen right now |
+| `TogglePhotoMode()` | `boolean` | Turns Photo Mode on or off and returns the new state |
+| `OpenSettings()` | `boolean` | Opens the settings panel and returns whether it is open |
+| `CloseSettings()` | nothing | Closes the settings panel without saving |
+
+## SetVisible [#setvisible]
+
+```lua
+exports.nerve_watermark:SetVisible(visible)
+```
+
+Hides or shows the watermark, for example during a cutscene or while a phone camera is open. It is not saved and only lasts until the player leaves or the resource restarts.
+
+Showing it again with `true` never overrides anything else that hides it. The watermark stays hidden while the player has switched it off, while Photo Mode is on, and while the pause menu is open.
+
+```lua
+-- Hide the watermark during a cutscene
+exports.nerve_watermark:SetVisible(false)
+-- ... play the cutscene ...
+exports.nerve_watermark:SetVisible(true)
+```
+
+## IsVisible [#isvisible]
+
+```lua
+local visible = exports.nerve_watermark:IsVisible()
+```
+
+Returns `true` when the watermark is on screen right now, and `false` when anything hides it.
+
+## TogglePhotoMode [#togglephotomode]
+
+```lua
+local active = exports.nerve_watermark:TogglePhotoMode()
+```
+
+Works like `/togglewatermark`: it turns Photo Mode on or off and returns `true` when it is now on. The timer from `photoMode.duration` applies as usual. See [Photo Mode](/nerve_watermark/commands#photo-mode).
+
+## OpenSettings [#opensettings]
+
+```lua
+exports.nerve_watermark:OpenSettings()
+```
+
+Opens the settings panel, the same as `/watermark`, for example from your own menu. Returns `true` when the panel is open. It returns `false` when it could not open: no logos are set up for that player, or the panel has not finished loading yet.
+
+## CloseSettings [#closesettings]
+
+```lua
+exports.nerve_watermark:CloseSettings()
+```
+
+Closes the settings panel and throws away unsaved changes, the same as **Cancel**.
