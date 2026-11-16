@@ -1,0 +1,94 @@
+---
+title: "Exports"
+description: "Server exports that let other resources leave evidence, open crime scenes and read cases and lab results in Nerve Studios Evidence Lab."
+---
+
+Other resources can leave evidence, open crime scenes and read results. All exports are **server side**: call them from a server script.
+
+| Export | Returns | What it does |
+| --- | --- | --- |
+| `RegisterCrimeScene(coords, label?)` | Scene id | Opens a scene at a point, or names the open one there |
+| `CreateEvidence(data)` | Evidence code | Leaves uncollected evidence in the world |
+| `TouchPoint(source, pointId)` | `true` when the point exists | Leaves the player's print on a point from `shared/config_points.lua` |
+| `LeavePrint(source, label?, kind?)` | `true` | Leaves the player's print, or DNA, where they stand |
+| `GetEvidence(code)` | The evidence record, or `nil` | Reads one piece of evidence |
+| `LinkEvidenceToCase(code, caseNumber)` | `true` when linked | Adds evidence to an investigation |
+| `GetCase(caseNumber)` | The case, or `nil` | Reads a case with its evidence codes and suspect names |
+| `SubmitEvidence(code, labId)` | Submission id | Queues sealed evidence a lab already holds |
+| `GetAnalysisResults(code)` | A list, newest first | Lab results for a piece of evidence |
+| `RegisterDNAProfile(source or identifier, name?)` | `{ fingerprint, dna }` | Puts a person on file, as booking does |
+| `RegisterFingerprintProfile(source or identifier, name?)` | `{ fingerprint, dna }` | Same as `RegisterDNAProfile` |
+| `RegisterFirearm(serial, weapon, ownerName?)` | Ballistic signature, or `nil` | Puts a firearm on file so its casings can be traced |
+| `GetProfile(source)` | `{ fingerprint, dna, booked }`, or `nil` | The codes of an online player, for MDTs and booking screens |
+
+## TouchPoint [#touchpoint]
+
+```lua
+exports.nerve_evidence:TouchPoint(source, pointId)
+```
+
+Leaves the player's print on a fixed point. Add the point to `shared/config_points.lua` first, see [Evidence points](/nerve_evidence/configuration#evidence-points). Returns `false` when no point has that id. A player who counts as wearing gloves leaves no fingerprint.
+
+```lua
+-- In a store robbery script, when the player opens the register
+exports.nerve_evidence:TouchPoint(source, 'ltd_grove_register')
+```
+
+## LeavePrint [#leaveprint]
+
+```lua
+exports.nerve_evidence:LeavePrint(source, label, kind)
+```
+
+Leaves a print where the player stands, for interactions that have no fixed point, such as picking a lock or cracking a safe. `label` is what the evidence is listed as (up to 64 characters). `kind` is `'fingerprint'` (the default) or `'dna'`.
+
+```lua
+exports.nerve_evidence:LeavePrint(source, 'Safe dial')
+```
+
+## CreateEvidence [#createevidence]
+
+```lua
+exports.nerve_evidence:CreateEvidence({
+    type = 'physical',
+    coords = vec3(x, y, z),
+    label = 'Crowbar',
+})
+```
+
+Leaves a piece of evidence in the world for officers to find and collect. It joins the open crime scene nearby, or opens a new one. Fields:
+
+- `type`: `'fingerprint'`, `'blood'`, `'dna'`, `'casing'` or `'physical'`. A casing needs `serial`.
+- `coords`: where it lies.
+- Optional: `label`, `source` or `identifier` and `name` (who it belongs to), `plate`, `serial`, `weapon`, `metadata` and `quality` (0 to 100).
+
+## RegisterCrimeScene [#registercrimescene]
+
+```lua
+local sceneId = exports.nerve_evidence:RegisterCrimeScene(coords, 'Fleeca Bank robbery')
+```
+
+Opens a crime scene at a point before any evidence lands there, or gives the open scene there a name. Evidence within `scenes.radius` metres joins it.
+
+## Cases and results [#cases-and-results]
+
+```lua
+local evidence = exports.nerve_evidence:GetEvidence('EV-4F2A9C')
+exports.nerve_evidence:LinkEvidenceToCase('EV-4F2A9C', 'C-2026-0001')
+local case = exports.nerve_evidence:GetCase('C-2026-0001')
+local results = exports.nerve_evidence:GetAnalysisResults('EV-4F2A9C')
+```
+
+Use these to show forensic results in your MDT. Evidence codes and case numbers are the ones shown in the workstation.
+
+## Profiles and firearms [#profiles-and-firearms]
+
+```lua
+-- From a booking or jail script
+exports.nerve_evidence:RegisterDNAProfile(source, 'John Doe')
+
+-- From a gun store, when a firearm is sold with an owner
+exports.nerve_evidence:RegisterFirearm(serial, 'WEAPON_PISTOL', 'John Doe')
+```
+
+Booking a person puts their prints and DNA on file, which matters when `analysis.requireBooking = true`. Registering a firearm marks it as test fired, and as registered when you pass an owner name, so casings fired from it can be traced under any `analysis.ballistics.onFile` setting.
