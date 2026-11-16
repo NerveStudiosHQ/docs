@@ -1,0 +1,720 @@
+---
+title: "Configuration"
+description: "Every option in Dispatch's config files."
+---
+
+The main options live in `shared/config.lua`. Departments are in `shared/config_departments.lua`, call types in `shared/config_categories.lua`, detection modules in `shared/config_detection.lua`, restricted areas in `shared/config_zones.lua` and map stations and district names in `shared/config_map.lua`. Each option has a comment explaining what it does. Restart the resource after changing any of them.
+
+## Change these first [#change-these-first]
+
+- **`shared/config_departments.lua`** maps your jobs and grades to roles. Check the job names match your server. See [Departments](#departments).
+- **`roles`** sets what officers, dispatchers, supervisors and admins may do.
+- **`commands`** and **`keys`** hold the command names and default keys. Set a command to `false` to turn it off.
+- **`ui.accent`** is the accent colour of the console and MDT, as a hex code. **`ui.alertPosition`** puts call alerts `'top-right'`, `'top-left'` or `'right'`.
+- **`messages.enabled = false`** removes the text messages from the console and MDT, if your units talk over a voice radio.
+- **`map.style`** sets the style the live map opens on. See [Live map](#live-map).
+- **`integrations.allowed`** limits which of your resources may use the [exports](/nerve_dispatch/exports).
+
+## Departments [#departments]
+
+Each entry in `shared/config_departments.lua` is a department, such as police, EMS or fire:
+
+```lua
+{
+    id = 'police',
+    label = 'Los Santos Police Department',
+    short = 'LSPD',
+    color = '#3b82f6',
+    jobs = {
+        police = { officer = 0, supervisor = 4 },
+        dispatch = { dispatcher = 0, supervisor = 3 },
+    },
+    requireDuty = true,
+    ace = true,
+    sees = { 'sheriff', 'state' },
+    callsign = { example = '1-ADAM-12' },
+    blipColor = 38,
+    tracking = true,
+}
+```
+
+- `jobs` lists your framework jobs with the lowest grade for each role. `police = { officer = 0, supervisor = 4 }` makes every police grade an officer and grade 4 and up a supervisor. A player gets every role whose grade they reach.
+- The four roles are `officer`, `dispatcher`, `supervisor` and `admin`. What each one may do is set under `roles` in `shared/config.lua`.
+- `requireDuty = true` gives roles only to players on duty in your framework.
+- `ace = true` also gives roles through ACE: `add_ace group.dispatch nerve_dispatch.police.dispatcher allow`. The `nerve_dispatch.admin` ACE (`adminAce`) makes a player admin in every department.
+- `sees` lists other departments whose calls and units this one also sees.
+- `tracking = false` hides the department's units from the live map and blips.
+
+Don't rename an `id` that is in use. Categories, zones, map stations and other scripts refer to it.
+
+## Roles and permissions [#roles]
+
+`roles` in `shared/config.lua` gives each role a list of permissions:
+
+| Permission | Lets the player |
+| --- | --- |
+| `open` | Open the dispatch console |
+| `mdt` | Open the MDT |
+| `view_calls` | See calls |
+| `respond` | Respond to calls, set their own status and add notes to their calls |
+| `create_calls` | Open calls by hand |
+| `edit_calls` | Edit, re-prioritise and link calls, and change their status |
+| `assign_units` and `remove_units` | Put units on calls and take them off |
+| `manage_units` | Change other units' callsigns and statuses |
+| `view_units` | See units and their positions |
+| `broadcast` | Send department broadcasts |
+| `view_history` | Search records |
+| `view_analytics` | See department statistics |
+| `view_anonymous` | Reveal anonymous callers |
+| `manage_intelligence` | Review detections and related call suggestions, and merge calls |
+| `view_audit` | Read the audit log |
+| `admin` | Use the **Admin** page and switch detection modules |
+
+## Call categories [#categories]
+
+`shared/config_categories.lua` lists every kind of call with its radio code, default priority and the departments that receive it. `report = '911'` or `report = '311'` puts it on that public line, and `report = false` keeps it off both. Priorities run from 1 (critical) to 4 (low), with labels and colours under `priorities`.
+
+## Units finishing their own calls [#units]
+
+- **`units.canResolve = true`** lets units on a call resolve it from the MDT, so calls get finished when no dispatcher is on.
+- **`units.resolveWhenCleared = true`** resolves a call by itself when the last unit on it clears.
+- A resolved call closes by itself after `incidents.closeResolvedAfter` minutes, and moves to the records.
+
+Set both to `false` if only dispatchers should finish calls.
+
+## Automatic detection [#detection]
+
+Every module is set up in `shared/config_detection.lua`: gunfire, vehicle crashes and restricted areas, plus alarms, robberies, vehicle thefts and medical alerts that your other scripts send. For each one:
+
+- `enabled` turns it on or off. Admins can also switch modules live on the console's **Admin** page.
+- `autoCreate = true` opens a call straight away. With `false`, the detection waits on the **Intel** page for a dispatcher to confirm it. Crashes wait by default.
+- `cooldown` and `areaSize` stop one event from opening many calls.
+- `exclusions` lists areas where it never triggers, such as shooting ranges.
+
+Gunfire also has `ignoreJobs`, `ignoreSuppressed`, the weapon `groups` that count and a `reportChance`. Crashes have `minSpeedLoss`, `severeSpeedLoss` and the vehicle classes to ignore.
+
+Restricted areas are listed in `shared/config_zones.lua`, as a circle (`coords` and `radius`) or a shape (`points`, `minZ` and `maxZ`). On-duty members of the area's `departments`, and players with one of its `jobs`, may enter without an alert.
+
+## Related calls [#correlation]
+
+`correlation` suggests calls that probably belong together, by distance, time, category, plate and source. Calls in one of the `groups` score higher together. `autoLink` and `autoMerge` let the script link or merge calls by itself above a very high score. Both are off by default, and a merge always keeps the original records.
+
+## Live map [#live-map]
+
+The live map shows the GTA V map. Dispatchers switch between **Satellite**, **Atlas** and a plain **Grid** from the **Layers** button on the map.
+
+- **`map.style`** is the style it opens on: `'satellite'`, `'atlas'` or `'grid'`.
+- **`map.landmarks`** reads the stations and district names from `shared/config_map.lua`.
+
+To show your own map picture instead, put it in the resource's `html` folder and set:
+
+```lua
+map = {
+    image  = 'map.jpg',
+    bounds = { left = -4200.0, right = 4600.0, top = 8400.0, bottom = -4400.0 },
+},
+```
+
+`bounds` are the world X and Y coordinates at the picture's left, right, top and bottom edges. If calls and units sit in the wrong place, adjust them. Set `image = false` to go back to the GTA V map.
+
+## Messages [#messages]
+
+`messages` controls the text messages between dispatch and units: broadcasts, direct messages and call threads. Set `enabled = false` if your server talks over a voice radio. The **Messages** sections then leave the console and MDT, and alerts from other scripts still arrive as notifications. `radioHook = true` also passes broadcasts to [`Editable.OnBroadcast`](/nerve_dispatch/hooks#editableonbroadcast) for your radio script.
+
+## Records [#records]
+
+`records` sets how many days finished calls, detections, messages and audit log entries are kept. `0` keeps them forever.
+
+## All options [#all-options]
+
+{/* nerve:config:start */}
+{/* Generated from the script's config files. Edit those, not this block. */}
+
+### `shared/config.lua` [#config]
+
+```lua title="shared/config.lua"
+return {
+    debug = false, -- Print verbose console logs for troubleshooting (leave off on a live server)
+
+    -- Look of the screens
+    ui = {
+        accent = '#a855f7',      -- Highlight colour of the workstation and MDT (any hex colour, e.g. your server's brand colour)
+        mdtScale = 1.0,          -- Size of the MDT panel (0.8 to 1.3)
+        alertPosition = 'top-right', -- Where call alerts appear: 'top-right', 'top-left' or 'right'
+    },
+
+    -- Chat commands (set any to false to disable it)
+    commands = {
+        emergency    = '911',        -- Report an emergency
+        nonEmergency = '311',        -- Report a non-emergency
+        panic        = 'panic',      -- Officer panic button (also bindable in the GTA key settings)
+        dispatch     = 'dispatch',   -- Open the dispatch workstation
+        mdt          = 'mdt',        -- Open the MDT
+        status       = 'unitstatus', -- Change your unit status: /unitstatus enroute
+        respond      = 'respond',    -- Respond to the latest call alert, or a call by number: /respond ND-10482
+        duty         = 'dispatchduty', -- Sign on or off as a unit
+    },
+
+    -- Default keys. Players can change them in the GTA key settings under FiveM.
+    keys = {
+        mdt     = 'F6',  -- Open the MDT ('' for no default key)
+        panic   = '',    -- Panic button ('' for no default key)
+        respond = 'Y',   -- Respond to the call alert on screen ('' for no default key)
+    },
+
+    -- Public reporting by players
+    reports = {
+        emergency = {
+            enabled  = true,  -- Players can call 911
+            cooldown = 60,    -- Seconds between 911 calls from the same player
+        },
+        nonEmergency = {
+            enabled  = true,  -- Players can call 311
+            cooldown = 120,   -- Seconds between 311 calls from the same player
+        },
+        allowAnonymous   = true,  -- Players can report without giving their name
+        maxDescription   = 500,   -- Longest report text in characters
+        requirePhone     = false, -- Only players carrying a phone can report (checked through shared/editable.lua)
+        mergeDuplicates  = true,  -- A report next to an open call of the same kind is added to that call instead of opening a new one
+    },
+
+    -- Panic button
+    panic = {
+        enabled     = true,  -- Units can press panic
+        cooldown    = 30,    -- Seconds between panics from the same officer
+        category    = 'officer_down', -- Call category a panic opens (from shared/config_categories.lua)
+        allDepartments = true, -- Every department sees a panic, not only the officer's own
+        flashSeconds = 8,    -- How long the panic flash stays on screen
+    },
+
+    -- Units and duty
+    units = {
+        followJobDuty  = true,   -- Signing on or off duty in your framework signs the unit on or off in dispatch
+        autoSignOn     = true,   -- Players already on duty are signed on when they join or the script restarts
+        defaultStatus  = 'available', -- Status a unit starts in
+        backupCategory = 'officer_assistance', -- Call category a backup request opens
+        backupCooldown = 30,     -- Seconds between backup requests from the same unit
+        canResolve     = true,   -- Units on a call can resolve it from the MDT, so calls get finished when no dispatcher is on
+        resolveWhenCleared = true, -- A call resolves by itself when the last unit on it clears (it then closes after incidents.closeResolvedAfter)
+        callsign = {
+            selfAssign = true,          -- Units can set their own callsign (otherwise only supervisors)
+            maxLength  = 10,            -- Longest callsign in characters
+            pattern    = '^[%w%- ]+$',  -- Allowed characters (Lua pattern: letters, numbers, dashes and spaces)
+        },
+    },
+
+    -- Live unit positions
+    tracking = {
+        interval     = 3000,  -- Milliseconds between position updates on the map and blips (1000 to 15000)
+        colleagueBlips = true, -- On-duty units see blips of units they are allowed to see
+        blipSprite   = 1,     -- Blip icon for colleagues (https://docs.fivem.net/docs/game-references/blips/)
+        blipScale    = 0.75,  -- Blip size for colleagues
+    },
+
+    -- Calls
+    incidents = {
+        refPrefix         = 'ND-',  -- Call numbers start with this
+        refStart          = 10000,  -- First call number on a new server
+        closeResolvedAfter = 15,    -- Minutes after a call is resolved that it closes by itself (0 = never)
+        cancelPendingAfter = 30,    -- Minutes an unanswered automatic call stays open before it is cancelled (0 = never)
+        reopenWindow      = 1440,   -- Minutes after closing that a call can still be reopened (0 = any time)
+        maxNoteLength     = 500,    -- Longest note in characters
+        maxTitleLength    = 80,     -- Longest call title in characters
+        maxDescription    = 1000,   -- Longest call description in characters
+        blips = {
+            enabled  = true,  -- Show blips for calls to units that can see them
+            seconds  = 300,   -- How long a call blip stays on the map (0 = until the call is finished)
+            route    = true,  -- Set a GPS route when you respond to a call
+            sprite   = 161,   -- Blip icon for calls (https://docs.fivem.net/docs/game-references/blips/)
+            scale    = 1.0,   -- Blip size for calls
+            colours  = { 1, 17, 5, 3 }, -- GTA blip colour for priority 1, 2, 3 and 4
+        },
+    },
+
+    -- Call categories, codes and default priorities: listed in shared/config_categories.lua
+    categories = lib.load('shared.config_categories'),
+
+    -- Priority labels and colours, from 1 (most urgent) to 4
+    priorities = {
+        [1] = { label = 'Critical', color = '#ef4444', sound = 'critical' }, -- Priority 1
+        [2] = { label = 'Urgent',   color = '#f97316', sound = 'urgent' },   -- Priority 2
+        [3] = { label = 'Routine',  color = '#eab308', sound = 'routine' },  -- Priority 3
+        [4] = { label = 'Low',      color = '#60a5fa', sound = false },      -- Priority 4 (false = silent)
+    },
+
+    -- Departments, their jobs and callsigns: listed in shared/config_departments.lua
+    departments = lib.load('shared.config_departments'),
+
+    -- What each role may do. Departments give roles to jobs and grades; an ACE
+    -- permission can give a role too (see shared/config_departments.lua).
+    roles = {
+        officer    = { 'mdt', 'view_calls', 'respond', 'view_units' },
+        dispatcher = { 'open', 'mdt', 'view_calls', 'respond', 'create_calls', 'edit_calls', 'assign_units', 'remove_units', 'view_units', 'broadcast' },
+        supervisor = { 'open', 'mdt', 'view_calls', 'respond', 'create_calls', 'edit_calls', 'assign_units', 'remove_units', 'manage_units', 'view_units', 'broadcast', 'view_history', 'view_analytics', 'manage_intelligence' },
+        admin      = { 'open', 'mdt', 'view_calls', 'respond', 'create_calls', 'edit_calls', 'assign_units', 'remove_units', 'manage_units', 'view_units', 'broadcast', 'view_history', 'view_analytics', 'view_anonymous', 'manage_intelligence', 'view_audit', 'admin' },
+    },
+
+    adminAce = 'nerve_dispatch.admin', -- ACE that makes a player admin in every department (add_ace group.admin nerve_dispatch.admin allow)
+
+    -- Automatic detection: gunfire, crashes, restricted areas and alarms from other scripts.
+    -- Every module is set up in shared/config_detection.lua
+    detection = lib.load('shared.config_detection'),
+
+    -- Restricted areas that raise an alert when entered without permission: listed in shared/config_zones.lua
+    zones = lib.load('shared.config_zones'),
+
+    -- Linking calls that are probably about the same thing
+    correlation = {
+        enabled      = true,  -- Suggest related calls to dispatchers
+        radius       = 300.0, -- Metres within which two calls can be related
+        window       = 900,   -- Seconds within which two calls can be related (900 = 15 minutes)
+        minScore     = 50,    -- Lowest match score (0 to 100) that is suggested
+        autoLink     = false, -- Link calls by themselves when the score is very high
+        autoLinkScore = 90,   -- Score needed for automatic linking
+        autoMerge    = false, -- Merge calls by themselves when the score is very high (originals are always kept)
+        autoMergeScore = 95,  -- Score needed for automatic merging
+        duplicateRadius = 75.0, -- Metres within which a new detection of the same kind counts as a repeat of an open call
+        duplicateWindow = 180,  -- Seconds within which a new detection of the same kind counts as a repeat
+        -- Categories that often belong to the same event. Calls in one group score higher together.
+        groups = {
+            { 'shots_fired', 'assault', 'homicide', 'medical', 'officer_down', 'armed_robbery' },
+            { 'vehicle_theft', 'pursuit', 'vehicle_accident' },
+            { 'robbery', 'armed_robbery', 'business_alarm', 'property_alarm', 'shots_fired' },
+            { 'fire', 'medical', 'vehicle_accident' },
+        },
+    },
+
+    -- Text messages between dispatch and units (broadcasts, direct messages, call threads)
+    messages = {
+        enabled      = true, -- Show Messages on the console and MDT (false if your server talks over a voice radio; alerts from other scripts still arrive as notifications)
+        maxLength    = 300,  -- Longest message in characters
+        history      = 50,   -- Messages loaded when a screen opens
+        radioHook    = true, -- Also pass broadcasts to Editable.OnBroadcast for your radio script
+    },
+
+    -- Sounds played with alerts. Uses GTA frontend sounds: { name, soundset }. Set one to false to mute it.
+    sounds = {
+        critical  = { 'Lose_1st', 'GTAO_FM_Events_Soundset' },        -- Priority 1 call
+        urgent    = { 'Event_Message_Purple', 'GTAO_FM_Events_Soundset' }, -- Priority 2 call
+        routine   = { 'Event_Start_Text', 'GTAO_FM_Events_Soundset' }, -- Priority 3 call
+        panic     = { 'Out_Of_Area', 'DLC_Lowrider_Relay_Race_Sounds' }, -- Panic button
+        message   = { 'Text_Arrive_Tone', 'Phone_SoundSet_Default' },  -- New message
+        assigned  = { 'Event_Message_Purple', 'GTAO_FM_Events_Soundset' }, -- You were assigned to a call
+    },
+
+    alerts = {
+        duration   = 12,  -- Seconds a call alert stays on screen
+        maxVisible = 3,   -- Most call alerts shown at once
+        minPriority = 4,  -- Only alert for calls at this priority or more urgent (1 = critical only, 4 = every call)
+    },
+
+    -- Records and data kept in the database
+    records = {
+        pageSize        = 25,  -- Rows per page in search results
+        retentionDays   = 90,  -- Days finished calls are kept (0 = forever)
+        detectionDays   = 14,  -- Days detections that never became a call are kept (0 = forever)
+        messageDays     = 14,  -- Days messages are kept (0 = forever)
+        auditDays       = 180, -- Days audit log entries are kept (0 = forever)
+    },
+
+    -- Live map. It shows the GTA V map, and dispatchers can switch between satellite, atlas and a
+    -- plain grid from the map's layers menu. To use your own map picture instead, put it in html/
+    -- and set image to its file name and bounds to the world coordinates of its edges.
+    map = {
+        style  = 'satellite', -- Map style the screens open on: 'satellite', 'atlas' or 'grid'
+        image  = false,     -- Your own map picture file in html/, e.g. 'map.jpg' (false = the GTA V map)
+        bounds = { left = -4200.0, right = 4600.0, top = 8400.0, bottom = -4400.0 }, -- World X/Y of your picture's edges (only used with image)
+        landmarks = lib.load('shared.config_map'), -- Stations and district names: listed in shared/config_map.lua
+    },
+
+    -- Other resources that may send calls and detections through the exports.
+    -- '*' allows any resource; otherwise list resource names, e.g. { 'nerve_businesses', 'my_robbery' }.
+    integrations = {
+        allowed = '*',      -- Resources allowed to use the exports
+        maxMetadata = 2048, -- Largest metadata a resource can attach to a call, in characters of JSON
+        defaultCategory = 'general', -- Category used when another resource opens a call without one
+    },
+}
+```
+
+### `shared/config_categories.lua` [#config-categories]
+
+```lua title="shared/config_categories.lua"
+-- Call categories. Read by `categories` in shared/config.lua.
+--
+-- One entry per kind of call:
+--   id          unique name, lowercase (used by exports and detection modules; don't rename one in use)
+--   label       name shown on screens
+--   code        radio code shown next to the call
+--   priority    default priority, 1 (critical) to 4 (low)
+--   departments departments that receive the call (ids from shared/config_departments.lua)
+--   report      which public line players can pick it from: '911', '311', or false for neither
+--   icon        icon on the map and in lists: 'gun', 'car', 'medical', 'fire', 'alarm', 'person', 'shield', 'eye', 'info'
+--   blip        optional GTA blip sprite for the call (leave out for the default)
+
+return {
+    { id = 'shots_fired',        label = 'Shots Fired',         code = '10-71', priority = 1, departments = { 'police', 'sheriff', 'state' }, report = '911', icon = 'gun' },
+    { id = 'robbery',            label = 'Robbery',             code = '10-31', priority = 2, departments = { 'police', 'sheriff', 'state' }, report = '911', icon = 'alarm' },
+    { id = 'armed_robbery',      label = 'Armed Robbery',       code = '10-32', priority = 1, departments = { 'police', 'sheriff', 'state' }, report = '911', icon = 'gun' },
+    { id = 'vehicle_accident',   label = 'Vehicle Accident',    code = '10-50', priority = 2, departments = { 'police', 'sheriff', 'state', 'ems' }, report = '911', icon = 'car' },
+    { id = 'vehicle_theft',      label = 'Vehicle Theft',       code = '10-16', priority = 3, departments = { 'police', 'sheriff', 'state' }, report = '911', icon = 'car' },
+    { id = 'pursuit',            label = 'Pursuit',             code = '10-80', priority = 1, departments = { 'police', 'sheriff', 'state' }, report = false, icon = 'car' },
+    { id = 'assault',            label = 'Assault',             code = '10-34', priority = 2, departments = { 'police', 'sheriff', 'state' }, report = '911', icon = 'person' },
+    { id = 'homicide',           label = 'Homicide',            code = '10-87', priority = 1, departments = { 'police', 'sheriff', 'state', 'ems' }, report = '911', icon = 'person' },
+    { id = 'medical',            label = 'Medical Emergency',   code = '10-52', priority = 2, departments = { 'ems' }, report = '911', icon = 'medical' },
+    { id = 'fire',               label = 'Fire',                code = '10-70', priority = 1, departments = { 'fire', 'ems' }, report = '911', icon = 'fire' },
+    { id = 'suspicious',         label = 'Suspicious Activity', code = '10-37', priority = 3, departments = { 'police', 'sheriff', 'state' }, report = '311', icon = 'eye' },
+    { id = 'officer_assistance', label = 'Officer Assistance',  code = '10-78', priority = 2, departments = { 'police', 'sheriff', 'state' }, report = false, icon = 'shield' },
+    { id = 'officer_down',       label = 'Officer Down',        code = '10-99', priority = 1, departments = { 'police', 'sheriff', 'state', 'ems' }, report = false, icon = 'shield' },
+    { id = 'business_alarm',     label = 'Business Alarm',      code = '10-90', priority = 2, departments = { 'police', 'sheriff', 'state' }, report = false, icon = 'alarm' },
+    { id = 'property_alarm',     label = 'Property Alarm',      code = '10-90', priority = 3, departments = { 'police', 'sheriff', 'state' }, report = false, icon = 'alarm' },
+    { id = 'restricted_area',    label = 'Restricted Area',     code = '10-66', priority = 2, departments = { 'police', 'sheriff', 'state' }, report = false, icon = 'eye' },
+    { id = 'noise',              label = 'Noise Complaint',     code = '10-35', priority = 4, departments = { 'police', 'sheriff' }, report = '311', icon = 'info' },
+    { id = 'general',            label = 'General Assistance',  code = '10-6',  priority = 3, departments = { 'police', 'sheriff', 'state', 'ems', 'gov' }, report = '311', icon = 'info' },
+}
+```
+
+### `shared/config_departments.lua` [#config-departments]
+
+```lua title="shared/config_departments.lua"
+-- Departments. Read by `departments` in shared/config.lua.
+--
+-- One entry per department:
+--   id          unique name, lowercase (used by categories and exports; don't rename one in use)
+--   label       full name
+--   short       short name shown on unit cards
+--   color       colour on the map and unit board (hex)
+--   jobs        which framework jobs belong here, and the lowest job grade for each role:
+--               jobs = { police = { officer = 0, supervisor = 4 } } means every police grade is an
+--               officer and grade 4 and up are supervisors. Roles are set in `roles` in shared/config.lua.
+--               A player gets every role whose grade they reach.
+--   requireDuty only players on duty in your framework get their roles (true or false)
+--   ace         also give roles through ACE: `add_ace group.x nerve_dispatch.<id>.<role> allow` (true or false)
+--   sees        other departments whose calls and units this one also sees (leave out for only its own)
+--   callsign    { example = '1-ADAM-12' } shown to players as a hint when they set their callsign
+--   blipColor   GTA blip colour for this department's units (https://docs.fivem.net/docs/game-references/blips/#blip-colors)
+--   tracking    false to hide this department's units from the live map and blips
+
+return {
+    {
+        id = 'police',
+        label = 'Los Santos Police Department',
+        short = 'LSPD',
+        color = '#3b82f6',
+        jobs = {
+            police = { officer = 0, supervisor = 4 },
+            dispatch = { dispatcher = 0, supervisor = 3 },
+        },
+        requireDuty = true,
+        ace = true,
+        sees = { 'sheriff', 'state' },
+        callsign = { example = '1-ADAM-12' },
+        blipColor = 38,
+        tracking = true,
+    },
+    {
+        id = 'sheriff',
+        label = "Blaine County Sheriff's Office",
+        short = 'BCSO',
+        color = '#d97706',
+        jobs = {
+            sheriff = { officer = 0, supervisor = 4 },
+            dispatch = { dispatcher = 0, supervisor = 3 },
+        },
+        requireDuty = true,
+        ace = true,
+        sees = { 'police', 'state' },
+        callsign = { example = '2-LINCOLN-4' },
+        blipColor = 47,
+        tracking = true,
+    },
+    {
+        id = 'state',
+        label = 'San Andreas State Police',
+        short = 'SASP',
+        color = '#94a3b8',
+        jobs = {
+            statepolice = { officer = 0, supervisor = 4 },
+            dispatch = { dispatcher = 0, supervisor = 3 },
+        },
+        requireDuty = true,
+        ace = true,
+        sees = { 'police', 'sheriff' },
+        callsign = { example = '3-TROOP-7' },
+        blipColor = 4,
+        tracking = true,
+    },
+    {
+        id = 'ems',
+        label = 'Emergency Medical Services',
+        short = 'EMS',
+        color = '#f43f5e',
+        jobs = {
+            ambulance = { officer = 0, supervisor = 3 },
+            dispatch = { dispatcher = 0 },
+        },
+        requireDuty = true,
+        ace = true,
+        callsign = { example = 'MEDIC-21' },
+        blipColor = 1,
+        tracking = true,
+    },
+    {
+        id = 'fire',
+        label = 'Los Santos Fire Department',
+        short = 'LSFD',
+        color = '#ef4444',
+        jobs = {
+            fire = { officer = 0, supervisor = 3 },
+            dispatch = { dispatcher = 0 },
+        },
+        requireDuty = true,
+        ace = true,
+        callsign = { example = 'ENGINE-7' },
+        blipColor = 49,
+        tracking = true,
+    },
+    {
+        id = 'gov',
+        label = 'Government Services',
+        short = 'GOV',
+        color = '#10b981',
+        jobs = {
+            government = { officer = 0, supervisor = 2 },
+        },
+        requireDuty = false,
+        ace = true,
+        callsign = { example = 'GOV-3' },
+        blipColor = 2,
+        tracking = false,
+    },
+}
+```
+
+### `shared/config_detection.lua` [#config-detection]
+
+```lua title="shared/config_detection.lua"
+-- Automatic detection modules. Read by `detection` in shared/config.lua.
+--
+-- A detection is something the server noticed, not proof that a crime happened.
+-- Each module can be switched on or off here (admins can also switch them live on
+-- the workstation's Admin page). Shared fields:
+--   enabled      run this module (true or false)
+--   category     call category it opens (from shared/config_categories.lua)
+--   priority     priority of the call (false = the category's default)
+--   departments  departments that receive it (false = the category's departments)
+--   autoCreate   open a call straight away (true), or only list it on the Intelligence page
+--                for a dispatcher to confirm (false)
+--   cooldown     seconds before the same area (or player, for player modules) can trigger it again
+--   exclusions   areas where it never triggers: { coords = vec3(x, y, z), radius = metres }
+
+return {
+    -- Shooting. The shooter's game notices the shot; the server checks the weapon they hold.
+    gunfire = {
+        enabled     = true,
+        category    = 'shots_fired',
+        priority    = false,
+        departments = false,
+        autoCreate  = true,
+        cooldown    = 45,       -- Seconds before shots in the same area open another detection
+        playerCooldown = 20,    -- Seconds between detections from the same shooter
+        areaSize    = 150.0,    -- Metres that count as "the same area" for the cooldown
+        reportChance = 100,     -- Percent chance that shots are reported at all (100 = always)
+        ignoreJobs  = { 'police', 'sheriff', 'statepolice' }, -- Jobs whose shots are never reported (on duty or not)
+        ignoreSuppressed = true, -- Suppressed weapons are not reported
+        -- Weapon groups that are reported. Names are GTA weapon groups.
+        groups = { 'GROUP_PISTOL', 'GROUP_SMG', 'GROUP_RIFLE', 'GROUP_MG', 'GROUP_SHOTGUN', 'GROUP_SNIPER', 'GROUP_HEAVY' },
+        exclusions = {
+            { coords = vec3(13.0, -1097.0, 29.8), radius = 30.0 },    -- Ammu-Nation range, Pillbox Hill
+            { coords = vec3(821.0, -2163.0, 29.6), radius = 30.0 },   -- Ammu-Nation range, Cypress Flats
+        },
+    },
+
+    -- Vehicle crashes. A sudden drop in speed with an impact is reported as a possible collision.
+    -- This measures the vehicle's impact only; it cannot tell whether anyone was hurt.
+    collision = {
+        enabled     = true,
+        category    = 'vehicle_accident',
+        priority    = false,
+        departments = false,
+        autoCreate  = false,
+        cooldown    = 60,       -- Seconds before a crash in the same area opens another detection
+        playerCooldown = 90,    -- Seconds between detections from the same driver
+        areaSize    = 100.0,    -- Metres that count as "the same area" for the cooldown
+        minSpeedLoss = 18.0,    -- Speed lost in one impact, in metres per second, to count (18 m/s is about 40 mph)
+        severeSpeedLoss = 30.0, -- Speed lost that marks the impact as severe and raises the call to priority 1
+        ignoreClasses = { 8, 13, 14, 15, 16, 18, 21 }, -- Vehicle classes never reported (8 motorcycles, 13 cycles, 14 boats, 15 helicopters, 16 planes, 18 emergency, 21 trains)
+        exclusions = {},
+    },
+
+    -- Restricted areas from shared/config_zones.lua
+    zone = {
+        enabled     = true,
+        category    = 'restricted_area',
+        priority    = false,
+        departments = false,
+        autoCreate  = true,
+        cooldown    = 300,      -- Seconds before the same player can trigger the same area again
+    },
+
+    -- Alarms sent by business and property scripts through the RegisterDetection export
+    alarm = {
+        enabled     = true,
+        category    = 'business_alarm',
+        priority    = false,
+        departments = false,
+        autoCreate  = true,
+        cooldown    = 120,      -- Seconds before the same business can raise another alarm
+        areaSize    = 50.0,     -- Metres that count as "the same place" when a script sends no business name
+    },
+
+    -- Robberies sent by robbery scripts through the RegisterDetection export
+    robbery = {
+        enabled     = true,
+        category    = 'robbery',
+        priority    = false,
+        departments = false,
+        autoCreate  = true,
+        cooldown    = 60,
+        areaSize    = 50.0,
+    },
+
+    -- Vehicle thefts sent by lockpick, hotwire or car theft scripts through the RegisterDetection export
+    theft = {
+        enabled     = true,
+        category    = 'vehicle_theft',
+        priority    = false,
+        departments = false,
+        autoCreate  = true,
+        cooldown    = 60,
+        areaSize    = 75.0,
+        showOwner   = false,    -- Show the registered owner's name on the call when the script sends it
+    },
+
+    -- Medical emergencies sent by ambulance or death scripts through the RegisterDetection export
+    medical = {
+        enabled     = true,
+        category    = 'medical',
+        priority    = false,
+        departments = false,
+        autoCreate  = true,
+        cooldown    = 30,
+        areaSize    = 25.0,
+    },
+}
+```
+
+### `shared/config_map.lua` [#config-map]
+
+```lua title="shared/config_map.lua"
+-- Map landmarks. Read by `map.landmarks` in shared/config.lua.
+--
+-- stations   department buildings drawn on the live map:
+--            { label = 'name', department = 'id from shared/config_departments.lua', coords = vec2(x, y) }
+-- districts  place names written on the map grid so dispatchers can find their way:
+--            { label = 'name', coords = vec2(x, y) } (the label is centred on coords)
+
+return {
+    stations = {
+        { label = 'Mission Row PD',        department = 'police',  coords = vec2(441.0, -982.0) },
+        { label = 'Vespucci PD',           department = 'police',  coords = vec2(-1094.0, -834.0) },
+        { label = 'Davis Sheriff',         department = 'sheriff', coords = vec2(370.0, -1600.0) },
+        { label = 'Sandy Shores Sheriff',  department = 'sheriff', coords = vec2(1853.0, 3686.0) },
+        { label = 'Paleto Bay Sheriff',    department = 'sheriff', coords = vec2(-447.0, 6013.0) },
+        { label = 'Pillbox Medical',       department = 'ems',     coords = vec2(298.0, -584.0) },
+        { label = 'Sandy Shores Medical',  department = 'ems',     coords = vec2(1839.0, 3672.0) },
+        { label = 'Davis Fire Station',    department = 'fire',    coords = vec2(205.0, -1650.0) },
+        { label = 'City Hall',             department = 'gov',     coords = vec2(-544.0, -204.0) },
+    },
+    districts = {
+        { label = 'Downtown',          coords = vec2(150.0, -850.0) },
+        { label = 'Mission Row',       coords = vec2(420.0, -1020.0) },
+        { label = 'Little Seoul',      coords = vec2(-700.0, -900.0) },
+        { label = 'Vespucci',          coords = vec2(-1150.0, -1450.0) },
+        { label = 'Del Perro',         coords = vec2(-1500.0, -650.0) },
+        { label = 'Rockford Hills',    coords = vec2(-800.0, -150.0) },
+        { label = 'Vinewood',          coords = vec2(300.0, 200.0) },
+        { label = 'Vinewood Hills',    coords = vec2(-100.0, 800.0) },
+        { label = 'Mirror Park',       coords = vec2(1100.0, -550.0) },
+        { label = 'East Vinewood',     coords = vec2(900.0, -150.0) },
+        { label = 'Strawberry',        coords = vec2(150.0, -1350.0) },
+        { label = 'Davis',             coords = vec2(100.0, -1750.0) },
+        { label = 'Rancho',            coords = vec2(450.0, -1800.0) },
+        { label = 'La Mesa',           coords = vec2(800.0, -1050.0) },
+        { label = 'Cypress Flats',     coords = vec2(850.0, -2200.0) },
+        { label = 'Port of Los Santos', coords = vec2(900.0, -3000.0) },
+        { label = 'LS International',  coords = vec2(-1100.0, -2750.0) },
+        { label = 'Pacific Bluffs',    coords = vec2(-2000.0, -350.0) },
+        { label = 'Chumash',           coords = vec2(-3150.0, 1050.0) },
+        { label = 'Tataviam Mountains', coords = vec2(1800.0, -100.0) },
+        { label = 'Palomino Highlands', coords = vec2(2400.0, -1100.0) },
+        { label = 'Great Chaparral',   coords = vec2(-450.0, 2100.0) },
+        { label = 'Harmony',           coords = vec2(550.0, 2700.0) },
+        { label = 'Grand Senora Desert', coords = vec2(1500.0, 3000.0) },
+        { label = 'Sandy Shores',      coords = vec2(1850.0, 3750.0) },
+        { label = 'Alamo Sea',         coords = vec2(800.0, 4000.0) },
+        { label = 'Grapeseed',         coords = vec2(1900.0, 4900.0) },
+        { label = 'Mount Chiliad',     coords = vec2(500.0, 5600.0) },
+        { label = 'Paleto Bay',        coords = vec2(-200.0, 6350.0) },
+        { label = 'Paleto Forest',     coords = vec2(-700.0, 5500.0) },
+        { label = 'Fort Zancudo',      coords = vec2(-2150.0, 3100.0) },
+        { label = 'Mount Gordo',       coords = vec2(2900.0, 5500.0) },
+        { label = 'Raton Canyon',      coords = vec2(-1100.0, 4400.0) },
+    },
+}
+```
+
+### `shared/config_zones.lua` [#config-zones]
+
+```lua title="shared/config_zones.lua"
+-- Restricted areas. Read by `zones` in shared/config.lua; the `zone` module in
+-- shared/config_detection.lua switches them on or off.
+--
+-- One entry per area:
+--   id          unique name, lowercase
+--   label       name shown on the call and the map
+--   coords      centre of a round area, with radius in metres
+--   points      or a shape: a list of vec2 corners in order, with minZ and maxZ (leave coords out)
+--   departments departments whose on-duty members may enter (ids from shared/config_departments.lua)
+--   jobs        other jobs that may enter (on duty or not)
+--   priority    priority of the call (false = the restricted_area category's default)
+--   cooldown    seconds before the same player can trigger this area again (false = the module default)
+
+return {
+    {
+        id = 'zancudo',
+        label = 'Fort Zancudo',
+        points = {
+            vec2(-2758.0, 3393.0), vec2(-2447.0, 2980.0), vec2(-1700.0, 2600.0), vec2(-1474.0, 2742.0),
+            vec2(-1612.0, 3030.0), vec2(-1935.0, 3373.0), vec2(-2207.0, 3546.0), vec2(-2600.0, 3600.0),
+        },
+        minZ = 0.0,
+        maxZ = 300.0,
+        departments = { 'state' },
+        jobs = { 'army' },
+        priority = 1,
+        cooldown = false,
+    },
+    {
+        id = 'humane_labs',
+        label = 'Humane Labs',
+        coords = vec3(3560.0, 3700.0, 30.0),
+        radius = 120.0,
+        departments = { 'police', 'sheriff', 'state' },
+        jobs = {},
+        priority = false,
+        cooldown = false,
+    },
+    {
+        id = 'bolingbroke',
+        label = 'Bolingbroke Penitentiary',
+        coords = vec3(1690.0, 2600.0, 45.5),
+        radius = 160.0,
+        departments = { 'police', 'sheriff', 'state' },
+        jobs = { 'doc' },
+        priority = false,
+        cooldown = false,
+    },
+}
+```
+{/* nerve:config:end */}

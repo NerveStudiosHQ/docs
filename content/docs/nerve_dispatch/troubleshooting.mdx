@@ -1,0 +1,128 @@
+---
+title: "Troubleshooting"
+description: "Fixes for the most common Nerve Studios Dispatch problems, with the exact console and in-game messages."
+---
+
+Most install problems show up in the **server console** when the resource starts. Every line from the script starts with `[nerve_dispatch]`. Problems during play show up as a notification in game.
+
+## The resource doesn't start [#the-resource-doesnt-start]
+
+- **`no supported framework found (es_extended, qbx_core)`**: neither ESX nor QBox was running when the script started. Start your framework before `nerve_dispatch` in `server.cfg`.
+- **`could not create tables, import sql/nerve_dispatch.sql manually: ...`**: the database user could not create the tables. Import `sql/nerve_dispatch.sql` with HeidiSQL or your database panel, then restart. The text after the colon gives the database's reason.
+- **`could not read sql/nerve_dispatch.sql; import it manually`**: the `sql/` folder is missing from the resource. Download it again from your Cfx.re Portal.
+- **`database upgrade to version ... failed: ...`**: an update could not change your tables. Check that the database user may alter tables, then restart.
+- **`... is missing; the resource files are incomplete`**: files are missing from the resource folder. Download it again from your Cfx.re Portal and replace the folder, keeping your config.
+- A message that names `ox_lib`, `oxmysql` or OneSync: that requirement is missing or starts after this script. See [Installation](/nerve_dispatch/installation#step-2-add-it-to-server-cfg).
+
+## Players can't open the console or MDT [#no-access]
+
+**"You are not allowed to do that"**: the player's job or grade doesn't give a role with that permission.
+
+- Check that the job is listed under `jobs` of a department in `shared/config_departments.lua`, spelled the way your framework spells it.
+- Check the grade. `{ officer = 0, supervisor = 4 }` means grade 4 and up are supervisors. Opening the console needs the `open` permission, which officers don't have by default. Give the player the `dispatcher` role, or more.
+- With `requireDuty = true`, the player must be on duty in your framework.
+- To give a role without a job, use ACE: `add_ace group.dispatch nerve_dispatch.police.dispatcher allow`. The department needs `ace = true`.
+
+**"Your job is not part of any department"** in the MDT: the player's job is not under `jobs` in any department.
+
+**"You can't open the MDT right now"**: your [`Editable.CanOpenMdt`](/nerve_dispatch/hooks#editablecanopenmdt) hook said no, for example because the player is not in an emergency vehicle.
+
+**"Dispatch is still loading, try again in a moment"**: the screens haven't finished loading. Wait a few seconds after joining. If it never goes away, the UI files are missing or damaged: download the resource again from your Cfx.re Portal.
+
+**"Dispatch is still starting, try again in a moment"**: the server is still setting up the database. If it stays, look for a database error in the server console.
+
+## Units can't sign on or respond [#units]
+
+- **"Sign on as a unit first"** or **"You are not signed on as a unit"**: run `/dispatchduty`, or sign on from the **Unit** tab of the MDT. With `units.followJobDuty = true`, going on duty in your framework signs the unit on.
+- **"Pick a department to sign on in"**: the player has no role in any department. Check their job under `jobs` in `shared/config_departments.lua`, and that they are on duty when the department has `requireDuty = true`. Players in more than one department sign on in the first one, or pick one with `/dispatchduty police`.
+- **"Unknown department ..."**: the name after `/dispatchduty` is not a department `id` in `shared/config_departments.lua`.
+- **"Another unit already uses that callsign"**: pick a different callsign. Callsigns are unique per department.
+- **"Callsigns are up to 10 letters, numbers, dashes or spaces"**: the callsign is too long or has other characters. See `units.callsign` in `shared/config.lua`.
+- **"Use /unitstatus with one of: ..."**: the status after `/unitstatus` is not one of `available`, `enroute`, `onscene`, `transporting`, `busy` or `unavailable`.
+- **"No call alert to respond to"**: there is no alert on screen. Use `/respond ND-10482` with a call number instead.
+- **"That unit's department does not handle this call"**: the call was not sent to the unit's department. Add the department to the call, or to the category's `departments` in `shared/config_categories.lua`.
+
+## Players can't call 911 or 311 [#reports]
+
+- **"This line is not available"** or **"This line is not taking calls right now"**: the line is turned off. Set `reports.emergency.enabled` or `reports.nonEmergency.enabled` to `true`.
+- **"Wait ... seconds before calling again"**: the player called moments ago. Lower `cooldown` under `reports.emergency` or `reports.nonEmergency`.
+- **"You need a phone to call"**: `reports.requirePhone` is on and the player has no phone. By default that means the `phone` item in ox_inventory. Change it in [`Editable.HasPhone`](/nerve_dispatch/hooks#editablehasphone).
+- **"Pick a valid call type"**: no category is set up for that line. A category shows on 911 or 311 when its `report` is `'911'` or `'311'` in `shared/config_categories.lua`.
+- A report next to an open call of the same kind is added to that call instead of opening a new one. Turn that off with `reports.mergeDuplicates = false`.
+
+## Panic or backup does nothing [#panic]
+
+- **"Panic was pressed moments ago"** or **"Backup was requested moments ago"**: wait for `panic.cooldown` or `units.backupCooldown`.
+- Panic and backup only work for signed-on units, and panic needs `panic.enabled = true`.
+- There is no panic key by default. Set `keys.panic`, or let players bind it in the GTA key settings under **FiveM**.
+- **`panic.category "..." is not a call category in shared/config_categories.lua`** in the server console: set `panic.category` to a category `id` that exists. The same goes for **`units.backupCategory "..." is not a call category ...`**.
+
+## Calls won't change status [#call-status]
+
+- **"Assign a unit before setting that status"**: statuses like en route or on scene need a unit on the call.
+- **"That call is no longer open"**: it was resolved, closed or cancelled.
+- **"This call closed too long ago to reopen"**: calls can be reopened for `incidents.reopenWindow` minutes after closing. Set it to `0` to allow any time.
+- Units can't resolve calls: check `units.canResolve = true`. A unit can only resolve a call it is on.
+- Calls stay open after every unit cleared: check `units.resolveWhenCleared = true`. A resolved call closes by itself after `incidents.closeResolvedAfter` minutes.
+
+## No gunfire or crash calls [#no-detections]
+
+- Check that the module is `enabled` in `shared/config_detection.lua`, and switched on in the console's **Admin** page. A switch on the Admin page overrides the file.
+- With `autoCreate = false` (the default for crashes), detections wait on the **Intel** page for a dispatcher to confirm them. They don't open a call by themselves.
+- Gunfire from jobs in `ignoreJobs` (police, sheriff and state police by default) and suppressed weapons are never reported. Only the weapon groups under `groups` count. Shots are also ignored near the Ammu-Nation ranges in `exclusions`.
+- `reportChance` below `100` lets some shots go unreported on purpose.
+- Crashes need a speed loss of at least `minSpeedLoss` metres per second in one impact, and motorcycles, cycles, boats, aircraft, emergency vehicles and trains are ignored by default.
+- Each module has a `cooldown` per area and per player, so a second shot or crash right after the first doesn't open another call.
+- OneSync must be on. The server checks every detection again.
+
+## Restricted areas don't alert [#zones]
+
+- The `zone` module must be `enabled` in `shared/config_detection.lua`.
+- Players in a department listed under the area's `departments` (while on duty), or with a job under its `jobs`, may enter without an alert.
+- After an alert, the same player can't trigger that area again for its `cooldown` seconds.
+
+## Messages are missing [#messages]
+
+If the console and MDT have no **Messages**, `messages.enabled` is `false` in `shared/config.lua`. Sending then says **"Messages are turned off on this server"**. Alerts from other scripts still arrive as notifications.
+
+## The live map is blank or in the wrong place [#live-map]
+
+- With `map.image = false`, the map shows the GTA V map. Pick the style it opens on with `map.style`: `'satellite'`, `'atlas'` or `'grid'`.
+- With your own picture, `map.image` must be the exact file name of a picture in the resource's `html` folder, for example `'map.jpg'`.
+- If calls and units sit in the wrong place on your picture, `map.bounds` doesn't match it. Set `left`, `right`, `top` and `bottom` to the world X and Y at the picture's edges.
+- Units of a department with `tracking = false` never show on the map.
+
+## Another script can't open calls [#integrations]
+
+Export problems are printed in the server console as the calling resource, the reason and the export, for example:
+
+```
+[nerve_dispatch] my_robbery: this resource is not allowed to use the dispatch exports (integrations.allowed in shared/config.lua) (CreateCall)
+```
+
+- **`this resource is not allowed to use the dispatch exports`**: add the resource to `integrations.allowed`, or set it to `'*'`.
+- **`unknown call category`** or **`unknown department`**: use an `id` from `shared/config_categories.lua` or `shared/config_departments.lua`.
+- **`too many calls to the dispatch exports, slow down`**: the script calls the exports in a loop. Call them once per event.
+- **`dispatch is still starting`**: the script called before dispatch was ready. Start it after `nerve_dispatch`, or retry a moment later.
+
+See [Exports](/nerve_dispatch/exports#error-codes) for every error code.
+
+## "Editable.... failed" in the console [#hook-failed]
+
+**`Editable.<name> failed: ...`**: one of your hooks in `shared/editable.lua` threw an error. The script carries on without it. The text after the colon gives the reason. See [Hooks](/nerve_dispatch/hooks).
+
+## The cursor is stuck on screen [#the-cursor-is-stuck-on-screen]
+
+Press Escape to close the console, MDT or report screen. The cursor is also released when the resource stops or restarts.
+
+## "rejected request from ..." in the console [#rejected-request]
+
+A player's game sent a request the server refused, for example a call type that doesn't exist on that line. An occasional line is harmless. Many lines from one player can mean a modified client.
+
+## "Could not check for updates" in the server console [#could-not-check-for-updates]
+
+The server couldn't reach the version list. This doesn't affect the script. Turn the check off with `set nerve:versioncheck false` in `server.cfg`.
+
+## Still stuck? [#still-stuck]
+
+Set `debug = true` in `shared/config.lua`, restart the resource, and reproduce the problem. Then open a ticket on [Discord](https://discord.gg/nervestudios) with the server console and F8 console output. See [Support](/general/support) for what to include.

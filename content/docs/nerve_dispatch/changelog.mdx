@@ -1,0 +1,21 @@
+---
+title: "Changelog"
+description: "Release history for Dispatch."
+---
+
+{/* Generated from CHANGELOG.md by docs-sync.js. Edit that file, not this page. */}
+
+## 1.0.0 (2026-11-16) [#v1-0-0]
+
+#### Added
+- Dispatch console with a live call queue, call workspace, unit board, messages and live map.
+- Live map on the GTA V map with street names, in satellite or atlas style or as a plain grid, switched from the map's layers menu (`map.style` in `shared/config.lua` sets the one it opens on).
+- 911, 311 and anonymous reporting, and a panic button for officers.
+- Units with callsigns, statuses, shifts and assignments that survive a restart.
+- MDT for units in the field.
+- Automatic detection of gunfire, vehicle crashes and restricted areas, plus alarms, robberies, vehicle thefts and medical alerts from other scripts.
+- Related call suggestions with linking and merging that keeps the original records.
+- Record search, department statistics and an audit log.
+- Exports and events for other resources.
+- Units can clear themselves from a call in the MDT and resolve calls they are on, so calls get finished on shifts with no dispatcher. The last unit to clear resolves the call (`units.canResolve` and `units.resolveWhenCleared` in `shared/config.lua`).
+- Text messages between dispatch and units, which servers that use a voice radio can turn off with `messages.enabled` in `shared/config.lua`. Alerts from other scripts still arrive as notifications.

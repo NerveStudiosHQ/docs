@@ -1,0 +1,144 @@
+---
+title: "Hooks"
+description: "Plug your own notify, phone, radio and logging into Nerve Studios Dispatch from shared/editable.lua."
+---
+
+`shared/editable.lua` holds the functions you can change to fit your server. Each one works out of the box with ox_lib. Edit the body, keep the name and arguments, and restart the resource.
+
+If a server hook throws an error, the script carries on and the server console prints `Editable.<name> failed: ...` with the reason.
+
+| Hook | Side | Use it for |
+| --- | --- | --- |
+| [`Editable.Notify`](#editablenotify) | Both | Your notification system |
+| [`Editable.GetPhoneNumber`](#editablegetphonenumber) | Server | The caller's number from your phone script |
+| [`Editable.HasPhone`](#editablehasphone) | Server | Who can call 911 and 311 |
+| [`Editable.CanOpenMdt`](#editablecanopenmdt) | Client | Where the MDT may be opened |
+| [`Editable.OnCallCreated`](#editableoncallcreated) | Server | Logs, Discord or a second dispatch |
+| [`Editable.OnCallStatus`](#editableoncallstatus) | Server | Logs when a call changes status |
+| [`Editable.OnUnitAssigned`](#editableonunitassigned) | Server | Radio channels or waypoints |
+| [`Editable.OnBroadcast`](#editableonbroadcast) | Server | Your radio script |
+| [`Editable.OnPanic`](#editableonpanic) | Server | Emergency radio channels and tones |
+| [`Editable.OnAudit`](#editableonaudit) | Server | Your logs |
+
+## Editable.Notify [#editablenotify]
+
+```lua
+function Editable.Notify(source, message, kind)
+```
+
+Shows a notification. It runs on both sides: on the server `source` is the player to notify, on the client it is `nil` and the local player sees it. `kind` is `'success'`, `'error'` or `'inform'`. The file has commented examples for the qbx_core and ESX notifications.
+
+## Editable.GetPhoneNumber [#editablegetphonenumber]
+
+```lua
+function Editable.GetPhoneNumber(source, default)
+    return default
+end
+```
+
+Server only. The phone number dispatchers see on a player's 911 and 311 calls. `default` is the number your framework stores for the character, and can be `nil`. If your phone script keeps its own numbers, return the number from it:
+
+```lua
+function Editable.GetPhoneNumber(source, default)
+    return exports['lb-phone']:GetEquippedPhoneNumber(source) or default
+end
+```
+
+## Editable.HasPhone [#editablehasphone]
+
+```lua
+function Editable.HasPhone(source)
+```
+
+Server only. Whether a player has a phone to call 911 or 311 with. It is only used when `reports.requirePhone = true`. By default it checks for the `phone` item in ox_inventory, and lets everyone call when ox_inventory isn't running. Change the item name, or check your phone script instead.
+
+## Editable.CanOpenMdt [#editablecanopenmdt]
+
+```lua
+function Editable.CanOpenMdt()
+    return true
+end
+```
+
+Client only. Return `false` to stop the player opening the MDT right now. They then see **"You can't open the MDT right now"**. To only allow it in an emergency vehicle:
+
+```lua
+function Editable.CanOpenMdt()
+    local vehicle = cache.vehicle
+    return vehicle and GetVehicleClass(vehicle) == 18
+end
+```
+
+The server still checks the player's permissions, whatever this returns.
+
+## Editable.OnCallCreated [#editableoncallcreated]
+
+```lua
+function Editable.OnCallCreated(call)
+end
+```
+
+Server only. Called when a call is opened, by a person, a detection or another script. Send it to Discord, your logs or a second dispatch here. `call` has `ref`, `title`, `category`, `code`, `priority`, `source`, `departments`, `coords` and `street`.
+
+```lua
+function Editable.OnCallCreated(call)
+    lib.logger(0, 'nerve_dispatch', ('%s %s (P%d) at %s'):format(call.ref, call.title, call.priority, call.street or 'unknown'))
+end
+```
+
+## Editable.OnCallStatus [#editableoncallstatus]
+
+```lua
+function Editable.OnCallStatus(data)
+end
+```
+
+Server only. Called when a call changes status. `data` has `ref`, `title`, `status` and `by`.
+
+## Editable.OnUnitAssigned [#editableonunitassigned]
+
+```lua
+function Editable.OnUnitAssigned(data)
+end
+```
+
+Server only. Called when a unit is assigned to a call. Good for putting the unit on a radio channel or setting a waypoint in another script. `data` has `ref`, `title`, `unit` (the player's server id), `callsign` and `department`.
+
+## Editable.OnBroadcast [#editableonbroadcast]
+
+```lua
+function Editable.OnBroadcast(data)
+end
+```
+
+Server only. Called when dispatch or a supervisor broadcasts to a department, while `messages.radioHook = true`. Pass it to your radio script here. `data` has `department` (`nil` for every department), `sender`, `callsign`, `text` and `priority`.
+
+## Editable.OnPanic [#editableonpanic]
+
+```lua
+function Editable.OnPanic(data)
+end
+```
+
+Server only. Called when an officer presses panic. Put the officer's radio on an emergency channel or play a radio tone here. `data` has `ref`, `unit`, `callsign`, `name`, `department` and `coords`.
+
+## Editable.OnAudit [#editableonaudit]
+
+```lua
+function Editable.OnAudit(entry)
+end
+```
+
+Server only. Called for every entry written to the audit log. Send it to your logs here, for example Discord, fivemanage or the ox_lib logger. `entry` has `action`, `actor`, `target` and `data`.
+
+```lua
+function Editable.OnAudit(entry)
+    lib.logger(0, 'nerve_dispatch', ('%s %s %s'):format(entry.actor, entry.action, entry.target or ''))
+end
+```
+
+<Callout type="warn">
+
+Only read data your server already holds in these hooks. Never trust a value the player's game sends you, or a modified client can get around your checks.
+
+</Callout>

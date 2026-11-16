@@ -1,0 +1,89 @@
+---
+title: "Overview"
+description: "Nerve Studios Dispatch: 911 and 311 calls, a panic button, a dispatch console with a live map, an MDT for units and automatic detection of gunfire and crashes."
+---
+
+Nerve Studios Dispatch is a complete emergency communications system for your server. Players call 911 and 311, officers press panic, and your other scripts report alarms, robberies and stolen cars. Dispatchers work every call from one console with a live map. Units sign on with callsigns and work their calls from an MDT. The server also notices gunfire and crashes by itself and suggests which calls belong together.
+
+It runs on ESX and QBox. The console and MDT ship ready to use, with no build step.
+
+<Cards>
+  <Card title="Installation" icon="Rocket" href="/nerve_dispatch/installation">
+    Start order, admin access and first start
+  </Card>
+  <Card title="Configuration" icon="Settings" href="/nerve_dispatch/configuration">
+    Departments, roles, categories, detection and the map
+  </Card>
+  <Card title="Exports" icon="Code" href="/nerve_dispatch/exports">
+    Open calls and send alarms from your other scripts
+  </Card>
+  <Card title="Hooks" icon="Plug" href="/nerve_dispatch/hooks">
+    Your notify, phone, radio and logging
+  </Card>
+</Cards>
+
+## Features
+
+- **Dispatch console** with a live call queue, a call workspace (timeline, notes, units, linked calls, reports) and four priority levels.
+- **911 and 311** for players, tied to the real caller and their real position. Callers can stay anonymous, and only a permitted supervisor can reveal them. Every reveal is logged.
+- **Panic button** that opens a priority 1 call at the officer's position and alerts every unit that should know.
+- **Units** with callsigns and statuses (available, en route, on scene, transporting, busy, unavailable), shift records and assignments that survive a restart.
+- **Live map** on the GTA V map, in satellite or atlas style with street names, or as a plain grid. It shows calls, units, stations and restricted areas, with filters, layers and a GPS button. You can use your own map picture instead.
+- **MDT** for units in the field: their own calls, department calls, status buttons, notes, backup requests and messages.
+- **Units finish their own calls.** A unit clears itself from a call in the MDT, and the last unit to clear resolves it. Units can also resolve a call they are on, so calls get finished on shifts with no dispatcher.
+- **Text messages:** department broadcasts, direct messages, call threads and emergency alerts, with an optional hand-off to your radio script. Servers that talk over a voice radio can turn them off.
+- **Automatic detection** you switch per module: gunfire, vehicle crashes and restricted areas, plus alarms, robberies, vehicle thefts and medical alerts from your other scripts. A detection is always shown as a detection, never as a confirmed crime.
+- **Related calls.** The console suggests calls that probably belong together by distance, time, category, plate and source. Dispatchers accept, reject, link or merge them. A merge always keeps the original records.
+- **Records** you can search, with a retention setting, department statistics (assignment, response and resolution times from real data) and an audit log.
+- **Departments and roles** per job and grade, or through ACE, set entirely in config.
+- **Your accent colour** on the console and MDT.
+- **Exports and events** for other resources, and hooks for your notify, phone, radio and logging.
+- **Translatable.** Every player-facing text is in the locale file.
+
+## How it plays
+
+1. A player runs `/911` or `/311`, picks what happened and describes it. The call opens at their position on the server. Officers can press panic with `/panic` or a key.
+2. Your other scripts, and the automatic detection, open calls or send detections for gunfire, crashes, alarms and robberies.
+3. Units sign on with `/dispatchduty`, or by going on duty in your framework. They pick a callsign in the MDT (`F6`).
+4. New calls pop up as alerts for every unit and dispatcher of the call's departments. A unit presses `Y` to respond, which assigns them and sets a GPS route.
+5. A dispatcher runs the console with `/dispatch`: assigns units, edits calls, writes notes, links related calls and watches the live map.
+6. When the work is done, units clear from the call in the MDT or resolve it. A resolved call closes by itself after a few minutes and moves to the records.
+
+## Departments and roles
+
+Departments live in `shared/config_departments.lua`. Each one maps your framework jobs and grades to four roles: officer, dispatcher, supervisor and admin. What each role may do is set under `roles` in `shared/config.lua`. A player only sees the departments their job belongs to, plus the departments those are set to see. See [Departments](/nerve_dispatch/configuration#departments).
+
+## The live map
+
+The console's map shows the GTA V map. Dispatchers switch between **Satellite**, **Atlas** and a plain **Grid** with district names from the **Layers** button on the map. `map.style` in `shared/config.lua` sets the style the map opens on. You can also show your own map picture with `map.image` and `map.bounds`. See [Live map](/nerve_dispatch/configuration#live-map).
+
+## What the game can and cannot tell
+
+Automatic detection only reports what the server can check:
+
+- Gunfire, crashes and restricted areas are noticed by the player's own game, then checked again on the server: the weapon in their hand, the vehicle they drive and their position. A modified client cannot invent calls.
+- A modified client can stay silent. Treat automatic detection as an extra source of calls, not a guarantee.
+- A crash detection measures the impact only. It cannot tell whether anyone was hurt.
+
+## Requirements
+
+| Requirement | Notes |
+| --- | --- |
+| ESX Legacy or QBox | Jobs, grades, duty and character names |
+| [ox_lib](https://github.com/overextended/ox_lib/releases) | Callbacks, zones, keybinds and language |
+| [oxmysql](https://github.com/overextended/oxmysql/releases) | Stores calls, units, records and the audit log |
+| [ox_inventory](https://github.com/overextended/ox_inventory/releases) | Optional. Checks the weapon in hand for gunfire and the phone item for `reports.requirePhone` |
+| OneSync | Required. Unit positions and detection checks are read on the server |
+
+ox_target is not needed. The database tables are created on the first start, so there is no SQL to import by hand.
+
+## Performance
+
+- About 0.00 ms in the client resmon while the player is on foot without a firearm drawn and no screen is open. A drawn firearm is watched for shots, and a driven vehicle for crashes, only while detection for them is on.
+- The console stays silent unless `debug = true`, apart from warnings and errors you need to act on.
+
+<Callout type="info">
+
+New here? Start with [Installation](/nerve_dispatch/installation).
+
+</Callout>

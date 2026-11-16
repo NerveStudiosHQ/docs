@@ -1,0 +1,284 @@
+---
+title: "Exports"
+description: "Server exports and events that let business, robbery, car theft, medical and phone scripts open calls, send detections and read units in Nerve Studios Dispatch."
+---
+
+Other resources can open and close calls, send detections, read units and listen for new calls. All exports and events are **server side**: use them from a server script.
+
+Choose which resources may use the exports with `integrations.allowed` in `shared/config.lua`. `'*'` allows every resource, or list them by name, for example `{ 'my_robbery', 'my_shops' }`.
+
+| Export | Returns | What it does |
+| --- | --- | --- |
+| `CreateCall(data)` | `{ id, ref }` | Opens a call, as if a dispatcher had created it |
+| `UpdateCall(call, changes)` | `true` | Changes a call's details |
+| `CloseCall(call, resolution?)` | `true` | Closes a call and clears its units |
+| `GetCall(call)` | The call, or `false` | Reads one call, open or finished |
+| `GetActiveCalls(department?)` | A list, most urgent first | Every open call |
+| `RegisterDetection(kind, data)` | `{ id, status, incident }` | Sends an alarm, robbery, theft or medical detection |
+| `RegisterDetectionType(id, definition)` | `true` | Adds your own detection type |
+| `GetUnits(department?)` | A list | Every signed-on unit |
+| `GetUnit(source)` | The unit, or `nil` | One signed-on unit |
+| `IsUnitOnDuty(source)` | `true` or `false` | Whether a player is signed on as a unit |
+| `SetUnitStatus(source, status)` | `true` | Changes a unit's status |
+| `AssignUnit(call, source)` | `true` | Puts a unit on a call |
+| `RemoveUnit(call, source)` | `true` | Takes a unit off a call |
+| `SendDepartmentAlert(department?, text, options?)` | `true` | Posts a message from "Dispatch" |
+| `GetDepartment(id)` | The department, or `nil` | One department from config |
+| `GetDepartments()` | A list | Every department from config |
+
+`call` is the call's number id, or its reference as shown in game (`'ND-10482'`, or just `'10482'`). `source` is the player's server id.
+
+## Return values and errors [#errors]
+
+Every export that changes something returns `false` and an error code when it fails, so check the first value:
+
+```lua
+local ok, err = exports.nerve_dispatch:CloseCall('ND-10482', 'Alarm reset by owner')
+if not ok then
+    print('could not close the call: ' .. err)
+end
+```
+
+For most errors the server console also prints why, at most once a minute per resource and code. Exports that return a list return an empty list and an error code instead.
+
+`CreateCall` and `RegisterDetection` take a short moment to return, so call them from a thread or an event handler.
+
+Each resource can make about 60 changing calls and 300 reading calls every 10 seconds. Beyond that it gets `rate_limited` until the window passes.
+
+## CreateCall [#createcall]
+
+```lua
+local call, err = exports.nerve_dispatch:CreateCall({
+    category = 'robbery',
+    title = 'Fleeca Bank robbery',
+    description = 'Vault door forced, two suspects inside',
+    coords = vector3(149.9, -1040.5, 29.4),
+    priority = 1,
+    metadata = { bank = 'Fleeca Legion Square' },
+})
+if call then
+    print(('opened %s'):format(call.ref))
+else
+    print('could not open the call: ' .. err)
+end
+```
+
+Opens a call. It is sent to every unit and dispatcher of its departments straight away and appears on the board. Fields:
+
+- `coords`: where it happened. Required. A `vector3`, or a table with `x`, `y` and `z`.
+- `category`: a category `id` from `shared/config_categories.lua`. Defaults to `integrations.defaultCategory` (`'general'`).
+- `title`, `code`, `priority` (1 critical to 4 low) and `departments`: default to the category's.
+- `description` and `plate`: text shown on the call.
+- `metadata`: extra details shown on the call. A flat table of text, numbers and `true`/`false`, up to 32 keys and `integrations.maxMetadata` characters.
+- `source`: what the call shows as its source. `'api'` (the default), `'report911'`, `'report311'`, `'alarm'`, `'robbery'`, `'theft'`, `'medical'`, `'gunfire'`, `'collision'` or `'zone'`.
+- `caller`: the server id of the player who called it in, from a phone script. Dispatch sees them as the reporter, with their phone number.
+- `anonymous`: `true` hides the caller's name, when `reports.allowAnonymous` is on.
+
+## UpdateCall [#updatecall]
+
+```lua
+exports.nerve_dispatch:UpdateCall('ND-10482', {
+    priority = 1,
+    description = 'Suspects fled north in a black Sultan',
+    plate = '46EEK572',
+})
+```
+
+Only the fields you give change: `title`, `category`, `priority`, `description`, `departments`, `coords` and `plate`. Every change shows on the call's timeline under your resource's name.
+
+## CloseCall [#closecall]
+
+```lua
+exports.nerve_dispatch:CloseCall(callRef, 'Alarm reset by owner')
+```
+
+Closes a call. Its units are cleared and it leaves the board. The resolution text is optional and shown on the record. Closing a call that is already closed succeeds and changes nothing.
+
+## GetCall and GetActiveCalls [#getcall]
+
+```lua
+local call = exports.nerve_dispatch:GetCall('ND-10482')
+local policeCalls = exports.nerve_dispatch:GetActiveCalls('police')
+```
+
+A call has `id`, `ref`, `title`, `category`, `code`, `priority`, `status`, `source`, `automated`, `panic`, `department`, `departments`, `coords`, `street`, `zone`, `plate`, `reports` (how many times it was reported), `units`, `links`, `suggestions`, `createdAt` and `updatedAt`.
+
+`status` is one of `pending`, `active`, `assigned`, `responding`, `onscene`, `resolved`, `closed` or `cancelled`. `GetActiveCalls` leaves out resolved, closed and cancelled calls. Pass a department `id` to get only the calls sent to it.
+
+## RegisterDetection [#registerdetection]
+
+```lua
+-- A shop till being emptied, from a store robbery script
+local result, err = exports.nerve_dispatch:RegisterDetection('robbery', {
+    coords = GetEntityCoords(GetPlayerPed(source)),
+    business = 'ltd_grove',
+    label = 'LTD Gasoline, Grove Street',
+    kind = 'register',
+    source = source,
+})
+if result and result.incident then
+    print('dispatch call ' .. result.incident.ref)
+elseif not result then
+    print('not raised: ' .. err) -- 'cooldown' is normal for a repeat
+end
+```
+
+Sends something your script noticed that may be a crime or an emergency. Depending on the module in `shared/config_detection.lua`, it opens a call straight away or waits on the **Intel** page for a dispatcher to confirm. A repeat near an open call of the same kind is added to that call instead.
+
+`kind` is `'alarm'`, `'robbery'`, `'theft'`, `'medical'`, or a type you added with [`RegisterDetectionType`](#registerdetectiontype). Fields, all optional except the position:
+
+- `coords`: where. Leave it out when you pass `source`, and the player's position is used.
+- `source`: the server id of the player involved.
+- `business`: a stable id of the business or property, used for the cooldown.
+- `label`: what is shown, for example the business name.
+- `kind`: what happened, for example `'register'`, `'safe'`, `'lockpick'` or `'downed'`.
+- `plate`, `model` and `owner`: the vehicle, for thefts. The owner only shows with `theft.showOwner = true`.
+- `description` and `metadata`: as for `CreateCall`.
+
+The result has `id`, `status` and `incident` (`{ id, ref }` when a call was opened or the detection joined one, otherwise `nil`). When nothing was raised, the error code says why: `cooldown`, `disabled` (the module is off), `excluded` (inside one of its `exclusions`) or `unknown_type`.
+
+Examples for other scripts:
+
+```lua
+-- Business or house alarm
+exports.nerve_dispatch:RegisterDetection('alarm', {
+    coords = vector3(-47.3, -1757.6, 29.4),
+    business = 'ltd_grove',
+    label = 'LTD Gasoline, Grove Street',
+})
+
+-- Car theft, from a lockpick or hotwire script
+exports.nerve_dispatch:RegisterDetection('theft', {
+    source = source,
+    plate = GetVehicleNumberPlateText(vehicle),
+    model = 'Sultan',
+    kind = 'lockpick',
+})
+
+-- Downed player, from an ambulance or death script
+exports.nerve_dispatch:RegisterDetection('medical', {
+    source = source,
+    kind = 'downed',
+})
+```
+
+## RegisterDetectionType [#registerdetectiontype]
+
+```lua
+exports.nerve_dispatch:RegisterDetectionType('atm_hack', {
+    label = 'ATM tampering',
+    category = 'robbery',
+    priority = 2,
+    autoCreate = false, -- wait for a dispatcher to confirm
+    cooldown = 120,
+    areaSize = 40.0,
+    validate = function(origin, data)
+        if not data.business then return false, 'no_atm' end
+        return data
+    end,
+})
+```
+
+Adds your own detection type, so it gets the same review, cooldown and duplicate handling as the built-in ones. Call it when your resource starts. It lasts until your resource stops, and admins can switch it on and off on the **Admin** page.
+
+- `id`: lowercase letters, numbers and underscores, 2 to 16 characters. It can't be a built-in type.
+- `category`: the call category it opens. Required.
+- `label`, `priority` and `departments`: override the category's.
+- `autoCreate`: open calls straight away. Defaults to `true`.
+- `cooldown`: seconds before the same place can raise it again. Defaults to 60.
+- `areaSize`: metres that count as the same place. Defaults to 50.
+- `validate`: optional check on every detection of this type. Return the data, changed or not, to accept it, or `false` and a short reason to reject it.
+
+## Units [#units]
+
+```lua
+local units = exports.nerve_dispatch:GetUnits('police')
+local unit = exports.nerve_dispatch:GetUnit(source)
+
+if exports.nerve_dispatch:IsUnitOnDuty(source) then
+    -- While a player is booking someone in a cell block
+    exports.nerve_dispatch:SetUnitStatus(source, 'busy')
+end
+```
+
+A unit has `unit` (the player's server id), `callsign`, `name`, `department`, `rank`, `status`, `incidents`, `coords`, `heading` and `since`. `IsUnitOnDuty` means signed on in dispatch, not only on duty in your framework.
+
+`status` is one of `available`, `enroute`, `onscene`, `transporting`, `busy` or `unavailable`.
+
+```lua
+exports.nerve_dispatch:AssignUnit('ND-10482', source)
+exports.nerve_dispatch:RemoveUnit('ND-10482', source)
+```
+
+A unit can only be assigned to a call sent to its department.
+
+## SendDepartmentAlert [#senddepartmentalert]
+
+```lua
+exports.nerve_dispatch:SendDepartmentAlert('police', 'Prison break at Bolingbroke', {
+    priority = true,
+    incident = 'ND-10482',
+})
+```
+
+Posts a message from "Dispatch" to one department, or to every department when the first argument is `nil`. The text can be up to `messages.maxLength` characters. Options:
+
+- `priority`: `true` shows it as an emergency alert.
+- `incident`: attach it to a call, by id or reference. It then goes to that call's units and dispatchers.
+
+## Departments [#departments]
+
+```lua
+local police = exports.nerve_dispatch:GetDepartment('police')
+local all = exports.nerve_dispatch:GetDepartments()
+```
+
+A department has `id`, `label`, `short`, `color`, `callsignExample` and `tracking`, from `shared/config_departments.lua`.
+
+## Events [#events]
+
+Dispatch fires these server events. Listen with `AddEventHandler` in a server script:
+
+```lua
+AddEventHandler('nerve_dispatch:callCreated', function(call)
+    print(('new call %s: %s'):format(call.ref, call.title))
+end)
+```
+
+| Event | Data | When |
+| --- | --- | --- |
+| `nerve_dispatch:callCreated` | The call, as `GetCall` returns it | A call is opened, by a player, a dispatcher, a detection or a script |
+| `nerve_dispatch:callStatus` | `{ id, ref, status }` | A call changes status |
+| `nerve_dispatch:unitStatus` | `{ unit, callsign, department, status }` | A unit changes status |
+| `nerve_dispatch:panic` | `{ ref, unit, department }` | An officer presses panic |
+
+For a ready-made spot to send these to your logs or radio, see [Hooks](/nerve_dispatch/hooks).
+
+## Error codes [#error-codes]
+
+| Code | Meaning |
+| --- | --- |
+| `not_allowed` | The resource is not in `integrations.allowed` |
+| `not_ready` | Dispatch is still starting |
+| `rate_limited` | Too many calls in a short time |
+| `invalid_data` | The data argument must be a table |
+| `invalid_coords` | `coords` is missing or outside the map |
+| `unknown_category` | No category has that `id` |
+| `unknown_department` | No department has that `id` |
+| `invalid_priority` | Priority must be 1, 2, 3 or 4 |
+| `invalid_text` | A text field is not text, or is empty |
+| `invalid_metadata` | `metadata` must be a flat table of text, numbers and `true`/`false`, up to 32 keys |
+| `metadata_too_large` | `metadata` is larger than `integrations.maxMetadata` |
+| `invalid_source` | `source` is not a call source scripts may use |
+| `invalid_player` | That player is not online |
+| `invalid_call` | The call id or reference is malformed |
+| `call_not_found` | No call has that id or reference |
+| `invalid_unit` | The unit's server id is malformed |
+| `unit_not_found` | That player is not signed on as a unit |
+| `invalid_status` | Unknown unit status |
+| `nothing_to_update` | `UpdateCall` got no usable changes |
+| `invalid_type` | Detection type names are lowercase letters, numbers and underscores, up to 16 characters |
+| `invalid_definition` | A field of the detection type definition is wrong |
+| `type_exists` | That detection type already exists |
+| `unavailable` | That part of dispatch is not running |
+| `failed` | Dispatch could not complete the request; the server console has the reason |
