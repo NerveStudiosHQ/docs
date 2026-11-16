@@ -75,6 +75,8 @@ npm run check:links    # verify every internal link and #anchor (run after build
 
 ## Publishing
 
-This is a standard Next.js app. Deploy it to Vercel, Netlify, or any Node
-host. Set `NEXT_PUBLIC_SITE_URL` to the public URL so canonical links, the
+The live site runs in Docker on the Nerve Studios VM. A cron job there pulls
+`main` every minute and rebuilds the container, so merging a PR publishes it
+within a few minutes. It is a standard Next.js app, so any Node host works
+too. Set `NEXT_PUBLIC_SITE_URL` to the public URL so canonical links, the
 sitemap, and robots.txt point at the right domain.
