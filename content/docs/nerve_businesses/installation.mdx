@@ -1,0 +1,135 @@
+---
+title: "Installation"
+description: "Install Nerve Studios Businesses: add the items and box image, start it after its requirements, give your admins access and build your first business."
+---
+
+## Requirements
+
+- ESX Legacy or QBox
+- [ox_lib](https://github.com/overextended/ox_lib/releases), [oxmysql](https://github.com/overextended/oxmysql/releases), [ox_inventory](https://github.com/overextended/ox_inventory/releases) and [ox_target](https://github.com/overextended/ox_target/releases), all started before this resource
+- OneSync turned on
+- Optional: esx_addonaccount on ESX, or Renewed-Banking on QBox, so businesses have an account for commissions, shop takings and supply runs
+
+## Step 1: Add the resource [#step-1-add-the-resource]
+
+1. Download `nerve_businesses` from your Cfx.re Portal and unzip it.
+2. Make sure the folder is named exactly `nerve_businesses`.
+3. Put it in your `resources` folder, for example `resources/[nerve]/nerve_businesses`.
+
+<Callout type="warn">
+
+Don't rename the folder. The box item and your other scripts call the resource by the name `nerve_businesses`.
+
+</Callout>
+
+## Step 2: Add the items [#step-2-add-the-items]
+
+Add these to `ox_inventory/data/items.lua`:
+
+```lua
+['business_box'] = { label = 'Business Box', weight = 500, stack = false, close = true, description = 'A portable storage box.', server = { export = 'nerve_businesses.useBox' } },
+['business_drink'] = { label = 'Drink', weight = 350, stack = true, close = true, client = { status = { thirst = 200000 }, anim = { dict = 'mp_player_intdrink', clip = 'loop_bottle' }, prop = { model = `prop_ld_flow_bottle`, pos = vec3(0.03, 0.03, 0.02), rot = vec3(0.0, 0.0, -1.5) }, usetime = 2500 } },
+['business_food'] = { label = 'Food', weight = 250, stack = true, close = true, client = { status = { hunger = 200000 }, anim = { dict = 'mp_player_inteat@burger', clip = 'mp_player_int_eat_burger_fp' }, prop = { model = `prop_cs_burger_01`, pos = vec3(0.02, 0.02, -0.02), rot = vec3(0.0, 0.0, 0.0) }, usetime = 2500 } },
+['business_joint'] = { label = 'Joint', weight = 20, stack = true, close = true, client = { status = { stress = -25000 }, anim = { dict = 'amb@world_human_aa_smoke@male@idle_a', clip = 'idle_b' }, prop = { model = `prop_cs_ciggy_01`, bone = 28422, pos = vec3(0.0, 0.0, 0.0), rot = vec3(0.0, 0.0, 0.0) }, usetime = 5000 } },
+['business_alcohol'] = { label = 'Alcohol', weight = 500, stack = true, close = true, client = { status = { thirst = 200000, drunk = 175000 }, anim = { dict = 'amb@world_human_drinking@coffee@male@idle_a', clip = 'idle_c' }, usetime = 3000 } },
+```
+
+- `business_box` is the branded carry box. Keep its `server = { export = 'nerve_businesses.useBox' }` line, or using a box does nothing.
+- The four product items are only carriers. Every product a boss designs is crafted as one of them, with the product's own name, description and image. Tune the status values, weights and animations to your server.
+- To offer another product type, add an item and list it under `products.baseItems` in `shared/config.lua`.
+- If you rename `business_box`, change `boxes.item` in `shared/config.lua` to match.
+
+## Step 3: Add the box image [#step-3-add-the-box-image]
+
+Put an image named `business_box.png` in `ox_inventory/web/images/`. It is the default icon for every carry box. Each business can set its own box image later in the Business Manager.
+
+Add images for the four product items too if you want icons for products that have no image of their own, named after the item, for example `business_drink.png`.
+
+## Step 4: Add it to server.cfg [#step-4-add-it-to-server-cfg]
+
+Add it **after** its requirements and your framework:
+
+```cfg
+ensure oxmysql
+ensure ox_lib
+ensure ox_inventory
+ensure ox_target
+ensure nerve_businesses
+```
+
+If you use esx_addonaccount or Renewed-Banking for business accounts, start it before `nerve_businesses` as well.
+
+## Step 5: Give your admins access [#step-5-give-your-admins-access]
+
+Admins open the Business Manager, the Recipe Manager and the station commands. A player counts as an admin in any of these ways:
+
+1. **ACE permission.** Add this to `server.cfg`:
+
+   ```cfg
+   add_ace group.admin nerve_businesses.admin allow
+   ```
+
+2. **Framework group.** `admin.groups` in `shared/config.lua` lists `god`, `superadmin` and `admin`. On ESX that is the player's ESX group. On QBox it is matched as an ACE permission of the same name.
+3. **Identifier.** Add a player's identifier with its prefix to `admin.identifiers`, for example `'license:abc123...'` or `'discord:123456789012345678'`.
+
+## Step 6: Start and build your first business [#step-6-start-and-build]
+
+1. Restart your server. The database tables are created on the first start, so there is no SQL to import.
+2. Join as an admin and run `/business`.
+3. Pick a job on the left, or click **Add job** to make a new one with its first rank.
+4. Click **Create business** for that job.
+5. Click **Add feature**, pick **Register**, give it a name, choose who can use it and click **Place in world**. Look where it goes, press **E** to place it, then save.
+6. Walk up to it with ox_target. Everyone with access sees it at once.
+
+See [Business Manager](/nerve_businesses/business-manager) for everything the manager does, and [Feature types](/nerve_businesses/feature-types) for what each feature does in play.
+
+## Discord logs [#discord-logs]
+
+Webhooks are read from convars in `server.cfg`, never from the config, so they stay out of files you share:
+
+```cfg
+set nerve_businesses:webhook "https://discord.com/api/webhooks/..."
+set nerve_businesses:webhook:transaction "https://discord.com/api/webhooks/..."
+```
+
+The first line receives every kind of log. A line with a kind at the end receives only that kind, and takes priority over the first for it. The kinds are:
+
+| Kind | What it logs |
+| --- | --- |
+| `success` | Successful crafts |
+| `failure` | Crafts that failed the skill check or were missing materials |
+| `cancel` | Cancelled crafts |
+| `exploit` | Requests the server rejected |
+| `business` | Businesses created and deleted |
+| `jobs` | Jobs and ranks created, changed and deleted |
+| `feature` | Features added, edited, moved and deleted |
+| `recipe` | Recipes created, changed and deleted, and products created and changed |
+| `transaction` | Register payments |
+| `shoppurchase` | Shop purchases |
+| `supplyrun` | Supply runs started, completed and cancelled |
+| `delivery` | Home deliveries started, completed and cancelled |
+
+Every log also goes to the [`Editable.OnLog`](/nerve_businesses/hooks#editableonlog) hook, so you can send it to your own logging instead.
+
+## Version check
+
+On start, the server console says whether the script is up to date, with a download link when a new version is out. To turn it off, add this to `server.cfg`:
+
+```cfg
+set nerve:versioncheck false
+```
+
+## Translations
+
+All player-facing text is in `locales/en.json`. To translate it, copy the file to your language code (for example `locales/de.json`), translate the values, and set ox_lib's language in `server.cfg`:
+
+```cfg
+setr ox:locale de
+```
+
+## Updating
+
+1. Back up `shared/config.lua`, `shared/config_locations.lua`, `shared/config_presets.lua`, `shared/config_recipes.lua`, `shared/editable.lua` and any locale files you changed.
+2. Replace the resource folder with the new version.
+3. Copy your changes back, and read the [changelog](/nerve_businesses/changelog) for anything new to add.
+4. Restart the server. Database changes are applied on start. Everything built in game is kept.

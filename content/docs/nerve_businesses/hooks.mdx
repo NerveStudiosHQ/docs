@@ -1,0 +1,141 @@
+---
+title: "Hooks"
+description: "Plug your own notify, target, banking, vehicle keys, boss menu, clothing, garage, fuel and logging into Nerve Studios Businesses from shared/editable.lua."
+---
+
+`shared/editable.lua` holds the functions you can change to fit your server. Each one works out of the box with ox_lib, ox_target and the common resources named below. Edit the body, keep the name and arguments, and restart the resource.
+
+If one of the server hooks marked **protected** below throws an error, the script carries on and the server console prints `Editable.<name> failed: ...` with the reason.
+
+## Editable.Notify [#editablenotify]
+
+```lua
+function Editable.Notify(source, message, kind)
+```
+
+Shows a notification with ox_lib. It runs on both sides: on the server `source` is the player to notify, on the client it is `nil` and the local player sees it. `kind` is `'success'`, `'error'`, `'inform'` or `'warning'`. The file has commented examples for the qbx_core and ESX notifications.
+
+## Business accounts [#business-accounts]
+
+```lua
+function Editable.GetBusinessMoney(job)
+function Editable.AddBusinessMoney(job, amount)
+function Editable.RemoveBusinessMoney(job, amount)
+```
+
+Server only, protected. Register commissions, shop takings, supply runs paid by the business and deliveries paid to the business all go through these. Return `nil` from all three to use the built-in support: esx_addonaccount (`society_<job>`) on ESX, Renewed-Banking on QBox.
+
+To use another banking script, return a value instead:
+
+- `GetBusinessMoney` returns the balance as a number.
+- `AddBusinessMoney` returns `true` when the money was paid in.
+- `RemoveBusinessMoney` returns `true` when it was taken, or `false` when the business can't afford it.
+
+`amount` is always a positive whole number.
+
+```lua
+function Editable.GetBusinessMoney(job)
+    return exports.my_banking:GetAccountBalance(job)
+end
+
+function Editable.AddBusinessMoney(job, amount)
+    return exports.my_banking:AddMoney(job, amount)
+end
+
+function Editable.RemoveBusinessMoney(job, amount)
+    return exports.my_banking:RemoveMoney(job, amount)
+end
+```
+
+## Vehicle keys [#vehicle-keys]
+
+```lua
+function Editable.GiveKeys(source, plate, vehicle)
+function Editable.RemoveKeys(source, plate, vehicle)
+```
+
+Server only, protected. Called when a player takes out a job garage vehicle or a supply run van, and when the vehicle is returned or the supply run ends. `vehicle` is the server entity handle. qbx_vehiclekeys, wasabi_carlock and Renewed-Vehiclekeys work out of the box. Add your own keys script in the body.
+
+## Editable.OnDuty [#editableonduty]
+
+```lua
+function Editable.OnDuty(source, onDuty, job)
+```
+
+Server only, protected. Called after a duty point changes a player's duty. Hook a payroll or timeclock script in here. For a plain server event instead, set `duty.event` in `shared/config.lua`.
+
+## Editable.OnCrafted [#editableoncrafted]
+
+```lua
+function Editable.OnCrafted(source, data)
+```
+
+Server only, protected. Called after every successful craft at a station, including products. Give XP or rewards here. `data` has `item`, `amount`, `recipe`, `station` (the station id) and `business` (the job, or `nil` for a station without a business).
+
+```lua
+function Editable.OnCrafted(source, data)
+    exports.my_skills:AddXP(source, 'cooking', data.amount * 5)
+end
+```
+
+## Editable.OnStorefrontStations [#editableonstorefrontstations]
+
+```lua
+function Editable.OnStorefrontStations(job, stations)
+```
+
+Server only, protected. Called when an admin picks which crafting stations feed a business's ordering app, in the Business Manager's [Apps](/nerve_businesses/business-manager#apps) tab. `stations` is a list of station ids. Read what they make with the [`GetStation`](/nerve_businesses/exports#getstation) export.
+
+## Editable.OnListing [#editableonlisting]
+
+```lua
+function Editable.OnListing(job, listing)
+```
+
+Server only, protected. Called when an admin changes a business's directory listing, for a phone directory or reviews app. `listing` has `listed`, `category`, `label` and `coords` (the business's first map blip, or its first feature, or `nil` when nothing is placed).
+
+## Editable.ListingCategories [#editablelistingcategories]
+
+```lua
+function Editable.ListingCategories()
+    return { 'Food', 'Drinks', 'Retail', 'Services', 'Automotive', 'Nightlife' }
+end
+```
+
+Server only, protected. The categories offered for a directory listing. Return the sections your directory app uses.
+
+## Editable.OnLog [#editableonlog]
+
+```lua
+function Editable.OnLog(kind, title, fields, source)
+```
+
+Server only, protected. Called for every logged event, after the Discord webhook. Send it to fivemanage, ox_lib's logger or your own logs. `kind` is one of the [log kinds](/nerve_businesses/installation#discord-logs). `fields` is a list of `{ name, value }`. `source` is the player it is about, or `nil`.
+
+```lua
+function Editable.OnLog(kind, title, fields, source)
+    lib.logger(source or 0, 'nerve_businesses:' .. kind, title)
+end
+```
+
+## Client hooks [#client-hooks]
+
+These run in the player's game.
+
+| Hook | What it does | Works out of the box with |
+| --- | --- | --- |
+| `Editable.AddTargetZone(data)` | Adds an interaction zone and returns an id to remove it with. `data` has `coords`, `radius` and `options` in ox_target's option format | ox_target |
+| `Editable.RemoveTargetZone(id)` | Removes a zone | ox_target |
+| `Editable.AddTargetEntity(entity, options)` | Adds options to a placed ped or prop | ox_target |
+| `Editable.RemoveTargetEntity(entity, names)` | Removes options from a placed ped or prop | ox_target |
+| `Editable.OpenBossMenu(job)` | Opens the boss menu at a boss menu point | qbx_management, esx_society, wasabi_multijob |
+| `Editable.OpenClothing()` | Opens the clothing menu at a clothing point | illenium-appearance, fivem-appearance, esx_skin |
+| `Editable.OpenGarage(garage)` | Opens a garage point. `garage` is the garage id set in the editor | jg-advancedgarages, cd_garage |
+| `Editable.StoreVehicle(garage, vehicle)` | Parks the vehicle the player is in at a garage point | jg-advancedgarages, cd_garage |
+| `Editable.SetFuel(vehicle)` | Fills a job vehicle's tank after it spawns | ox_fuel, LegacyFuel, or the game's own fuel level |
+
+When none of the listed boss menu, clothing or garage resources is started, players see "No boss menu script found, set one up in editable.lua" (or the clothing or garage version of it). Add your script to that hook.
+
+### Another target script [#another-target-script]
+
+To use a target script other than ox_target, change the four target hooks. Options keep ox_target's format: `label`, `icon`, `onSelect`, `canInteract` and `distance`. Convert them if your script expects another shape.
