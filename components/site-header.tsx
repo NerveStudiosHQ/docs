@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useNotebookLayout } from 'fumadocs-ui/layouts/notebook';
 import { ArrowUpRight, BookOpen, Globe, LifeBuoy, Menu, PanelLeft, ShoppingBag } from 'lucide-react';
-import { DiscordIcon, YouTubeIcon } from '@/components/icons';
+import { DiscordIcon, GitHubIcon, YouTubeIcon } from '@/components/icons';
 import { site } from '@/lib/site';
 
 const nav = [
@@ -93,6 +93,9 @@ export function SiteHeader(props: ComponentProps<'header'>) {
             </a>
             <a href={site.links.youtube} target="_blank" rel="noreferrer" className={iconBtn} aria-label="YouTube" title="YouTube">
               <YouTubeIcon />
+            </a>
+            <a href={site.links.github} target="_blank" rel="noreferrer" className={iconBtn} aria-label="GitHub" title="GitHub">
+              <GitHubIcon />
             </a>
             <span aria-hidden className="mx-2 h-5 w-px shrink-0 bg-white/[0.1]" />
           </div>

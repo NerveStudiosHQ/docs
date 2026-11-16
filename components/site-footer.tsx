@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ShoppingBag } from 'lucide-react';
-import { DiscordIcon, YouTubeIcon } from '@/components/icons';
+import { DiscordIcon, GitHubIcon, YouTubeIcon } from '@/components/icons';
 import { site } from '@/lib/site';
 
 type FooterLink = { label: string; href: string; external?: boolean };
@@ -29,6 +29,7 @@ const groups: { title: string; links: FooterLink[] }[] = [
     title: 'Nerve Studios',
     links: [
       { label: 'Website', href: site.links.website, external: true },
+      { label: 'GitHub', href: site.links.github, external: true },
       { label: 'Store Terms', href: `${site.links.store}/terms`, external: true },
     ],
   },
@@ -37,6 +38,7 @@ const groups: { title: string; links: FooterLink[] }[] = [
 const socials = [
   { label: 'Discord', href: site.links.discord, Icon: DiscordIcon },
   { label: 'YouTube', href: site.links.youtube, Icon: YouTubeIcon },
+  { label: 'GitHub', href: site.links.github, Icon: GitHubIcon },
   { label: 'Store', href: site.links.store, Icon: ShoppingBag },
 ];
 
