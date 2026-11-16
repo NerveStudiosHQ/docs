@@ -1,0 +1,301 @@
+---
+title: "Configuration"
+description: "Every option in Evidence Lab's config files."
+---
+
+All options live in `shared/config.lua`, laboratories in `shared/config_labs.lua` and fixed evidence points in `shared/config_points.lua`. Each option has a comment explaining what it does. Restart the resource after changing any of them.
+
+## Change these first [#change-these-first]
+
+- **`jobs`** lists the jobs that can use the forensic tools, with the minimum grade for each action. `police` and `sheriff` are set up by default. With `requireDuty = true`, only on-duty members get access.
+- **`items`** holds the item names. Change them only if you renamed the items in ox_inventory. Set `gloves = false` to ignore gloves completely.
+- **`evidence`** turns each evidence type on or off and sets its equipment, collection time, lab time and how fast it ages. Lab times are in seconds, so lower them if your shifts are short.
+- **`analysis.requireBooking`** decides who can be identified. With `false`, prints and DNA match any character. With `true`, only people an officer has booked with **Take prints and DNA** can be identified.
+- **`analysis.ballistics.onFile`** decides which firearms casings can be traced to: `'all'`, `'registered'` (sold with an owner) or `'testfired'` (seized and analysed in a lab, the default).
+- **`custody.unauthorized`** decides what happens when someone without the `transfer` permission takes an evidence bag: `'block'` stops it, `'flag'` lets it happen and records it as tampering.
+- **`ui.accent`** is the workstation's accent colour, as a hex code. **`ui.anywhere = false`** limits the workstation to laboratories.
+
+## Laboratories [#laboratories]
+
+Each entry in `shared/config_labs.lua` is a place where officers submit evidence and analysts run it:
+
+```lua
+{
+    id     = 'mrpd',
+    label  = 'Mission Row Forensics',
+    jobs   = { 'police', 'sheriff' },
+    bench  = vec4(483.66, -988.59, 30.69, 90.0),
+    locker = vec3(480.0, -990.0, 30.69),
+    blip   = { sprite = 499, colour = 27 },
+}
+```
+
+- `bench` is where the ox_target point sits. Submitting and starting an analysis both happen there.
+- `locker` adds an evidence locker officers can deposit bags in. Leave it out for none.
+- `speed = 2.0` makes a lab process twice as fast.
+- `jobs` limits a lab to some jobs. Leave it out to allow every job in `jobs`.
+
+## Evidence points [#evidence-points]
+
+`shared/config_points.lua` lists fixed surfaces that keep prints, such as a register, safe or ATM. It is empty by default. Your other scripts leave a print on a point with the [`TouchPoint`](/nerve_evidence/exports#touchpoint) export:
+
+```lua
+{
+    id     = 'ltd_grove_register',
+    label  = 'Register',
+    coords = vec3(-47.3, -1757.6, 29.4),
+    type   = 'fingerprint',
+}
+```
+
+## All options [#all-options]
+
+{/* nerve:config:start */}
+{/* Generated from the script's config files. Edit those, not this block. */}
+
+### `shared/config.lua` [#config]
+
+```lua title="shared/config.lua"
+return {
+    debug = false, -- Print verbose console logs for troubleshooting (leave off on a live server)
+
+    -- Who can use the forensic tools. One entry per job; grades are the minimum job grade for each action.
+    jobs = {
+        police = {
+            requireDuty = true,    -- Only on-duty members get access (QBox duty, or ESX jobs that use off-duty job names)
+            grades = {
+                collect  = 0,      -- Search scenes, collect and bag evidence
+                transfer = 0,      -- Hand evidence bags to colleagues and deposit them in lockers
+                book     = 0,      -- Take a person's fingerprints and DNA for the records
+                submit   = 0,      -- Submit evidence bags to a laboratory
+                analyze  = 2,      -- Run laboratory analysis and check evidence back out of the lab
+                viewCases = 0,     -- Open the workstation and read cases, evidence and reports
+                editCases = 1,     -- Create cases, add notes, link evidence, suspects and vehicles
+                assignCases = 3,   -- Assign and remove investigators on any case
+                closeCases = 3,    -- Mark cases solved or closed, and reopen them
+                personnel = 3,     -- See the personnel roster and their workload
+            },
+        },
+        sheriff = {
+            requireDuty = true,    -- Only on-duty members get access
+            grades = {
+                collect  = 0,      -- Search scenes, collect and bag evidence
+                transfer = 0,      -- Hand evidence bags to colleagues and deposit them in lockers
+                book     = 0,      -- Take a person's fingerprints and DNA for the records
+                submit   = 0,      -- Submit evidence bags to a laboratory
+                analyze  = 2,      -- Run laboratory analysis and check evidence back out of the lab
+                viewCases = 0,     -- Open the workstation and read cases, evidence and reports
+                editCases = 1,     -- Create cases, add notes, link evidence, suspects and vehicles
+                assignCases = 3,   -- Assign and remove investigators on any case
+                closeCases = 3,    -- Mark cases solved or closed, and reopen them
+                personnel = 3,     -- See the personnel roster and their workload
+            },
+        },
+    },
+
+    -- Item names. Add these items to ox_inventory (the README has the ready-made block).
+    items = {
+        sample          = 'evidence_sample',     -- A collected, unpackaged sample
+        bag             = 'evidence_bag',        -- An empty evidence bag, used up when evidence is sealed
+        sealed          = 'evidence_bag_sealed', -- A sealed evidence bag holding one piece of evidence
+        fingerprintKit  = 'fingerprint_kit',     -- Powder and lifting tape for fingerprints
+        swabKit         = 'swab_kit',            -- Sterile swabs for blood and DNA
+        gloves          = 'forensic_gloves',     -- Gloves that prevent contaminating samples (set to false to ignore gloves)
+    },
+
+    -- Evidence categories. labTime is the laboratory processing time in seconds.
+    -- decayPerHour is how much quality (0-100) a sample loses per hour left at the scene.
+    evidence = {
+        fingerprint = {
+            enabled      = true,                  -- Leave fingerprints on vehicles, doors, weapons and scripted surfaces
+            kit          = 'fingerprintKit',      -- Equipment needed to collect (a key of items above, or false for none)
+            consumeKit   = false,                 -- Use up one kit per collection
+            collectTime  = 6000,                  -- Milliseconds the collection animation takes
+            labTime      = 300,                   -- Seconds of lab processing (300 = 5 minutes)
+            decayPerHour = 8,                     -- Quality lost per hour at the scene
+        },
+        blood = {
+            enabled      = true,                  -- Leave blood where players are hurt by weapons
+            kit          = 'swabKit',             -- Equipment needed to collect
+            consumeKit   = true,                  -- Use up one swab per collection
+            collectTime  = 5000,                  -- Milliseconds the collection animation takes
+            labTime      = 600,                   -- Seconds of lab processing (600 = 10 minutes)
+            decayPerHour = 4,                     -- Quality lost per hour at the scene
+            chance       = 0.6,                   -- Chance (0-1) that a weapon hit leaves blood
+            cooldown     = 20,                    -- Seconds before the same player can leave another blood sample
+        },
+        dna = {
+            enabled      = true,                  -- Leave trace DNA inside vehicles people have used
+            kit          = 'swabKit',             -- Equipment needed to collect
+            consumeKit   = true,                  -- Use up one swab per collection
+            collectTime  = 7000,                  -- Milliseconds the collection animation takes
+            labTime      = 900,                   -- Seconds of lab processing (900 = 15 minutes)
+            decayPerHour = 2,                     -- Quality lost per hour at the scene
+        },
+        casing = {
+            enabled      = true,                  -- Drop shell casings where firearms are fired
+            kit          = false,                 -- Equipment needed to collect (false = only an evidence bag)
+            consumeKit   = false,                 -- Use up the kit
+            collectTime  = 2500,                  -- Milliseconds the collection animation takes
+            labTime      = 420,                   -- Seconds of lab processing (420 = 7 minutes)
+            decayPerHour = 0.5,                   -- Quality lost per hour at the scene
+            cooldown     = 6,                     -- Seconds between casings recorded for one shooter (keeps scenes readable)
+        },
+        weapon = {
+            enabled      = true,                  -- Allow officers to bag a seized firearm from their own inventory
+            labTime      = 900,                   -- Seconds of lab processing (900 = 15 minutes)
+        },
+        physical = {
+            enabled      = true,                  -- Generic evidence created by other resources through the exports
+            kit          = false,                 -- Equipment needed to collect
+            consumeKit   = false,                 -- Use up the kit
+            collectTime  = 3000,                  -- Milliseconds the collection animation takes
+            labTime      = 300,                   -- Seconds of lab processing
+            decayPerHour = 0,                     -- Quality lost per hour at the scene
+        },
+    },
+
+    -- Crime scenes are created automatically around new evidence.
+    scenes = {
+        radius        = 25.0,   -- Metres: evidence this close to an open scene joins it instead of making a new one
+        lifetime      = 7200,   -- Seconds before uncollected evidence washes away (7200 = 2 hours, 0 = never)
+        maxPerScene   = 40,     -- Most uncollected items one scene holds; the oldest goes first
+        maxActive     = 600,    -- Most uncollected items across the whole server
+        collectRange  = 2.5,    -- Metres an officer must be within to collect
+    },
+
+    -- Searching for evidence.
+    sweep = {
+        command  = 'forensics',  -- Command that toggles the evidence search (set to false to disable)
+        key      = '',           -- Default key for the search toggle, players can rebind it in GTA settings ('' = none)
+        item     = false,        -- Item needed to search, for example 'uv_flashlight' (false = none)
+        radius   = 30.0,         -- Metres around the officer that evidence shows up in
+        refresh  = 3000,         -- Milliseconds between scans while searching
+    },
+
+    -- Fingerprints left on vehicles: entering a seat without gloves leaves a print for that plate.
+    vehicles = {
+        maxPrints = 6,          -- Prints kept per vehicle; the oldest is wiped first
+        dnaChance = 0.25,       -- Chance (0-1) that using a vehicle also leaves trace DNA
+    },
+
+    -- Gloves. Players carrying the gloves item leave no prints. Clothing gloves can be added in shared/editable.lua.
+    gloves = {
+        useItem = true,                 -- Carrying the gloves item counts as wearing gloves
+    },
+
+    -- Doors: with ox_doorlock running, unlocking or locking a door leaves a print on it.
+    doors = {
+        enabled = true,          -- Leave prints on ox_doorlock doors
+    },
+
+    -- How samples age and get contaminated.
+    quality = {
+        sealedFactor        = 0.1,   -- Sealed bags age at this fraction of the scene rate (0.1 = ten times slower)
+        unsealedPerMinute   = 1.5,   -- Quality lost per minute a sample is carried without a sealed bag
+        noGlovesContamination = 0.2, -- Chance (0-1) a sample collected without gloves gets contaminated
+        openedContamination = 0.35,  -- Chance (0-1) breaking a seal outside a laboratory contaminates the sample
+    },
+
+    -- How the laboratory turns samples into results.
+    analysis = {
+        requireBooking = false,      -- Only people whose prints and DNA were taken by an officer can be identified
+        fingerprint = {
+            identify = 45,           -- Minimum quality for a full identification
+            partial  = 25,           -- Minimum quality for a partial print (identifies with a stated confidence)
+        },
+        dna = {
+            identify = 30,           -- Minimum quality for a DNA identification
+            contaminatedResult = 'inconclusive', -- What a contaminated sample returns: 'inconclusive' or 'mixed' (identifies with low confidence)
+        },
+        ballistics = {
+            identify = 20,           -- Minimum casing quality to read the firing pin and breech marks
+            onFile   = 'testfired',  -- Which firearms are on file: 'all', 'registered' (sold with an owner) or 'testfired' (test-fired in a lab)
+        },
+        minigame = {
+            enabled    = true,                          -- Analysts pass a short skill check to start processing
+            difficulty = { 'easy', 'easy', 'medium' },  -- ox_lib skill check stages
+            inputs     = { 'w', 'a', 's', 'd' },         -- Keys used by the skill check
+        },
+    },
+
+    -- Laboratories: listed in shared/config_labs.lua
+    labs = lib.load('shared.config_labs'),
+
+    -- Fixed places that hold evidence: listed in shared/config_points.lua
+    points = lib.load('shared.config_points'),
+
+    -- Cases.
+    cases = {
+        numberFormat = 'C-%s-%04d',  -- Case number format: year, then a running number (C-2026-0001)
+        maxNotes     = 200,          -- Most notes one case can hold
+        noteLength   = 1000,         -- Most characters in one note
+        titleLength  = 80,           -- Most characters in a case title
+    },
+
+    -- Chain of custody.
+    custody = {
+        handoverRange   = 3.0,       -- Metres two officers must be within to hand a bag over
+        unauthorized    = 'block',   -- Someone without the transfer permission taking a bag: 'block' it, or 'flag' it as tampered
+        lockerPrefix    = 'evidence', -- Stashes whose name starts with this count as evidence lockers
+    },
+
+    -- The forensic workstation.
+    ui = {
+        command = 'evidence',        -- Command that opens the workstation (set to false to disable)
+        accent  = '#a855f7',         -- Accent colour of the workstation (hex)
+        anywhere = true,             -- Open the workstation anywhere (false = only at a laboratory)
+    },
+}
+```
+
+### `shared/config_labs.lua` [#config-labs]
+
+```lua title="shared/config_labs.lua"
+-- Laboratories, read by `labs` in shared/config.lua.
+-- Each entry is a place where evidence is submitted and analysed. Officers
+-- submit and analysts work at the bench point with ox_target.
+--
+-- {
+--     id     = 'mrpd',                           -- Unique id (letters, numbers, underscores); stored with every submission
+--     label  = 'Mission Row Forensics',          -- Name shown in the workstation and reports
+--     jobs   = { 'police' },                     -- Jobs that may use this lab (leave out for every job in config.jobs)
+--     bench  = vec4(x, y, z, heading),           -- Where the bench target sits
+--     size   = vec3(1.6, 0.8, 1.2),              -- Size of the bench target box (optional, this is the default)
+--     speed  = 1.0,                              -- Processing speed (2.0 = twice as fast; optional, default 1.0)
+--     locker = vec3(x, y, z),                    -- Evidence locker officers deposit bags in (optional; leave out for none)
+--     blip   = { sprite = 499, colour = 27 },     -- Map blip (optional; leave out for no blip)
+-- }
+
+return {
+    {
+        id    = 'mrpd',
+        label = 'Mission Row Forensics',
+        jobs  = { 'police', 'sheriff' },
+        bench = vec4(483.66, -988.59, 30.69, 90.0),
+        size  = vec3(1.6, 0.8, 1.2),
+        speed = 1.0,
+    },
+}
+```
+
+### `shared/config_points.lua` [#config-points]
+
+```lua title="shared/config_points.lua"
+-- Fixed evidence points, read by `points` in shared/config.lua.
+-- A point is a surface that keeps prints of whoever uses it: a register, a
+-- safe, an ATM. Other resources leave a print on a point with
+-- exports.nerve_evidence:TouchPoint(source, 'pointId'), for example from a
+-- robbery script when a player opens the register.
+--
+-- {
+--     id     = 'ltd_grove_register',     -- Unique id used by TouchPoint
+--     label  = 'Register',               -- What the evidence is listed as
+--     coords = vec3(x, y, z),            -- Where the print sits
+--     type   = 'fingerprint',            -- 'fingerprint' or 'dna' (optional, default 'fingerprint')
+-- }
+
+return {
+}
+```
+{/* nerve:config:end */}

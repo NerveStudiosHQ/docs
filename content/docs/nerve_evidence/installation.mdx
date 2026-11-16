@@ -1,0 +1,94 @@
+---
+title: "Installation"
+description: "Install Nerve Studios Evidence Lab: add the items, set your lab, start the server and run a first collection."
+---
+
+## Requirements
+
+- ESX Legacy or QBox
+- [ox_lib](https://github.com/overextended/ox_lib/releases), [oxmysql](https://github.com/overextended/oxmysql/releases), [ox_inventory](https://github.com/overextended/ox_inventory/releases) and [ox_target](https://github.com/overextended/ox_target/releases), all started before this resource
+- OneSync turned on
+- Optional: [ox_doorlock](https://github.com/overextended/ox_doorlock/releases), so doors keep prints
+
+## Step 1: Add the resource [#step-1-add-the-resource]
+
+1. Download `nerve_evidence` from your Cfx.re Portal and unzip it.
+2. Make sure the folder is named exactly `nerve_evidence`.
+3. Put it in your `resources` folder, for example `resources/[nerve]/nerve_evidence`.
+
+<Callout type="warn">
+
+Don't rename the folder. The items and other resources call the script by the name `nerve_evidence`.
+
+</Callout>
+
+## Step 2: Add the items [#step-2-add-the-items]
+
+Add these to `ox_inventory/data/items.lua`:
+
+```lua
+['evidence_sample'] = { label = 'Evidence sample', weight = 20, stack = false, close = true, client = { export = 'nerve_evidence.useSample' } },
+['evidence_bag'] = { label = 'Evidence bag', weight = 10, stack = true, close = true, client = { export = 'nerve_evidence.useBag' } },
+['evidence_bag_sealed'] = { label = 'Sealed evidence bag', weight = 30, stack = false, close = true, client = { export = 'nerve_evidence.useSealed' } },
+['fingerprint_kit'] = { label = 'Fingerprint kit', weight = 300, stack = true, close = true },
+['swab_kit'] = { label = 'Swab kit', weight = 50, stack = true, close = true },
+['forensic_gloves'] = { label = 'Forensic gloves', weight = 20, stack = true, close = true },
+```
+
+Add images for them to `ox_inventory/web/images/` if you want icons in the inventory, named after the item, for example `evidence_bag.png`.
+
+Hand out the kits, bags and gloves however your server does it, for example from a police armoury shop. If you rename an item, change its name under `items` in `shared/config.lua` too.
+
+## Step 3: Add it to server.cfg [#step-3-add-it-to-server-cfg]
+
+Add it **after** its requirements:
+
+```cfg
+ensure oxmysql
+ensure ox_lib
+ensure ox_inventory
+ensure ox_target
+ensure nerve_evidence
+```
+
+If you use ox_doorlock, start it before `nerve_evidence` as well.
+
+## Step 4: Set your lab and jobs [#step-4-set-your-lab-and-jobs]
+
+1. Open `shared/config_labs.lua`. The example lab sits at Mission Row. Stand where you want the bench in game, note your position and heading, and set `bench` to it.
+2. Add a `locker` position to a lab if officers should store bags there.
+3. Open `shared/config.lua` and check `jobs`. It lists `police` and `sheriff` with the minimum grade for each action. Add or rename jobs to match your server.
+
+See [Configuration](/nerve_evidence/configuration) for every option.
+
+## Step 5: Start and test [#step-5-start-and-test]
+
+1. Restart your server. The database tables are created on the first start, so there is no SQL to import.
+2. Join as an on-duty officer with a fingerprint kit, a swab kit and some evidence bags.
+3. Fire a gun somewhere, then run `/forensics` to search. The casing shows up as a marker. Collect it with ox_target.
+4. Use an evidence bag to seal the sample.
+5. Take the sealed bag to the lab bench and choose **Submit evidence**.
+6. Still at the bench, choose **Open workstation** (or run `/evidence`) and start the analysis from the laboratory section. Starting an analysis needs the `analyze` grade (2 by default) and you must stand at the bench.
+
+## Version check
+
+On start, the server console says whether the script is up to date, with a download link when a new version is out. To turn it off, add this to `server.cfg`:
+
+```cfg
+set nerve:versioncheck false
+```
+
+## Translations
+
+All player-facing text is in `locales/en.json`. To translate it, copy the file to your language code (for example `locales/de.json`), translate the values, and set ox_lib's language in `server.cfg`:
+
+```cfg
+setr ox:locale de
+```
+
+## Updating
+
+1. Back up `shared/config.lua`, `shared/config_labs.lua`, `shared/config_points.lua`, `shared/editable.lua` and any locale files you changed.
+2. Replace the resource folder with the new version.
+3. Copy your changes back, and read the changelog for anything new to add.
+4. Restart the server. Database changes are applied on start.

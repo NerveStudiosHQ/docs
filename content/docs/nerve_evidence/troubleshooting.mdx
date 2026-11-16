@@ -1,0 +1,85 @@
+---
+title: "Troubleshooting"
+description: "Fixes for the most common Nerve Studios Evidence Lab problems, with the exact console and in-game messages."
+---
+
+Most install problems show up in the **server console** when the resource starts. Problems during play show up as a notification in game.
+
+## The resource doesn't start [#the-resource-doesnt-start]
+
+- **`no supported framework found (es_extended, qbx_core)`**: neither ESX nor QBox was running when the script started. Start your framework before `nerve_evidence` in `server.cfg`.
+- **`could not create tables, import sql/nerve_evidence.sql manually: ...`**: the database user could not create the tables. Import `sql/nerve_evidence.sql` with HeidiSQL or your database panel, then restart. The text after the colon gives the database's reason.
+- **`could not read sql/nerve_evidence.sql; import it manually`**: the `sql/` folder is missing from the resource. Download it again from your Cfx.re Portal.
+- A message that names `ox_lib`, `oxmysql`, `ox_inventory`, `ox_target` or OneSync: that requirement is missing or starts after this script. See [Installation](/nerve_evidence/installation#step-3-add-it-to-server-cfg).
+
+## Officers can't use anything [#officers-cant-use-anything]
+
+**"You are not allowed to do that"**: the player's job or grade doesn't allow the action.
+
+- Check that the job is listed under `jobs` in `shared/config.lua`, spelled the way your framework spells it.
+- Check the grade for that action under `grades`. Starting a lab analysis needs `analyze`, which is grade 2 by default.
+- With `requireDuty = true`, the player must be on duty.
+
+## The evidence items do nothing [#the-evidence-items-do-nothing]
+
+Using an evidence sample, bag or sealed bag should open a menu. If nothing happens, the item in `ox_inventory/data/items.lua` is missing its `client = { export = ... }` line. Copy the item block from [Installation](/nerve_evidence/installation#step-2-add-the-items) again and restart ox_inventory.
+
+## Collecting fails [#collecting-fails]
+
+- **"You need a Fingerprint kit"** or **"You need a Swab kit"**: the officer doesn't carry the equipment that evidence type needs. Set `kit = false` for a type in `evidence` to collect it without equipment.
+- **"You need an empty evidence bag"**: the officer has no `evidence_bag` to seal the sample in.
+- **"You need the right equipment to search"**: `sweep.item` is set, and the officer doesn't carry that item.
+- **"Someone already collected that"**: another officer picked it up first.
+- **"You are too far away"**: walk closer. Officers must be within `scenes.collectRange` metres.
+
+## No evidence shows up [#no-evidence-shows-up]
+
+- Turn on the search with `/forensics`. Evidence markers only show while it is on, within `sweep.radius` metres.
+- Check that the evidence type is `enabled` under `evidence`.
+- Uncollected evidence washes away after `scenes.lifetime` seconds (2 hours by default).
+- Blood is left on a share of weapon hits (`evidence.blood.chance`), with a cooldown per player.
+
+## Players leave no fingerprints [#players-leave-no-fingerprints]
+
+Players who carry the gloves item (`forensic_gloves` by default) leave no fingerprints. That is on purpose. To make gloves never count, set `gloves.useItem = false`. Trace DNA in vehicles is left with or without gloves.
+
+## Doors keep no prints [#doors-keep-no-prints]
+
+Door prints need ox_doorlock, started before `nerve_evidence`, and `doors.enabled = true`. A print is left when a player locks or unlocks a door.
+
+## The lab bench is missing [#the-lab-bench-is-missing]
+
+- The example lab sits at Mission Row. If your map or MLO moves the room, set `bench` in `shared/config_labs.lua` to where the bench is on your server.
+- A lab with `jobs` only shows to those jobs.
+- **"You need to be at a laboratory bench"**: submitting and starting an analysis only work at the bench.
+
+## Submitting or handing over fails [#submitting-or-handing-over-fails]
+
+- **"Reseal the bag before submitting it"**: the seal was broken. Use the opened bag, choose **Reseal with a new bag** (it uses up one empty evidence bag), then submit.
+- **"That evidence is already with the lab"**: it was submitted before. Check the laboratory section of the workstation.
+- **"They cannot take custody of evidence"**: the other player lacks the `transfer` permission.
+- **"Evidence can only be handled by authorised personnel"**: someone without the `transfer` permission tried to take or move a bag, and `custody.unauthorized` is `'block'`.
+
+## A casing isn't traced to a firearm [#a-casing-isnt-traced]
+
+With the default `analysis.ballistics.onFile = 'testfired'`, a casing is only traced to its firearm once that firearm has been seized and analysed in a lab. Until then, casings fired from the same gun are still linked to each other. Set `onFile = 'all'` to trace every firearm, or register firearms from your gun store with [`RegisterFirearm`](/nerve_evidence/exports#profiles-and-firearms).
+
+## Prints or DNA come back "Not on file" [#not-on-file]
+
+With `analysis.requireBooking = true`, only people an officer has booked with **Take prints and DNA** can be identified. Low-quality samples come back as a partial match or inconclusive. Seal samples quickly, because unbagged samples age fast.
+
+## The cursor is stuck on screen [#the-cursor-is-stuck-on-screen]
+
+Press Escape to close the workstation. The cursor is also released when the resource stops or restarts. If the workstation never appears or looks broken, the UI files are missing or damaged: download the resource again from your Cfx.re Portal.
+
+## "rejected request from ..." in the console [#rejected-request]
+
+A player's game sent a request the server refused, for example too many in a short time or an action they weren't allowed. An occasional line during busy play is harmless. Many lines from one player can mean a modified client.
+
+## "Could not check for updates" in the server console [#could-not-check-for-updates]
+
+The server couldn't reach the version list. This doesn't affect the script. Turn the check off with `set nerve:versioncheck false` in `server.cfg`.
+
+## Still stuck? [#still-stuck]
+
+Set `debug = true` in `shared/config.lua`, restart the resource, and reproduce the problem. Then open a ticket on [Discord](https://discord.gg/nervestudios) with the server console and F8 console output. See [Support](/general/support) for what to include.

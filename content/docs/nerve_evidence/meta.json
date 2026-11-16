@@ -1,0 +1,13 @@
+{
+  "title": "Evidence Lab",
+  "icon": "Fingerprint",
+  "pages": [
+    "overview",
+    "installation",
+    "configuration",
+    "exports",
+    "hooks",
+    "troubleshooting",
+    "changelog"
+  ]
+}

@@ -7,6 +7,14 @@
     "version": "1.0.2",
     "date": "2026-11-09"
   },
+  "nerve_evidence": {
+    "title": "Evidence Lab",
+    "icon": "Fingerprint",
+    "category": "Law Enforcement",
+    "description": "Forensic evidence collection, lab analysis, chain of custody and case management",
+    "version": "1.0.0",
+    "date": "2026-11-15"
+  },
   "nerve_watermark": {
     "title": "Watermark",
     "icon": "Stamp",

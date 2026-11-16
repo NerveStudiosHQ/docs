@@ -1,0 +1,79 @@
+---
+title: "Hooks"
+description: "Plug your own notify, dispatch, logging and clothing gloves into Nerve Studios Evidence Lab from shared/editable.lua."
+---
+
+`shared/editable.lua` holds the functions you can change to fit your server. Each one works out of the box with ox_lib. Edit the body, keep the name and arguments, and restart the resource.
+
+If a server hook throws an error, the script carries on and the server console prints `Editable.<name> failed: ...` with the reason.
+
+## Editable.Notify [#editablenotify]
+
+```lua
+function Editable.Notify(source, message, kind)
+```
+
+Shows a notification. It runs on both sides: on the server `source` is the player to notify, on the client it is `nil` and the local player sees it. `kind` is `'success'`, `'error'` or `'inform'`. The file has commented examples for the qbx_core and ESX notifications.
+
+## Editable.WearingGloves [#editablewearinggloves]
+
+```lua
+function Editable.WearingGloves(source)
+    return false
+end
+```
+
+Server only. Return `true` when the player wears gloves from their clothing, so they leave no fingerprints and don't contaminate samples. By default only the gloves item counts, because the server cannot see clothing.
+
+If your clothing or appearance script keeps outfits on the server, look the player up here and check their arms:
+
+```lua
+function Editable.WearingGloves(source)
+    local outfit = exports.my_clothing:GetOutfit(source)
+    return outfit ~= nil and outfit.gloves == true
+end
+```
+
+<Callout type="warn">
+
+Only read data your server already holds. Never trust a value the player's game sends you for this, or a modified client can skip leaving prints.
+
+</Callout>
+
+## Editable.OnCustody [#editableoncustody]
+
+```lua
+function Editable.OnCustody(entry)
+```
+
+Server only. Called after every chain of custody entry is written. Send it to your logs here, for example Discord, fivemanage or the ox_lib logger. `entry` has `serial`, `evidence`, `from`, `to`, `reason` and `tampered`.
+
+```lua
+function Editable.OnCustody(entry)
+    lib.logger(0, 'nerve_evidence', ('%s: %s -> %s (%s)'):format(entry.serial, entry.from, entry.to, entry.reason))
+end
+```
+
+## Editable.OnTamper [#editableontamper]
+
+```lua
+function Editable.OnTamper(data)
+```
+
+Server only. Called when an evidence bag is tampered with: a seal broken outside a lab, or a bag taken by someone without the `transfer` permission. Send a dispatch alert or a log here. `data` has `serial`, `evidence`, `by`, `reason` and `coords`.
+
+## Editable.OnResult [#editableonresult]
+
+```lua
+function Editable.OnResult(data)
+```
+
+Server only. Called when a laboratory finishes an analysis. `data` has `evidence`, `type`, `outcome`, `lab` and `caseNumber` (or `nil` when the evidence is not in a case). Use it to post results to your MDT.
+
+## Editable.OnCaseStatus [#editableoncasestatus]
+
+```lua
+function Editable.OnCaseStatus(data)
+```
+
+Server only. Called when a case changes status. `data` has `number`, `title`, `status` and `by`.

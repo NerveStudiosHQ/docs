@@ -1,0 +1,84 @@
+---
+title: "Overview"
+description: "Nerve Studios Evidence Lab: forensic evidence officers collect at the scene, seal, analyse in a lab and build cases from, with a chain of custody nobody can rewrite."
+---
+
+Nerve Studios Evidence Lab turns crime scenes into real investigations. Shots leave casings, wounds leave blood, drivers leave prints. Officers search the scene, collect and seal what they find, carry it to a laboratory and build the case from the results. Every handover is written into a chain of custody that can never be edited or deleted.
+
+It runs on ESX and QBox. The forensic workstation ships ready to use, with no build step.
+
+<Cards>
+  <Card title="Installation" icon="Rocket" href="/nerve_evidence/installation">
+    Items, lab position and first start
+  </Card>
+  <Card title="Configuration" icon="Settings" href="/nerve_evidence/configuration">
+    Jobs, grades, evidence types and lab rules
+  </Card>
+  <Card title="Exports" icon="Code" href="/nerve_evidence/exports">
+    Leave evidence from your robbery and crime scripts
+  </Card>
+  <Card title="Hooks" icon="Plug" href="/nerve_evidence/hooks">
+    Your notify, dispatch, logs and clothing gloves
+  </Card>
+</Cards>
+
+## Features
+
+- **Evidence from real play.** Shell casings where firearms are fired, blood where players are hurt, prints and trace DNA in vehicles people sit in, prints on ox_doorlock doors, and prints on surfaces your other scripts point at.
+- **Evidence search.** Authorised officers toggle a search that shows nearby evidence, then collect each piece with the right equipment and an animation.
+- **Six evidence types:** fingerprints, blood, trace DNA, shell casings, seized firearms and general physical evidence. Each has its own equipment, collection time, lab time and ageing.
+- **Sealed evidence bags** with serial numbers. Breaking a seal outside a lab, or a bag landing in the wrong hands, is recorded as tampering.
+- **Chain of custody** for every item: collection, sealing, handovers, lockers, drops, lab submission, analysis and check-out, with who, where, why and the sample's condition.
+- **Laboratories** with a submission bench, a processing queue, a short skill check for analysts and processing times per evidence type.
+- **Identification.** Fingerprints and DNA are matched against every character, or only people who were booked. Ballistics tie casings to a firearm by its serial once it is on file, and link casings fired from the same gun even before that.
+- **Quality and contamination.** Samples age at the scene and faster when unbagged. Gloves matter. Degraded or contaminated samples return partial or inconclusive results.
+- **Investigations** with case numbers, investigators, linked evidence, scenes, suspects and vehicles, notes, lab reports and a timeline.
+- **Forensic workstation** with an overview, evidence database, crime scenes, laboratory, investigations, suspects, forensic reports, custody ledger, personnel and a configuration view.
+- **Permissions per job and grade** for collecting, handling, booking, submitting, analysing, editing, assigning and closing cases.
+- **Your accent colour** on the workstation.
+- **Exports** for other resources, and hooks for your notify, dispatch and logging.
+- **Translatable.** Every player-facing text is in the locale file.
+
+## How it plays
+
+1. A shot, a wound, a vehicle or a door leaves evidence and opens a crime scene around it.
+2. An officer turns on the evidence search with `/forensics`, finds the markers and collects each piece with the right kit. Vehicles are dusted or swabbed directly with ox_target.
+3. Using an evidence bag seals a sample, or a seized firearm, into a serialised bag. Unbagged samples lose quality quickly.
+4. Bags are handed over face to face, stored in evidence lockers or carried to a lab. Every move goes into the chain of custody.
+5. At the lab bench the bag is submitted. An analyst starts the analysis, and the result is ready after the processing time.
+6. Results land in the workstation (`/evidence`), where they are linked to an investigation and its suspects.
+
+Officers put a person on file by taking their prints and DNA with ox_target (**Take prints and DNA**).
+
+## What the game can and cannot tell
+
+GTA has no fingerprints or ballistics of its own, so the script records only what it can verify:
+
+- Casings come from the firearm the server sees in the shooter's hands, with its ox_inventory serial. There is no bullet path or projectile recovery.
+- Prints exist where the script knows someone touched something: vehicle seats, ox_doorlock doors, and points your scripts report. Not on every prop in the world.
+- The server cannot see clothing, so gloves count when the player carries the gloves item. If your clothing script keeps outfits on the server, the [`Editable.WearingGloves`](/nerve_evidence/hooks#editablewearinggloves) hook can add clothing gloves.
+
+## Requirements
+
+| Requirement | Notes |
+| --- | --- |
+| ESX Legacy or QBox | Jobs, grades, duty and character names |
+| [ox_lib](https://github.com/overextended/ox_lib/releases) | Menus, progress bars, skill check and language |
+| [oxmysql](https://github.com/overextended/oxmysql/releases) | Stores evidence, custody and cases |
+| [ox_inventory](https://github.com/overextended/ox_inventory/releases) | Evidence items, firearm serials and evidence lockers |
+| [ox_target](https://github.com/overextended/ox_target/releases) | Collecting, vehicles, booking and the lab bench |
+| [ox_doorlock](https://github.com/overextended/ox_doorlock/releases) | Optional. Leaves prints on doors |
+| OneSync | Required |
+
+The database tables are created on the first start. There is no SQL to import by hand.
+
+## Performance
+
+- About 0.00 ms in the client resmon while the player has no weapon drawn and the evidence search is off. A drawn firearm is watched for shots until it is put away.
+- The console stays silent unless `debug = true`, apart from warnings and errors you need to act on.
+
+<Callout type="info">
+
+New here? Start with [Installation](/nerve_evidence/installation).
+
+</Callout>
