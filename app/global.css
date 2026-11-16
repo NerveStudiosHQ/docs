@@ -3,104 +3,76 @@
 @import 'fumadocs-ui/css/preset.css';
 
 /* ---------------------------------------------------------------------------
-   Nerve Studios design tokens, same names and values as store.nervestudios.net.
-   Dark is the default theme. Light keeps the same structure with inverted ink.
+   Design tokens, same names and values as store.nervestudios.net: neutral near-black
+   canvas, hairline white borders, translucent white fills, neutral grey text.
+   Purple is a small accent only, never a surface. Dark only, like the store.
 --------------------------------------------------------------------------- */
-:root {
-  --fd-layout-width: 1400px;
+:root,
+.dark {
+  --fd-layout-width: 80rem;
 
-  --accent: #9333ea;
-  --accent-hi: #7e22ce;
+  --accent: #a855f7;
+  --accent-hi: #c084fc;
   --accent-ink: #ffffff;
-  --accent-dim: #a855f71a;
-  --accent-soft: #a855f738;
-  --accent-glow: #a855f74d;
+  --accent-dim: #a855f71f;
+  --accent-soft: #a855f733;
+  --accent-glow: #a855f740;
 
-  --fill-1: #7c3aed08;
-  --fill-2: #7c3aed0f;
-  --fill-3: #7c3aed1c;
-  --divider: #4c1d951f;
+  --fill-1: #ffffff08;
+  --fill-2: #ffffff0f;
+  --fill-3: #ffffff1a;
+  --divider: #ffffff12;
 
-  --bg: #fcfbff;
-  --float: #ffffff;
-  --float-shadow: 0 0.75rem 2rem #1a103014;
+  --bg: #111111;
+  --float: #1a1a1a;
+  --card: #151515;
+  --overlay: #0a0a0ad9;
+  --float-shadow: 0 1rem 2.5rem #000000b3;
 
-  --ink: #17141f;
-  --ink-2: #57526a;
-  --ink-3: #807a93;
+  --ink: #f5f5f5;
+  --ink-2: #a3a3a3;
+  --ink-3: #6e6e6e;
+
+  --good: #34d399;
+  --warn: #fbbf24;
+  --bad: #f04444;
 
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --radius: 0.75rem;
   --radius-inner: 0.5rem;
 
-
+  /* Fumadocs palette mapped onto the store tokens. Opaque values where surfaces overlap content. */
   --color-fd-background: var(--bg);
   --color-fd-foreground: var(--ink);
-  --color-fd-muted: #f4f1fa;
+  --color-fd-muted: var(--float);
   --color-fd-muted-foreground: var(--ink-2);
   --color-fd-popover: var(--float);
   --color-fd-popover-foreground: var(--ink);
-  --color-fd-card: #f9f7fd;
+  --color-fd-card: var(--card);
   --color-fd-card-foreground: var(--ink);
   --color-fd-border: var(--divider);
-  --color-fd-primary: #7e22ce;
+  --color-fd-primary: var(--accent);
   --color-fd-primary-foreground: #ffffff;
-  --color-fd-secondary: #f4f1fa;
+  --color-fd-secondary: var(--float);
   --color-fd-secondary-foreground: var(--ink);
-  --color-fd-accent: #ede8f6;
+  --color-fd-accent: #1f1f1f;
   --color-fd-accent-foreground: var(--ink);
-  --color-fd-ring: #a855f7;
-  --color-fd-overlay: #0b0a1033;
-}
-
-.dark {
-  --accent: #a855f7;
-  --accent-hi: #c084fc;
-  --accent-ink: #ffffff;
-  --accent-dim: #a855f724;
-  --accent-soft: #a855f738;
-  --accent-glow: #a855f773;
-
-  --fill-1: #b78cff0a;
-  --fill-2: #b78cff12;
-  --fill-3: #b78cff1f;
-  --divider: #c4a1ff1a;
-
-  --bg: #0b0a10;
-  --float: #15131b;
-  --float-shadow: 0 0.75rem 2rem #0009;
-
-  --ink: #ededed;
-  --ink-2: #a8a3b5;
-  --ink-3: #78738a;
-
-
-  /* Opaque equivalents of --fill-1/2/3 over --bg, for surfaces that overlap other content. */
-  --color-fd-background: var(--bg);
-  --color-fd-foreground: var(--ink);
-  --color-fd-muted: #171321;
-  --color-fd-muted-foreground: var(--ink-2);
-  --color-fd-popover: var(--float);
-  --color-fd-popover-foreground: var(--ink);
-  --color-fd-card: #120f19;
-  --color-fd-card-foreground: var(--ink);
-  --color-fd-border: var(--divider);
-  --color-fd-primary: #a855f7;
-  --color-fd-primary-foreground: #ffffff;
-  --color-fd-secondary: #171321;
-  --color-fd-secondary-foreground: var(--ink);
-  --color-fd-accent: #201a2d;
-  --color-fd-accent-foreground: var(--ink);
-  --color-fd-ring: #a855f7;
-  --color-fd-overlay: #0b0a10d9;
+  --color-fd-ring: var(--accent);
+  --color-fd-overlay: var(--overlay);
+  --color-fd-info: #60a5fa;
+  --color-fd-warning: var(--warn);
+  --color-fd-error: var(--bad);
+  --color-fd-success: var(--good);
 }
 
 @theme inline {
-  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --color-bg: var(--bg);
   --color-float: var(--float);
+  --color-card: var(--card);
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-ink-3: var(--ink-3);
@@ -113,16 +85,35 @@
   --color-accent-dim: var(--accent-dim);
   --color-accent-soft: var(--accent-soft);
   --shadow-float: var(--float-shadow);
+  --text-md: 0.9375rem;
+  --text-2xs: 0.6875rem;
 }
 
 /* ---------------------------------------------------------------------------
-   Base: one flat canvas, no decorative backgrounds.
+   Base: one flat canvas, no decoration.
 --------------------------------------------------------------------------- */
 html {
+  font-size: 100%;
+  color-scheme: dark;
   scrollbar-gutter: stable;
   scrollbar-width: thin;
-  scrollbar-color: var(--fill-3) var(--bg);
+  scrollbar-color: rgba(255, 255, 255, 0.14) var(--bg);
 }
+
+/* Everything is sized in rem, so stepping the root up scales the whole site evenly on big screens. */
+@media (min-width: 1536px) {
+  html { font-size: 106.25%; }
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border: 3px solid var(--bg);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.28); }
+::-webkit-scrollbar-corner { background: var(--bg); }
 
 html > body[data-scroll-locked] {
   margin-right: 0px !important;
@@ -137,8 +128,6 @@ body {
 
 ::selection {
   background: rgba(168, 85, 247, 0.35);
-}
-.dark ::selection {
   color: #ffffff;
 }
 
@@ -148,6 +137,12 @@ h1, h2, h3, h4 {
 
 strong, b {
   font-weight: 700;
+}
+
+a, button {
+  transition-property: color, background-color, border-color, opacity, box-shadow, transform, translate, scale;
+  transition-duration: 250ms;
+  transition-timing-function: var(--ease);
 }
 
 /* ---------------------------------------------------------------------------
@@ -163,8 +158,9 @@ strong, b {
     flex-shrink: 0;
     height: 2.75rem;
     padding: 0 1.25rem;
+    border: 0;
     border-radius: var(--radius);
-    font-size: 0.9375rem;
+    font-size: var(--text-md);
     font-weight: 500;
     line-height: 1;
     white-space: nowrap;
@@ -176,17 +172,16 @@ strong, b {
   }
   :where(.btn:hover) { background: var(--fill-2); }
   :where(.btn:active) { transform: scale(0.97); }
-  :where(.btn-primary) {
-    color: var(--accent-ink);
-    background: #a855f7;
-    box-shadow: 0 0 0 1px #c084fc33 inset, 0 0.5rem 1.75rem -0.5rem var(--accent-glow);
-  }
-  :where(.btn-primary:hover) {
-    background: #c084fc;
-    box-shadow: 0 0 0 1px #d8b4fe55 inset, 0 0.75rem 2.25rem -0.5rem var(--accent-glow);
-  }
+  :where(.btn-sm) { height: 2.25rem; padding: 0 0.875rem; font-size: 0.875rem; border-radius: var(--radius-inner); }
+  :where(.btn-lg) { height: 3rem; padding: 0 1.5rem; font-size: 1rem; }
+  :where(.btn-primary) { color: var(--accent-ink); background: var(--accent); box-shadow: none; font-weight: 600; }
+  :where(.btn-primary:hover) { background: #9333ea; }
+  :where(.btn-light) { color: #0a0a0a; background: #ffffff; box-shadow: none; font-weight: 600; }
+  :where(.btn-light:hover) { background: #e5e5e5; }
   :where(.btn-ghost) { color: var(--ink); background: var(--fill-1); box-shadow: inset 0 0 0 1px var(--divider); }
   :where(.btn-ghost:hover) { background: var(--fill-2); }
+  :where(.btn-quiet) { color: var(--ink-2); background: transparent; box-shadow: none; }
+  :where(.btn-quiet:hover) { color: var(--ink); background: var(--fill-1); }
 
   :where(.pill) {
     display: inline-flex;
@@ -196,7 +191,7 @@ strong, b {
     height: 1.375rem;
     padding: 0 0.5rem;
     border-radius: 999px;
-    font-size: 0.6875rem;
+    font-size: var(--text-2xs);
     font-weight: 600;
     line-height: 1;
     white-space: nowrap;
@@ -204,7 +199,7 @@ strong, b {
     background: var(--fill-2);
     box-shadow: inset 0 0 0 1px var(--divider);
   }
-  :where(.pill[data-tone="accent"]) { color: var(--accent-hi); background: var(--accent-dim); box-shadow: inset 0 0 0 1px var(--accent-soft); }
+  :where(.pill[data-tone="accent"]) { color: var(--accent-hi); background: var(--accent-dim); }
 
   :where(.surface-card) {
     background: var(--fill-1);
@@ -212,78 +207,103 @@ strong, b {
     border-radius: var(--radius);
     transition: box-shadow 0.2s var(--ease), background-color 0.2s var(--ease);
   }
-  :where(.surface-card:hover) { box-shadow: inset 0 0 0 1px var(--accent-soft); }
+  :where(.surface-card:hover) { box-shadow: inset 0 0 0 1px var(--fill-3); }
 
-  :where(.text-gradient) {
-    color: transparent;
-    background: linear-gradient(100deg, #7e22ce 0%, #9333ea 45%, #a855f7 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
+  /* Store product card: flat panel with a hairline that brightens on hover. */
+  :where(.glass-card) {
+    background: var(--card);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: var(--radius);
+    transition: border-color 0.2s, background-color 0.2s, translate 0.3s var(--ease);
   }
-  :where(.dark .text-gradient) {
-    background-image: linear-gradient(100deg, #e9d5ff 0%, #c084fc 35%, #a855f7 70%, #7c3aed 100%);
+  :where(.glass-card:hover) { border-color: rgba(255, 255, 255, 0.14); }
+
+  :where(.eyebrow) {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
   }
+
+  :where(.font-display) { font-family: var(--font-display); }
+
+  @keyframes hero-in { from { opacity: 0; transform: translateY(0.625rem); } to { opacity: 1; transform: none; } }
+  :where(.hero-in) { animation: hero-in 0.5s var(--ease) both; }
 }
 
-/* Purple rule that fades out to the right, under page headers. */
-.nd-rule {
-  background: linear-gradient(to right, rgba(168, 85, 247, 0.6), rgba(196, 161, 255, 0.12) 40%, transparent);
-}
+/* Section title flanked by hairlines that fade out towards the edges. */
+.title-rule { display: flex; align-items: center; gap: 1.25rem; }
+.title-rule::after { content: ""; height: 1px; flex: 1 1 0; background: linear-gradient(to right, rgba(255, 255, 255, 0.22), transparent); }
 
-/* Search field: store search input look, purple focus ring. */
+/* Search field: the store catalogue search box. */
 .nd-search {
-  height: 2.625rem;
+  height: 2.5rem;
   gap: 0.625rem;
-  padding-inline: 0.75rem 0.5rem;
+  padding-inline: 0.875rem 0.5rem;
   border-radius: var(--radius);
-  border-color: var(--divider);
-  background: var(--fill-1);
+  border-color: rgba(255, 255, 255, 0.08);
+  background: #141414;
   color: var(--ink-3);
-  transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s, color 0.15s;
+  transition: border-color 0.2s, background-color 0.2s, color 0.2s;
 }
 .nd-search:hover {
-  background: var(--fill-2);
+  border-color: rgba(255, 255, 255, 0.16);
   color: var(--ink-2);
 }
 .nd-search:focus-visible {
   outline: none;
-  border-color: rgba(168, 85, 247, 0.5);
-  background: var(--fill-2);
-  box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
 }
 .nd-search:hover > svg,
 .nd-search:focus-visible > svg {
-  color: var(--accent-hi);
+  color: var(--ink);
 }
 .nd-search kbd {
   display: inline-flex;
   align-items: center;
   height: 1.25rem;
+  border-radius: 0.375rem;
   border-color: var(--divider);
   background: var(--fill-1);
-  font-size: 0.6875rem;
+  font-family: var(--font-sans);
+  font-size: var(--text-2xs);
   font-weight: 500;
   color: var(--ink-3);
 }
 
+/* Search dialog and other popovers: the store's floating menus. */
+[role="dialog"][class*="bg-fd-popover"],
+[data-radix-popper-content-wrapper] > [class*="bg-fd-popover"] {
+  border-color: rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius);
+  box-shadow: 0 1.25rem 3rem -0.5rem rgba(0, 0, 0, 0.75);
+}
+
 /* ---------------------------------------------------------------------------
-   Sidebar: rows like the store catalogue sidebar.
+   Sidebar: rows like the store's Scripts menu, active row like an active filter chip.
 --------------------------------------------------------------------------- */
+#nd-sidebar {
+  background: var(--bg);
+}
+
 :is(#nd-sidebar, #nd-sidebar-mobile) a[data-active],
 :is(#nd-sidebar, #nd-sidebar-mobile) button[data-state] {
-  border-radius: var(--radius);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
   font-weight: 500;
   color: var(--ink-2);
 }
 :is(#nd-sidebar, #nd-sidebar-mobile) a[data-active]:hover,
 :is(#nd-sidebar, #nd-sidebar-mobile) button[data-state]:hover {
-  background: var(--fill-1);
+  background: rgba(255, 255, 255, 0.06);
   color: var(--ink);
 }
 :is(#nd-sidebar, #nd-sidebar-mobile) a[data-active="true"],
 :is(#nd-sidebar, #nd-sidebar-mobile) a[data-active="true"]:hover {
-  background: var(--accent-dim);
-  box-shadow: inset 0 0 0 1px rgba(168, 85, 247, 0.3);
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
   color: var(--ink);
 }
 :is(#nd-sidebar, #nd-sidebar-mobile) a[data-active="true"]::before {
@@ -292,7 +312,7 @@ strong, b {
 :is(#nd-sidebar, #nd-sidebar-mobile) a[data-active] > svg,
 :is(#nd-sidebar, #nd-sidebar-mobile) button[data-state] > svg:first-child:not(:only-child) {
   color: var(--ink-3);
-  transition: color 0.15s;
+  transition: color 0.2s;
 }
 :is(#nd-sidebar, #nd-sidebar-mobile) a[data-active="true"] > svg,
 :is(#nd-sidebar, #nd-sidebar-mobile) a[data-active]:hover > svg,
@@ -300,75 +320,62 @@ strong, b {
   color: var(--accent-hi);
 }
 
-/* Section labels (the ---Category--- separators). */
+/* Section labels (the ---Category--- separators): the store eyebrow. */
 :is(#nd-sidebar, #nd-sidebar-mobile) p {
   margin-bottom: 0.5rem;
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-3);
 }
 
 /* Nested page guide line. */
 :is(#nd-sidebar, #nd-sidebar-mobile) [class*="before:bg-fd-border"]::before {
-  background: var(--divider);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 /* ---------------------------------------------------------------------------
-   Page header: breadcrumb pill with purple chevrons, bold title, purple fading rule.
+   Page header: the store's inner page intro. Back link, big display title, one muted line.
 --------------------------------------------------------------------------- */
-.nd-crumbs {
-  align-self: flex-start;
-  width: fit-content;
-  max-width: 100%;
-  flex-wrap: wrap;
-  padding: 0.375rem 0.75rem;
-  border: 1px solid var(--divider);
-  border-radius: 999px;
-  background: var(--fill-1);
-  font-size: 0.75rem;
+.nd-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
   font-weight: 500;
-  color: var(--ink-3);
+  color: var(--ink-2);
 }
-.nd-crumbs > svg {
-  width: 0.75rem;
-  height: 0.75rem;
-  color: var(--accent);
+.nd-back:hover {
+  color: var(--accent-hi);
 }
-.nd-crumbs a:hover {
-  opacity: 1;
-  color: var(--ink);
+.nd-back > svg {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.3s var(--ease);
 }
-.nd-crumbs > :last-child {
-  color: var(--ink);
-  font-weight: 500;
+.nd-back:hover > svg {
+  transform: translateX(-0.125rem);
 }
 
 .nd-page-header {
-  position: relative;
-  padding-bottom: 1.75rem;
-  margin-bottom: 2rem;
-}
-.nd-page-header::after {
-  content: "";
-  position: absolute;
-  inset: auto 0 0 0;
-  height: 1px;
-  background: linear-gradient(to right, rgba(168, 85, 247, 0.6), rgba(196, 161, 255, 0.12) 40%, transparent);
+  padding-bottom: 2rem;
+  margin-bottom: 0.5rem;
 }
 .nd-page-header h1 {
-  font-size: clamp(2rem, 1.6rem + 1.5vw, 2.5rem);
+  font-family: var(--font-display);
+  font-size: clamp(1.875rem, 1.5rem + 1.6vw, 3rem);
   font-weight: 700;
   line-height: 1.1;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.025em;
   color: var(--ink);
 }
 .nd-page-header p {
-  margin: 0.875rem 0 0;
+  margin: 0.75rem 0 0;
   max-width: 42rem;
-  font-size: 1.0625rem;
-  line-height: 1.6;
+  font-size: 1rem;
+  line-height: 1.625;
   color: var(--ink-2);
 }
 
@@ -379,15 +386,25 @@ strong, b {
 }
 
 /* ---------------------------------------------------------------------------
-   Content.
+   Content: the store's product description prose, scaled for docs.
 --------------------------------------------------------------------------- */
 .prose {
+  --tw-prose-body: var(--ink-2);
   --tw-prose-headings: var(--ink);
   --tw-prose-bold: var(--ink);
   --tw-prose-links: var(--accent-hi);
+  --tw-prose-counters: var(--accent-hi);
+  --tw-prose-bullets: var(--accent);
+  --tw-prose-hr: var(--divider);
+  --tw-prose-th-borders: var(--divider);
+  --tw-prose-td-borders: var(--divider);
+  color: var(--ink-2);
+  font-size: var(--text-md);
+  line-height: 1.75;
 }
 
 .prose :is(h2, h3, h4) {
+  font-family: var(--font-display);
   font-weight: 700;
   letter-spacing: -0.025em;
   color: var(--ink);
@@ -395,10 +412,10 @@ strong, b {
 }
 
 .prose h2 {
-  font-size: 1.5rem;
-  margin-top: 2.25em;
+  font-size: 1.625rem;
+  margin-top: 2.5em;
   padding-top: 1.5em;
-  border-top: 1px solid var(--divider);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .prose > h2:first-child {
@@ -408,25 +425,43 @@ strong, b {
 }
 
 .prose h3 {
-  font-size: 1.1875rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.prose h4 {
+  font-size: 1.0625rem;
+  font-weight: 600;
 }
 
 .prose strong {
   color: var(--ink);
+  font-weight: 600;
 }
 
-/* Links: purple-hi with a soft underline that firms up on hover. */
-.prose a:not([data-card]) {
+/* Bullets: small purple dots, numbers in purple, as on the store. */
+.prose ul > li::marker {
+  color: var(--accent);
+}
+.prose ol > li::marker {
+  color: var(--accent-hi);
+  font-weight: 600;
+}
+
+/* Links: purple-hi with a soft underline, white on hover. */
+.prose a:not([data-card]):not(.not-prose *) {
   color: var(--accent-hi);
   font-weight: 500;
+  text-decoration: underline;
   text-decoration-thickness: 1px;
-  text-underline-offset: 4px;
-  text-decoration-color: color-mix(in oklab, var(--accent-hi) 40%, transparent);
-  transition: text-decoration-color 0.15s, color 0.15s;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--accent-soft);
+  transition: text-decoration-color 0.2s, color 0.2s;
 }
-.prose a:not([data-card]):hover {
+.prose a:not([data-card]):not(.not-prose *):hover {
   opacity: 1;
-  text-decoration-color: var(--accent-hi);
+  color: var(--ink);
+  text-decoration-color: currentColor;
 }
 /* Heading self-links keep the heading colour. */
 .prose :is(h1, h2, h3, h4, h5, h6) a:not([data-card]) {
@@ -435,31 +470,28 @@ strong, b {
   text-decoration: none;
 }
 
-/* Inline code: flat fill chip with a hairline. */
+/* Inline code: the store's code chip. */
 .prose :not(pre) > code:not(.not-prose *) {
-  padding: 0.15em 0.4em;
+  padding: 0.1em 0.4em;
   border: 1px solid var(--divider);
-  border-radius: 0.375rem;
+  border-radius: 0.375em;
   font-size: 0.85em;
-  background: var(--fill-2);
+  background: var(--float);
   color: var(--ink);
 }
 
-/* Code blocks: --float surface, divider hairline, 0.75rem radius, no shadow. */
+/* Code blocks: card panel, white hairline, no shadow. */
 figure.shiki:not([class*="bg-fd-secondary"]) {
   border-radius: var(--radius);
-  border-color: var(--divider);
-  background: var(--fill-1);
+  border-color: rgba(255, 255, 255, 0.07);
+  background: var(--card);
   box-shadow: none;
 }
-.dark figure.shiki:not([class*="bg-fd-secondary"]) {
-  background: var(--float);
-}
 figure.shiki > div:first-child:not(:last-child) {
-  border-color: var(--divider);
+  border-color: rgba(255, 255, 255, 0.07);
 }
 
-/* Callouts: fill surface, divider border, no shadow. */
+/* Callouts: flat fill, hairline, no shadow. */
 [style*="--callout-color"] {
   border-radius: var(--radius);
   border-color: var(--divider);
@@ -470,23 +502,28 @@ figure.shiki > div:first-child:not(:last-child) {
 /* Cards (Fumadocs also sets data-card on heading anchors, so match the card class only). */
 [data-card][class*="bg-fd-card"] {
   border-radius: var(--radius);
-  border-color: var(--divider);
-  background: var(--fill-1);
-  transition: border-color 0.2s var(--ease), background-color 0.2s var(--ease);
+  border-color: rgba(255, 255, 255, 0.07);
+  background: var(--card);
+  transition: border-color 0.2s, background-color 0.2s;
 }
 a[data-card][class*="bg-fd-card"]:hover {
-  background: var(--fill-2);
-  border-color: var(--accent-soft);
+  background: var(--card);
+  border-color: rgba(255, 255, 255, 0.14);
 }
 [data-card][class*="bg-fd-card"] > div:first-child {
-  border: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-inner);
-  background: var(--accent-dim);
-  color: var(--accent-hi);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ink-2);
   box-shadow: none;
+  transition: color 0.2s;
+}
+a[data-card][class*="bg-fd-card"]:hover > div:first-child {
+  color: var(--accent-hi);
 }
 [data-card][class*="bg-fd-card"] h3 {
-  font-size: 0.9375rem;
+  font-family: var(--font-display);
+  font-size: 1rem;
   font-weight: 600;
   color: var(--ink);
 }
@@ -494,7 +531,7 @@ a[data-card][class*="bg-fd-card"]:hover {
 /* Tabs and tables. */
 .prose div[class*="bg-fd-card"][class*="rounded-xl"]:not([data-card]) {
   border-radius: var(--radius);
-  border-color: var(--divider);
+  border-color: rgba(255, 255, 255, 0.07);
 }
 
 .prose table {
@@ -508,9 +545,13 @@ a[data-card][class*="bg-fd-card"]:hover {
   color: var(--ink);
 }
 
-/* "On this page": active entry in purple-hi, inline code as plain text. */
+/* "On this page": active entry white, inline code as plain text. */
+#nd-toc a {
+  color: var(--ink-3);
+}
+#nd-toc a:hover,
 #nd-toc a[data-active="true"] {
-  color: var(--accent-hi);
+  color: var(--ink);
 }
 #nd-toc code {
   padding: 0;
@@ -519,18 +560,13 @@ a[data-card][class*="bg-fd-card"]:hover {
   font-size: 0.92em;
 }
 
-/* Previous / next footer cards. */
+/* Previous / next footer cards: store product cards. */
 #nd-page a[class*="rounded-xl"][class*="border"] {
-  border-color: var(--divider);
+  border-color: rgba(255, 255, 255, 0.07);
   border-radius: var(--radius);
+  background: var(--card);
 }
 #nd-page a[class*="rounded-xl"][class*="border"]:hover {
-  border-color: var(--accent-soft);
-  background: var(--fill-1);
-}
-
-/* The breadcrumb hugs its content instead of spanning the column. */
-#nd-page > .nd-crumbs {
-  width: fit-content;
-  margin-inline: 0 auto;
+  border-color: rgba(255, 255, 255, 0.14);
+  background: var(--card);
 }

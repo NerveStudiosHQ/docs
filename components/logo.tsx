@@ -1,15 +1,16 @@
 import { site } from '@/lib/site';
 
-/**
- * Nerve Studios logo: the purple mark plus the name as live text, same as the
- * store header. Text follows the theme, so one asset works in light and dark.
- */
+/** Nerve Studios watermark, the same image as the store header. */
 export function Logo({ className = '' }: { className?: string }) {
   return (
-    <span className={`inline-flex items-center gap-2.5 ${className}`}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/logo/nerve-logo.png" alt="" width={384} height={384} className="size-7 select-none" draggable={false} />
-      <span className="whitespace-nowrap text-[1.0625rem] font-bold tracking-tight text-fd-foreground">{site.name}</span>
-    </span>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/logo/nerve-watermark.png"
+      alt={site.name}
+      width={480}
+      height={191}
+      draggable={false}
+      className={`h-10 w-auto select-none ${className}`}
+    />
   );
 }

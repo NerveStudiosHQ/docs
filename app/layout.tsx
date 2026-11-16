@@ -1,18 +1,19 @@
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import type { Metadata, Viewport } from 'next';
-import { Plus_Jakarta_Sans, Geist_Mono } from 'next/font/google';
+import { Figtree, Outfit } from 'next/font/google';
 import { site } from '@/lib/site';
 import './global.css';
 
-const jakarta = Plus_Jakarta_Sans({
+const figtree = Figtree({
   subsets: ['latin'],
-  variable: '--font-jakarta',
+  variable: '--font-figtree',
   display: 'swap',
 });
 
-const geistMono = Geist_Mono({
+const outfit = Outfit({
   subsets: ['latin'],
-  variable: '--font-geist-mono',
+  variable: '--font-outfit',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -29,21 +30,22 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#fcfbff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0b0a10' },
-  ],
+  themeColor: '#111111',
+  colorScheme: 'dark',
 };
 
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
     <html
       lang="en"
-      className={`${jakarta.variable} ${geistMono.variable} font-sans`}
+      className={`${figtree.variable} ${outfit.variable} dark font-sans`}
       suppressHydrationWarning
     >
       <body className="flex flex-col min-h-screen">
-        <RootProvider theme={{ defaultTheme: 'dark' }} search={{ options: { type: 'static' } }}>
+        <RootProvider
+          theme={{ defaultTheme: 'dark', forcedTheme: 'dark', enableSystem: false }}
+          search={{ options: { type: 'static' } }}
+        >
           {children}
         </RootProvider>
       </body>

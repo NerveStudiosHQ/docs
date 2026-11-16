@@ -1,33 +1,39 @@
 import Link from 'next/link';
-import { ArrowRight, ArrowUpRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { DiscordIcon } from '@/components/icons';
 import { site } from '@/lib/site';
 
-/** Intro for the docs home page, laid out like the store's page header: pill, bold title, muted line, buttons, purple rule. */
+/** Intro for the docs home page, built like the store hero: announcement pill, big uppercase title with one accent word, two buttons. */
 export function DocsHero() {
   return (
-    <div className="not-prose relative mb-12 pb-10 pt-2">
-      <span className="pill" data-tone="accent">
-        Documentation
-      </span>
-      <h1 className="mt-5 text-4xl font-bold leading-[1.05] tracking-[-0.035em] text-ink sm:text-[3.25rem]">
-        <span className="text-gradient">{site.name}</span> docs
+    <div className="not-prose mb-12 pt-2">
+      <Link
+        href="/general/getting-started"
+        className="hero-in group inline-flex h-8 items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] pl-1 pr-3 text-xs font-medium text-ink-2 transition-colors hover:border-white/[0.16] hover:text-ink"
+      >
+        <span className="rounded-full bg-accent px-2 py-1 text-[0.625rem] font-bold uppercase leading-none tracking-wider text-white">
+          Docs
+        </span>
+        New here? Install your first script
+        <ChevronRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5" aria-hidden />
+      </Link>
+      <h1
+        className="hero-in mt-6 font-display text-4xl font-extrabold uppercase leading-[1.02] tracking-tight text-ink sm:text-5xl lg:text-6xl"
+        style={{ animationDelay: '60ms' }}
+      >
+        Get the most out of <span className="text-accent">Nerve</span> scripts
       </h1>
-      <p className="mt-4 max-w-2xl text-base leading-relaxed text-ink-2 sm:text-lg">
+      <p className="hero-in mt-5 max-w-2xl text-base leading-relaxed text-ink-2 sm:text-lg" style={{ animationDelay: '120ms' }}>
         Install guides, configuration references and troubleshooting for every {site.name} FiveM script.
       </p>
-      <div className="mt-8 flex flex-wrap gap-3">
-        <Link href="/general/getting-started" className="btn btn-primary">
-          Get started <ArrowRight className="size-4" />
+      <div className="hero-in mt-8 flex flex-wrap gap-3" style={{ animationDelay: '180ms' }}>
+        <Link href="/general/getting-started" className="btn btn-light btn-lg">
+          Get started <ChevronRight className="size-4" />
         </Link>
-        <a href={site.links.store} target="_blank" rel="noreferrer" className="btn btn-ghost">
-          Visit the store <ArrowUpRight className="size-4 text-ink-3" />
-        </a>
-        <a href={site.links.discord} target="_blank" rel="noreferrer" className="btn btn-ghost">
-          <DiscordIcon className="size-4" /> Discord
+        <a href={site.links.discord} target="_blank" rel="noreferrer" className="btn btn-primary btn-lg">
+          <DiscordIcon className="size-[1.125rem]" /> Join Discord
         </a>
       </div>
-      <span aria-hidden className="nd-rule absolute inset-x-0 bottom-0 h-px" />
     </div>
   );
 }

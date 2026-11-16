@@ -13,6 +13,7 @@ export default function Layout({ children }: LayoutProps<'/'>) {
         {...base}
         nav={{ ...nav, mode: 'top' }}
         slots={{ header: SiteHeader }}
+        themeSwitch={{ enabled: false }}
         tree={source.getPageTree()}
         sidebar={{ defaultOpenLevel: 0 }}
       >

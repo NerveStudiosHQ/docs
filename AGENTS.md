@@ -105,24 +105,32 @@ does and how to use it — never how it is built.**
   URLs). Only prose says "Nerve Studios".
 - Supported frameworks for `nerve_` scripts are ESX and QBox. Never claim
   QBCore support on a `nerve_` page.
-- Design matches store.nervestudios.net: same tokens (`--bg #0b0a10`, `--float`,
-  `--fill-1/2/3`, `--divider`, `--ink/-2/-3`, `--accent #a855f7`, `--accent-hi #c084fc`,
-  `--radius 0.75rem`) defined in `app/global.css` and mapped onto the Fumadocs
-  `--color-fd-*` variables. Dark is the default theme; light keeps the same structure.
-  Store utilities `.btn`, `.btn-primary`, `.btn-ghost`, `.pill`, `.surface-card` and
-  `.text-gradient` are ported there too.
+- Design matches store.nervestudios.net exactly. Tokens use the store's names and
+  values (`--bg #111111`, `--float #1a1a1a`, `--card #151515`, `--fill-1/2/3` white at
+  3/6/10%, `--divider` white at 7%, `--ink #f5f5f5` / `--ink-2 #a3a3a3` / `--ink-3 #6e6e6e`,
+  `--accent #a855f7`, `--accent-hi #c084fc`, `--radius 0.75rem`), defined in
+  `app/global.css` and mapped onto the Fumadocs `--color-fd-*` variables. Surfaces are
+  neutral grey; purple is a small accent only, never a surface. Dark only, like the store
+  (the theme is forced and the switch is off).
+  Store utilities `.btn`, `.btn-light`, `.btn-primary`, `.btn-ghost`, `.btn-quiet`,
+  `.pill`, `.surface-card`, `.glass-card` and `.eyebrow` are ported there too.
+  When the store's `src/app/globals.css` changes, port the change here.
 - Flat background only: no grids, glows, aurora or particles.
-- Type is Plus Jakarta Sans (same as the store); code uses Geist Mono.
+- Type matches the store: Figtree for text, Outfit (`font-display`) for titles and
+  headings, the system mono for code.
 - Header is `components/site-header.tsx`, passed as the notebook layout's `header`
-  slot: logo mark + name + tagline, centered links, search and an icon group. It is a
+  slot. It copies the store header: watermark logo and icon nav links on the left, then
+  search, Discord and YouTube, the sidebar toggle and a Store button on the right. It is a
   solid bar pinned to the top that never changes on scroll (no floating island, no
-  blur). It reuses the Fumadocs search, sidebar and theme slots, so keep those when
-  editing it.
-  Footer is `components/site-footer.tsx`.
+  blur). It reuses the Fumadocs search and sidebar slots, so keep those when editing it.
+  Footer is `components/site-footer.tsx`, a copy of the store footer.
+- Page headers copy the store's inner page intro: a "Back to ..." link (the script's
+  first page, or the docs home), a big display title and one muted line.
 - Fumadocs also puts `data-card` on heading anchors, so card styles target
   `[data-card][class*="bg-fd-card"]` only.
-- Logo mark is `public/logo/nerve-logo.png`; `nerve-wordmark*.png` are kept for
-  other uses. Favicons are `app/icon.png` and `app/apple-icon.png`, copied from nervestudios.net so
+- Header and footer logo is `public/logo/nerve-watermark.png`, copied from the store's
+  `public/logos/watermark-header.png`. `nerve-logo.png` and `nerve-wordmark*.png` are kept
+  for other uses. Favicons are `app/icon.png` and `app/apple-icon.png`, copied from nervestudios.net so
   both sites share one icon; recopy from that repo's `app/` when it changes.
 
 <!-- BEGIN:nextjs-agent-rules -->

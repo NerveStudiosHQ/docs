@@ -15,19 +15,17 @@ const shortcuts = [
 export default function NotFound() {
   return (
     <main className="[grid-area:main] flex min-h-[70vh] flex-col items-center justify-center px-6 py-16 text-center">
-      <span className="pill" data-tone="accent">
-        Error 404
-      </span>
-      <h1 className="mt-6 text-6xl font-bold tracking-tight sm:text-7xl">
-        <span className="text-gradient">Lost?</span>
+      <p className="eyebrow">Error 404</p>
+      <h1 className="mt-4 font-display text-6xl font-extrabold uppercase tracking-tight text-ink sm:text-7xl">
+        Page <span className="text-accent">lost</span>
       </h1>
       <p className="mt-4 max-w-md text-base leading-relaxed text-ink-2">
         This page does not exist or has moved. Search with{' '}
-        <kbd className="whitespace-nowrap rounded-md border border-divider bg-fill-2 px-1.5 py-0.5 font-mono text-xs">Ctrl K</kbd> or pick a
+        <kbd className="whitespace-nowrap rounded-md border border-divider bg-fill-1 px-1.5 py-0.5 text-xs text-ink-3">Ctrl K</kbd> or pick a
         place to start.
       </p>
       <div className="mt-8 flex flex-wrap justify-center gap-3">
-        <Link href="/" className="btn btn-primary">
+        <Link href="/" className="btn btn-light">
           Back to the docs <ArrowRight className="size-4" />
         </Link>
         {shortcuts.map(({ href, label, Icon, external }) =>

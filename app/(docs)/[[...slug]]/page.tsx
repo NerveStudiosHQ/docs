@@ -6,11 +6,33 @@ import {
   DocsTitle,
 } from 'fumadocs-ui/layouts/notebook/page';
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
+import type { Folder, Node } from 'fumadocs-core/page-tree';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import type { Metadata } from 'next';
 import { getMDXComponents } from '@/components/mdx';
 import { DocsHero } from '@/components/docs-hero';
 import { site } from '@/lib/site';
+
+function findFolder(nodes: Node[], url: string): Folder | undefined {
+  for (const node of nodes) {
+    if (node.type !== 'folder') continue;
+    if (node.index?.url === url || node.children.some((child) => child.type === 'page' && child.url === url)) return node;
+    const nested = findFolder(node.children, url);
+    if (nested) return nested;
+  }
+}
+
+/** Where the store-style "Back to ..." link points: a script's first page, or the docs home from there and from loose pages. */
+function backLink(url: string) {
+  const folder = findFolder(source.getPageTree().children, url);
+  const first = folder?.index ?? folder?.children.find((child) => child.type === 'page');
+  if (folder && first && first.type === 'page' && first.url !== url) {
+    return { href: first.url, label: folder.name };
+  }
+  return { href: '/', label: 'Docs' };
+}
 
 export default async function Page(props: PageProps<'/[[...slug]]'>) {
   const params = await props.params;
@@ -19,17 +41,22 @@ export default async function Page(props: PageProps<'/[[...slug]]'>) {
 
   const MDX = page.data.body;
   const isHome = page.url === '/';
+  const back = backLink(page.url);
 
   return (
     <DocsPage
       toc={page.data.toc}
       full={page.data.full}
-      breadcrumb={{ enabled: !isHome, className: 'nd-crumbs' }}
+      breadcrumb={{ enabled: false }}
     >
       {isHome ? (
         <DocsHero />
       ) : (
         <header className="nd-page-header">
+          <Link href={back.href} className="nd-back">
+            <ArrowLeft aria-hidden />
+            Back to {back.label}
+          </Link>
           <DocsTitle>{page.data.title}</DocsTitle>
           <DocsDescription>{page.data.description}</DocsDescription>
         </header>
