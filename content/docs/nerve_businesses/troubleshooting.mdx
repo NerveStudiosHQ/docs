@@ -1,0 +1,114 @@
+---
+title: "Troubleshooting"
+description: "Fixes for the most common Nerve Studios Businesses problems, with the exact console and in-game messages."
+---
+
+Most install problems show up in the **server console** when the resource starts, after `[nerve_businesses]`. Problems during play show up as a notification in game.
+
+## The resource doesn't start [#the-resource-doesnt-start]
+
+- **`no supported framework found (es_extended, qbx_core)`**: neither ESX nor QBox was running when the script started. Start your framework before `nerve_businesses` in `server.cfg`.
+- **`could not create tables, import sql/nerve_businesses.sql manually: ...`**: the database user could not create the tables. Import `sql/nerve_businesses.sql` with HeidiSQL or your database panel, then restart. The text after the colon gives the database's reason.
+- **`could not read sql/nerve_businesses.sql; import it manually`**: the `sql/` folder is missing from the resource. Download it again from your Cfx.re Portal.
+- A message that names `oxmysql`, `ox_lib`, `ox_inventory` or OneSync: that requirement is missing or starts after this script. See [Installation](/nerve_businesses/installation#step-4-add-it-to-server-cfg).
+
+## "Still starting up, try again in a moment" [#still-starting-up]
+
+The script hasn't finished loading. Wait a few seconds after a restart. If it never goes away, look for one of the console errors above.
+
+## /business does nothing or says no permission [#no-permission]
+
+**"You do not have permission to use this command"**: you aren't an admin to the script. Add the ACE line, your framework group or your identifier, see [admin access](/nerve_businesses/installation#step-5-give-your-admins-access).
+
+- On ESX, `admin.groups` must hold your ESX group, spelled the same.
+- On QBox, groups are checked as ACE permissions. `add_ace group.admin nerve_businesses.admin allow` is the simplest fix.
+- After changing admin access, reconnect so your game picks it up.
+
+If the command is unknown, check that it isn't set to `false` or renamed under `commands` in `shared/config.lua`.
+
+## Nothing to interact with [#nothing-to-interact-with]
+
+Placed features are used through ox_target. Start ox_target before `nerve_businesses`, or set your own target script in [`shared/editable.lua`](/nerve_businesses/hooks#another-target-script).
+
+If only some players see nothing, check the feature's **Who can use it**: they need one of its jobs at the minimum grade or higher.
+
+## The carry box doesn't work [#the-carry-box-doesnt-work]
+
+- **"The box item is missing, tell an admin"** in game, with **`the business_box item is missing from ox_inventory; see the README`** in the console: add the items to `ox_inventory/data/items.lua` from [Installation](/nerve_businesses/installation#step-2-add-the-items) and restart ox_inventory. If you renamed the item, set `boxes.item` to the new name.
+- Using a box does nothing: the item is missing its `server = { export = 'nerve_businesses.useBox' }` line.
+- **"This box is not linked to a business"**: the box was given with a command or another script. Take one from a box pickup point.
+- **"That can't go in a box"**: the item is on `boxes.blacklist` or starts with an entry in `boxes.blacklistPrefixes`.
+- **"Boxes only hold items made on this server"**: `boxes.recipeOnly` is on and no crafting recipe makes that item.
+- The box has no icon: put `business_box.png` in `ox_inventory/web/images/`.
+
+## Commissions or shop takings go nowhere [#business-money]
+
+The console says **`could not pay $<amount> into the business account of <job>: no business account system found (see Editable.AddBusinessMoney)`**. The business needs an account:
+
+- On ESX, start esx_addonaccount before `nerve_businesses`. Jobs made in the Business Manager get their `society_<job>` account when `jobs.society = true`.
+- On QBox, start Renewed-Banking before `nerve_businesses`.
+- With another banking script, fill in the [business account hooks](/nerve_businesses/hooks#business-accounts).
+
+Until then, a register pays the employee the whole charge, and **"The business can't afford this"** shows when a supply run is charged to the business.
+
+## Images don't save or show [#images]
+
+- **"Enter a full https:// image link"**: the link must start with `https://`.
+- **"Image host not allowed. Use one of: ..."**: the link's host isn't in `imageHosts` in `shared/config.lua`. Upload the image to a listed host, or add yours.
+- **"Image links can't contain spaces, brackets or quotes. Rename the file at your host and paste the new link"**: rename the file so its link has none of those.
+
+## A ped, prop or vehicle won't place [#model-wont-place]
+
+**"Could not load model ..., check the name and that it streams"**: the model name is wrong, or the resource streaming it isn't started. Check the spelling and start that resource first.
+
+## Boss menu, clothing or garage points do nothing [#service-points]
+
+**"No boss menu script found, set one up in editable.lua"**, or the clothing or garage version: none of the scripts the hook supports is started. Start yours, or add it to the matching [client hook](/nerve_businesses/hooks#client-hooks).
+
+## Registers [#registers]
+
+- **"Nobody close enough"**: the customer must stand within `registers.customerDistance` metres of the employee.
+- **"That customer already has a payment waiting"**: they must pay or decline the first request, or let it expire after `registers.expiry` seconds.
+- **"Not enough cash"** or **"Not enough money in the bank"**: the customer can't pay that way.
+
+## Supply runs [#supply-runs]
+
+- **"This supply point has no van spot or items"**: edit the supply point, place its van spawn and add at least one item.
+- **"Your rank is too low for supply runs"**: the employee isn't allowed by the point's **Who can use it**.
+- **"This business must wait ... more minute(s) for another supply run"**: lower `supply.cooldown` if runs should come quicker.
+- **"Bring the van back with you"**: the van must be within 40 metres of the supply point to deliver.
+- **"Not enough space for the supplies, free some up and try again"**: the employee's inventory can't hold the order. The run stays open, so free some space and deliver again.
+- **"Supply run cancelled, you left the van"**: the employee was away from the van for longer than `supply.abandonAfter` seconds.
+
+## Home delivery [#home-delivery]
+
+- **"Nothing to deliver from this point yet"**: the delivery point has no crafting stations, or they have no recipes. Edit it and pick stations that craft something. Products are never ordered.
+- **"No delivery destinations are set up"**: `deliveryDrops` in `shared/config_locations.lua` is empty.
+- **"Too many deliveries running for this business"**: raise `delivery.maxPerBusiness`.
+- **"Missing: ..."**: the employee doesn't have everything the order needs, in their pockets or in carry boxes.
+
+## Job garages [#job-garages]
+
+- **"Something is blocking the spawn spot"**: move what stands within `jobGarages.blockedRadius` metres of the spawn pad.
+- **"You already have a vehicle from this garage"**: return it first, or turn on **Allow more than one vehicle out** for the garage.
+- **"You already have ... job vehicles out"**: the player hit `jobGarages.maxActive`.
+- **"No job vehicle from this garage nearby"**: bring it within `jobGarages.returnDistance` metres of the garage or its spawn pad.
+- No keys: add your keys script to the [vehicle keys hooks](/nerve_businesses/hooks#vehicle-keys).
+
+## "The framework refused the job change" [#framework-refused]
+
+This, or **"The framework refused the rank change"**, means your framework did not save a job or rank change from the Business Manager. On ESX, the jobs are saved to your database, so look in the server console for a database error from oxmysql at the same moment. Fix what it names, then try again.
+
+## The cursor is stuck on screen [#the-cursor-is-stuck-on-screen]
+
+Press Escape to close any screen. The cursor is also released when the resource stops or restarts. If a screen never appears or looks broken, the UI files are missing or damaged: download the resource again from your Cfx.re Portal.
+
+## Console messages [#console-messages]
+
+- **`rejected request from ...`**: a player's game sent a request the server refused, for example too many in a short time or an action they weren't allowed. An occasional line during busy play is harmless. Many lines from one player can mean a modified client. They are also sent to the `exploit` webhook.
+- **`Editable.<name> failed: ...`**: one of your [hooks](/nerve_businesses/hooks) in `shared/editable.lua` threw an error. The reason follows the colon.
+- **`Could not check for updates`**: the server couldn't reach the version list. This doesn't affect the script. Turn the check off with `set nerve:versioncheck false` in `server.cfg`.
+
+## Still stuck? [#still-stuck]
+
+Set `debug = true` in `shared/config.lua`, restart the resource, and reproduce the problem. Then open a ticket on [Discord](https://discord.gg/nervestudios) with the server console and F8 console output. See [Support](/general/support) for what to include.

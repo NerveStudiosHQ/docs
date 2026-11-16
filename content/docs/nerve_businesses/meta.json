@@ -1,0 +1,16 @@
+{
+  "title": "Businesses",
+  "icon": "Store",
+  "pages": [
+    "overview",
+    "installation",
+    "configuration",
+    "business-manager",
+    "feature-types",
+    "commands",
+    "exports",
+    "hooks",
+    "troubleshooting",
+    "changelog"
+  ]
+}

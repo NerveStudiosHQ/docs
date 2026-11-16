@@ -1,0 +1,141 @@
+---
+title: "Business Manager"
+description: "Create jobs and ranks, set up a business per job, and place, copy, move and delete its features from inside the game."
+---
+
+The Business Manager is where admins build every business on the server. Open it with `/business`. It opens on your own job, or on the list of every job when your job isn't in the list. Only [admins](/nerve_businesses/installation#step-5-give-your-admins-access) can open it.
+
+Every save reaches every player straight away. Nothing needs a restart.
+
+## Picking a business [#picking-a-business]
+
+The switcher in the top bar lists every job on the server, split into jobs that already have a business and jobs that don't, plus **Public** for features no job owns. Search it by name or id, or click **Add job** to make a new job.
+
+The bar under it shows the open job with its feature and rank counts and whether it is listed in your directory app. **Edit job** and **More** hold the job actions.
+
+## Jobs [#jobs]
+
+| Action | What it does |
+| --- | --- |
+| **Add job** | Creates a job with a label and an id (2 to 40 lowercase letters, numbers or underscores). It starts with the rank set in `jobs.firstGrade` |
+| **Edit job** | Changes the label, or the id. Changing the id moves every member, rank and business feature to the new id |
+| **Copy job** | Makes a new job with the same ranks. Turn on **Copy business features too** to copy every placed feature to the new job at the same spots, ready to move |
+| **Delete job** | Removes the job. Its members become unemployed and its business is removed |
+
+On ESX, when your jobs table supports it, a job can also be marked **Whitelisted**, so only admins can give it to players. Jobs made here are real framework jobs, so they show up in every other script that reads jobs, and they survive restarts.
+
+<Callout type="warn">
+
+After renaming a job id, restart other resources that keep their own copy of job names, such as a boss menu or MDT.
+
+</Callout>
+
+With `jobs.society = true`, every new job also gets a business account (on ESX through esx_addonaccount). Renewed-Banking on QBox creates job accounts by itself.
+
+## Ranks [#ranks]
+
+Once a job has a business, its **Ranks** tab lists every rank with its grade and salary.
+
+- **Add rank** asks for a rank id, a label, a salary and whether it is a **Boss rank**.
+- Drag ranks to reorder them. The top rank is grade 0.
+- Deleting a rank moves its members to the lowest rank. A job always keeps at least one rank, and can have up to `jobs.maxGrades`.
+
+Bosses open the boss menu, change menu boards, brand the carry boxes and design products. A player counts as the boss when their rank is a boss rank in the framework, or when the rank's id is listed in `bossGrades` (`boss`, `owner` and `chief` by default).
+
+## Creating the business [#creating-the-business]
+
+A job has no business until you click **Create business**. The business holds the job's placed features, its box branding, its apps settings and its activity log. Deleting a business (under **More**) removes everything placed for it. The job and its ranks stay.
+
+**Public** is always there. Features placed under it belong to no job, for example a public bench, a bus stop seat or a city hall elevator. Supply runs, home delivery and the Product Manager need a business, so they can't be public.
+
+## Placing features [#placing-features]
+
+The **Features** tab lists everything placed for the business in one table, grouped by type. Filter it by category or search it by name.
+
+1. Click **Add feature** and pick a type from the menu. It is grouped by category and can be searched. See [Feature types](/nerve_businesses/feature-types) for what each one does.
+2. Fill in the editor in the side panel: a name, the type's own settings, and **Who can use it**.
+3. Click **Place in world**, or **Use where I stand** to drop it at your feet.
+4. Save. The feature appears for every player at once.
+
+### Who can use it [#who-can-use-it]
+
+Each feature is open to **Everyone**, with or without a job, or locked to one or more jobs, each with its own minimum grade. A feature locked to no job at all can be used by nobody until you pick one. Map blips have **Who sees it** instead.
+
+### Placement controls [#placement-controls]
+
+The Business Manager hides while you place. A marker, or a see-through preview of the ped, prop or vehicle, follows your camera.
+
+| Key | Action |
+| --- | --- |
+| **Arrow left / right** | Rotate |
+| **Arrow up / down** | Raise or lower |
+| **Shift** (held) | Fine steps |
+| **E** | Place |
+| **G** | Switch to the gizmo (props, peds and seats) |
+| **Backspace** or **Esc** | Cancel |
+
+### Precision gizmo [#precision-gizmo]
+
+Props, peds and seats can be set exactly with the gizmo.
+
+| Key | Action |
+| --- | --- |
+| **Left mouse** | Grab a handle |
+| **W** | Move mode |
+| **R** | Rotate mode |
+| **Q** | Switch between world and local axes |
+| **Left Alt** | Snap to the ground |
+| **Right mouse** (held) | Look around |
+| **Enter** | Done |
+| **Backspace** | Cancel |
+
+W, R, Q and the left mouse button can be rebound under **Settings > Key Bindings > FiveM** in game.
+
+### Seats [#seats]
+
+Adding a seat starts placing straight away. Place the first one like any other feature. After each seat, the next one opens in the gizmo at the same spot, so you only nudge it along and press **Enter** to fill a row. Press **Backspace** to stop. Every seat is saved as you place it, open to everyone. Edit a seat afterwards to lock it to a job.
+
+## Managing what is placed [#managing-what-is-placed]
+
+Each row in the table has these actions:
+
+- **Edit** opens the editor. Use **Re-place** in it to move the feature.
+- **Teleport** takes you to the feature.
+- **Copy** puts the feature on a clipboard. Open another business and click **Paste here** to add a copy at the same spot. Job access moves to the new job. A copied delivery point starts with no crafting stations, because stations belong to their own business.
+- **Delete** removes it after you confirm.
+
+Each type's group header also has **Delete all**, which removes every feature of that type from the business at once.
+
+## Activity [#activity]
+
+The **Activity** tab is the business's audit trail: every feature added, edited, moved and deleted, and every change to its box branding, products, menu boards and apps settings, with who did it and when. The same changes go to your [Discord logs](/nerve_businesses/installation#discord-logs) when a webhook is set.
+
+## Apps [#apps]
+
+The **Apps** tab holds three panels:
+
+- **Box branding.** The image, item name, slots and weight of every carry box this business hands out. Leave a field blank for the server default under `boxes`. The boss can change the image and name too, from the box pickup point. Slots and weight are for admins only.
+- **Storefront.** Pick which of the business's crafting stations feed an ordering app. Your phone or app script reads them through the [`Editable.OnStorefrontStations`](/nerve_businesses/hooks#editableonstorefrontstations) hook and the [`GetStation`](/nerve_businesses/exports#getstation) export.
+- **Directory.** Whether the business is listed in your directory or reviews app, and under which category. Turning it off hides it without losing its reviews in that app. Your app script reads it through [`Editable.OnListing`](/nerve_businesses/hooks#editableonlisting) and the [`GetBusiness`](/nerve_businesses/exports#getbusiness) export. The categories come from [`Editable.ListingCategories`](/nerve_businesses/hooks#editablelistingcategories).
+
+## Recipe Manager [#recipe-manager]
+
+Run `/recipecreator` to open the Recipe Manager, or click **New recipe** in a crafting station's editor. A recipe has:
+
+- an id (letters, numbers and underscores),
+- the item it makes,
+- how many can be crafted at once (up to `crafting.maxAmount`),
+- how long each one takes (at least `crafting.minTime` milliseconds),
+- the ingredients used up per craft.
+
+Recipes from `shared/config_recipes.lua` show with a **Config** badge and can't be changed or deleted in game. **Save as in-game copy** makes a copy with the same id that replaces the config recipe.
+
+## Crafting stations without a business [#stations-without-a-business]
+
+Admins can also manage crafting stations outside the Business Manager:
+
+- `/createstation` places a crafting station that belongs to no business. Look where it goes and press **E**, or **Backspace** to cancel, then fill in its editor.
+- `/editstation` and `/deletestation` list every crafting station on the server, searchable by name or id, to edit, teleport to or delete.
+- `/liststations` prints every crafting station to chat with its id, distance and recipe count.
+
+See [Commands](/nerve_businesses/commands).

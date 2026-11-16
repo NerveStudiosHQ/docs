@@ -1,0 +1,410 @@
+---
+title: "Configuration"
+description: "Every option in Nerve Studios Businesses' config files: admins, commissions, carry boxes, products, job garages, supply runs and home delivery."
+---
+
+Server-wide options live in `shared/config.lua`. Mission locations are in `shared/config_locations.lua`, the editors' shortlists in `shared/config_presets.lua` and recipes that always exist in `shared/config_recipes.lua`. Each option has a comment explaining what it does. Restart the resource after changing any of them.
+
+Businesses, jobs, ranks, features, recipes and products are built in game with the [Business Manager](/nerve_businesses/business-manager), not in these files.
+
+## Change these first [#change-these-first]
+
+- **`admin`** decides who opens the Business Manager: the ACE permission, framework `groups` and single `identifiers`. See [admin access](/nerve_businesses/installation#step-5-give-your-admins-access).
+- **`bossGrades`** lists rank ids that count as the boss on top of the framework's own boss flag. Bosses design products, brand boxes and change menu boards.
+- **`imageHosts`** lists the hosts that image links for boxes, products and menu boards may come from. Add the host your community uploads to.
+- **`registers.commission`** is the percent of every register charge paid to the business account. Each register can set its own.
+- **`shops.payBusiness`** decides whether shop takings go to the business account.
+- **`boxes`** sets the carry box item, its default slots and weight, how many times it opens before it wears out, and what can never go in it. With `recipeOnly = true`, boxes only hold items some recipe makes.
+- **`products.baseItems`** maps each product type to the item that carries it. Keep these in step with the items in `ox_inventory/data/items.lua`. **`products.allowedIngredients`** limits what bosses may put in a product.
+- **`supply`** and **`delivery`** set the van, fees, cooldowns, who pays and who is paid. `delivery.payTo = 'business'` pays deliveries into the business account instead of the employee.
+- **`ui.accent`** is the accent colour of every screen, as a hex code.
+
+## Mission locations [#mission-locations]
+
+`shared/config_locations.lua` lists where supply vans collect stock (`supplyPickups`), where delivery customers wait (`deliveryDrops`) and which ped models they can be (`deliveryPeds`). One is picked at random for each run or order. Add spots that suit your map.
+
+## Editor shortlists [#editor-shortlists]
+
+`shared/config_presets.lua` holds the choices offered in the editors: crafting animations, blip icons and colours, ped models and what peds do, props and job garage vehicles. Admins can still type any model, scenario or animation that isn't listed.
+
+## Recipes in the config [#recipes-in-the-config]
+
+`shared/config_recipes.lua` lists recipes that always exist. They show in the Recipe Manager as read-only and can't be deleted in game. A recipe made in game with the same id replaces one from the file:
+
+```lua
+['sandwich'] = {
+    item = 'sandwich',
+    label = 'Sandwich',
+    maxAmount = 5,
+    time = 5000,
+    ingredients = {
+        { item = 'bread', amount = 2 },
+        { item = 'water', amount = 1 },
+    },
+},
+```
+
+## All options [#all-options]
+
+{/* nerve:config:start */}
+{/* Generated from the script's config files. Edit those, not this block. */}
+
+### `shared/config.lua` [#config]
+
+```lua title="shared/config.lua"
+local locations = lib.load('shared.config_locations') -- Mission locations: listed in shared/config_locations.lua
+
+return {
+    debug = false, -- Print verbose console logs for troubleshooting (leave off on a live server)
+
+    -- Menu look
+    ui = {
+        accent = '#a855f7',    -- Highlight colour of every menu (hex). Set '#ffffff' for a monochrome look
+    },
+
+    -- Who counts as an admin. Admins open the Business Manager, the Recipe Manager and the station commands.
+    admin = {
+        ace = 'nerve_businesses.admin', -- ACE permission that grants admin (add_ace group.admin nerve_businesses.admin allow)
+        groups = { 'god', 'superadmin', 'admin' }, -- Framework groups that count as admin (ESX groups, or ACE groups on QBox)
+        identifiers = {                -- Specific players, by any identifier they carry, with its prefix
+            -- 'license:abc1234567890abcdef1234567890abcdef12345678',
+            -- 'discord:123456789012345678',
+        },
+    },
+
+    -- Grade names that count as the boss of a business, on top of the framework's own boss flag
+    bossGrades = { 'boss', 'owner', 'chief' },
+
+    -- Commands (set any to false to disable it)
+    commands = {
+        manager = 'business',          -- Opens the Business Manager (admin)
+        recipes = 'recipecreator',     -- Opens the Recipe Manager (admin)
+        createStation = 'createstation', -- Starts placing a crafting station that belongs to no business (admin)
+        editStation = 'editstation',   -- Lists every crafting station to edit (admin)
+        deleteStation = 'deletestation', -- Lists every crafting station to delete (admin)
+        listStations = 'liststations', -- Prints every crafting station to chat (admin)
+    },
+
+    -- Hosts any player-supplied image URL may come from: box branding, products and menu boards
+    imageHosts = {
+        'r2.fivemanage.com',
+        'i.imgur.com',
+        'cdn.discordapp.com',
+    },
+
+    -- New jobs made in the Business Manager
+    jobs = {
+        firstGrade = { name = 'employee', label = 'Employee', salary = 50 }, -- Rank every new job starts with
+        maxGrades = 20,                -- Most ranks a job may have
+        society = true,                -- Register a business account for new jobs (esx_addonaccount on ESX)
+    },
+
+    -- Default interaction distance for features that do not set their own (metres)
+    interactDistance = 2.0,
+
+    -- Distance at which placed peds, props and seats appear for a player (metres)
+    streamDistance = 60.0,
+
+    -- Stashes. Slots and weight apply to every stash of that kind; a feature can set its own max weight.
+    stashes = {
+        trays    = { slots = 10, weight = 10000 },  -- Public counters anyone can use
+        storage  = { slots = 50, weight = 100000 }, -- Job-locked storage
+        trashcans = { slots = 10, weight = 50000, clearAfter = 60 }, -- Empties this many seconds after the last person closes it
+        freezer  = { slots = 50, weight = 100000 }, -- Job-locked storage where food stops going off
+        lockers  = { slots = 50, weight = 100000 }, -- Private per-character storage
+    },
+
+    -- Branded portable boxes. Each business can set its own image, label, slots and weight in the Business Manager.
+    boxes = {
+        item = 'business_box',         -- Item handed out at a box pickup point (add it to ox_inventory, see README)
+        slots = 5,                     -- Default slots per box
+        weight = 50000,                -- Default max weight per box (grams)
+        uses = 10,                     -- Times a box can be opened before it is used up (0 = unlimited)
+        image = 'business_box.png',    -- Default inventory image, from ox_inventory/web/images
+        label = 'Business Box',        -- Default item label
+        description = 'A portable storage box.', -- Default item description
+        blacklist = { 'money', 'black_money' }, -- Items that can never go in a box
+        blacklistPrefixes = { 'WEAPON_', 'ammo-' }, -- Item names starting with these can never go in a box
+        recipeOnly = true,             -- Only items that have a crafting recipe may go in a box
+    },
+
+    -- Cash registers
+    registers = {
+        customerDistance = 5.0,        -- How close a customer must be to be charged (metres)
+        commission = 30,               -- Percent of each charge paid to the business account; the rest goes to the worker
+        maxCharge = 100000,            -- Highest amount a worker can charge at once
+        maxTip = 10000,                -- Highest tip a customer can add
+        expiry = 60,                   -- Seconds a customer has to answer a payment request
+    },
+
+    -- Shops
+    shops = {
+        payBusiness = true,            -- Shop takings go to the business account (false = the money just leaves the player)
+        maxItems = 50,                 -- Most items one shop may list
+    },
+
+    -- Crafting
+    crafting = {
+        compact = false,               -- Smaller crafting menu with the recipe list only
+        minTime = 100,                 -- Shortest craft time a recipe can have (milliseconds)
+        maxAmount = 50,                -- Highest "max amount" a recipe can allow per craft
+        skillCheck = {
+            enabled = true,            -- Stations with a skill check chance run ox_lib's skill check
+            difficulty = { 'easy', 'easy' }, -- ox_lib skill check stages
+            keys = { 'e' },            -- Keys the skill check uses
+            defaultChance = 25,        -- Skill check chance (%) new stations start with
+        },
+    },
+
+    -- Products bosses design at a Product Manager point
+    products = {
+        enabled = true,                -- false hides the Product Manager everywhere
+        maxPerBusiness = 25,           -- Most products one business may have
+        baseItems = {                  -- Product type → the item that carries it (add these to ox_inventory, see README)
+            drink   = 'business_drink',
+            food    = 'business_food',
+            joint   = 'business_joint',
+            alcohol = 'business_alcohol',
+        },
+        allowedIngredients = { 'water', 'sugar', 'chocolate', 'milk', 'ice' }, -- Items bosses may use (empty = any item not blacklisted)
+        ingredientBlacklist = { 'money', 'black_money' }, -- Items bosses may never use
+        maxIngredients = 6,            -- Most different ingredients per product
+        maxIngredientAmount = 20,      -- Most of one ingredient per product
+        craftTime = 5000,              -- Time to craft one product (milliseconds)
+        maxAmount = 5,                 -- Most products crafted at once
+    },
+
+    -- Job garages
+    jobGarages = {
+        blockedRadius = 3.0,           -- A vehicle within this distance of the spawn pad blocks spawning (metres)
+        platePrefix = 'JOB',           -- Plate prefix for job vehicles (up to 4 characters)
+        previewModel = 'buffalo',      -- Ghost vehicle shown while placing the spawn pad
+        cooldown = 5,                  -- Seconds between spawning or returning vehicles
+        maxActive = 5,                 -- Most job vehicles one player can have out at once
+        returnDistance = 15.0,         -- How close the vehicle must be to the garage to be returned (metres)
+    },
+
+    -- Garage points (open your garage script, see editable.lua)
+    garages = {
+        radius = 5.0,                  -- Default zone size (metres)
+    },
+
+    -- Clothing points
+    clothing = {
+        radius = 2.0,                  -- Default zone size (metres)
+    },
+
+    -- Duty points
+    duty = {
+        event = '',                    -- Extra event fired on the server after a duty change, with (source, onDuty, job). Empty = none
+        notify = true,                 -- Tell the player their new duty state
+    },
+
+    -- Supply runs
+    supply = {
+        vehicle = 'rumpo2',            -- Van model
+        cooldown = 5,                  -- Minutes between supply runs per business (0 = no cooldown)
+        maxQuantity = 500,             -- Most of one item per order
+        abandonAfter = 120,            -- Seconds away from the van before the run is cancelled
+        serviceFee = 25,               -- Percent added on top of the item prices
+        employeeAccount = 'cash',      -- Account an employee pays from when not using the business account ('cash' or 'bank')
+        businessPayBossOnly = true,    -- Only bosses may charge a supply run to the business account (false = any employee)
+        pickups = locations.supplyPickups, -- Supplier locations: listed in shared/config_locations.lua
+    },
+
+    -- Home delivery
+    delivery = {
+        cooldown = 60,                 -- Seconds a player waits between deliveries
+        maxPerBusiness = 2,            -- Most active deliveries one business can have at once
+        handoverDistance = 3.0,        -- How close to the customer the order must be handed over (metres)
+        pedDistance = 30.0,            -- Distance at which the customer appears (metres)
+        payTo = 'employee',            -- Who is paid: 'employee' or 'business'
+        employeeAccount = 'cash',      -- Account the employee is paid into ('cash' or 'bank')
+        pedModels = locations.deliveryPeds, -- Customer models: listed in shared/config_locations.lua
+        destinations = locations.deliveryDrops, -- Drop-off points: listed in shared/config_locations.lua
+    },
+
+    -- Choices offered in the editors: listed in shared/config_presets.lua
+    presets = lib.load('shared.config_presets'),
+
+    -- Recipes that always exist and cannot be deleted in game: listed in shared/config_recipes.lua
+    recipes = lib.load('shared.config_recipes'),
+}
+```
+
+### `shared/config_locations.lua` [#config-locations]
+
+```lua title="shared/config_locations.lua"
+-- World locations used by missions. Read by config.lua:
+--   supply.pickups       → supplyPickups
+--   delivery.destinations → deliveryDrops
+--   delivery.pedModels   → deliveryPeds
+--
+-- supplyPickups: where a supply van collects goods. One is picked at random per run.
+--   { coords = vec3(x, y, z), heading = 0.0 }
+-- deliveryDrops: where home delivery customers wait. One is picked at random per order.
+--   vec4(x, y, z, heading)
+-- deliveryPeds: ped models a delivery customer can be. One is picked at random per order.
+
+return {
+    supplyPickups = {
+        { coords = vec3(89.71, -1745.66, 29.52), heading = 140.0 },
+        { coords = vec3(-439.34, 295.14, 82.43), heading = 140.0 },
+    },
+
+    deliveryDrops = {
+        vec4(-685.96, 223.25, 81.95, 25.51),
+        vec4(-47.64, -585.97, 37.94, 65.20),
+        vec4(168.65, -567.38, 43.87, 79.37),
+        vec4(920.78, -238.55, 70.16, 144.57),
+        vec4(996.99, -729.47, 57.81, 314.65),
+        vec4(758.06, -1332.22, 27.27, 184.25),
+        vec4(478.97, -107.31, 63.15, 155.91),
+        vec4(-60.32, 25.05, 72.21, 300.47),
+    },
+
+    deliveryPeds = {
+        'a_m_y_business_01',
+        'a_f_y_business_01',
+        'a_m_y_hipster_01',
+        'a_f_y_hipster_01',
+        'a_m_m_business_01',
+    },
+}
+```
+
+### `shared/config_presets.lua` [#config-presets]
+
+```lua title="shared/config_presets.lua"
+-- Choices offered in the Business Manager's editors. Read by config.lua at `presets`.
+-- Admins can still type any custom model or animation; these are the shortlists.
+--
+-- animations: crafting animations a station can play
+--   { id = 'unique_id', label = 'Shown in menus', dict = 'anim dict', clip = 'anim name', flag = 49 }
+--   { id = 'unique_id', label = '...', scenario = 'WORLD_HUMAN_...' }
+--   particles = 'bbq' adds grill smoke while crafting (optional)
+-- blipSprites: { label = '...', sprite = 1 }   (ids: https://docs.fivem.net/docs/game-references/blips/)
+-- blipColors:  { label = '...', color = 0 }
+-- pedModels:   { label = '...', model = 'ped_model' }
+-- pedScenarios: what a placed ped does
+--   { id = 'unique_id', label = '...', scenario = 'WORLD_HUMAN_...' }
+--   { id = 'unique_id', label = '...', dict = 'anim dict', clip = 'anim name' }
+--   { id = 'none', label = '...' } stands still
+-- props: prop models offered in the prop picker
+-- vehicles: vehicle models suggested in the job garage editor { label = '...', model = 'spawncode' }
+
+return {
+    animations = {
+        { id = 'wall_crafting', label = 'Wall crafting', dict = 'anim@amb@clubhouse@tutorial@bkr_tut_ig3@', clip = 'machinic_loop_mechandplayer', flag = 49 },
+        { id = 'repair_bench', label = 'Repair bench', dict = 'mini@repair', clip = 'fixing_a_player', flag = 49 },
+        { id = 'welding', label = 'Welding', scenario = 'WORLD_HUMAN_WELDING' },
+        { id = 'bbq', label = 'Grill', dict = 'amb@prop_human_bbq@male@idle_a', clip = 'idle_b', flag = 49, particles = 'bbq' },
+        { id = 'bin', label = 'Rummaging', scenario = 'PROP_HUMAN_BUM_BIN' },
+        { id = 'give_take', label = 'Hand over', dict = 'mp_common', clip = 'givetake1_a', flag = 49 },
+        { id = 'pointing', label = 'Pointing', dict = 'gestures@f@standing@casual', clip = 'gesture_point', flag = 49 },
+    },
+
+    blipSprites = {
+        { label = 'Hammer', sprite = 89 },
+        { label = 'Garage', sprite = 357 },
+        { label = 'Warehouse', sprite = 473 },
+        { label = 'Factory', sprite = 566 },
+        { label = 'Crate', sprite = 478 },
+        { label = 'Food', sprite = 106 },
+        { label = 'Bar', sprite = 93 },
+        { label = 'Shop', sprite = 52 },
+    },
+
+    blipColors = {
+        { label = 'White', color = 0 },
+        { label = 'Red', color = 1 },
+        { label = 'Green', color = 2 },
+        { label = 'Blue', color = 3 },
+        { label = 'Yellow', color = 5 },
+        { label = 'Orange', color = 17 },
+        { label = 'Purple', color = 27 },
+        { label = 'Pink', color = 48 },
+    },
+
+    pedModels = {
+        { label = 'Warehouse mechanic', model = 'mp_m_waremech_01' },
+        { label = 'Weapon worker', model = 'mp_m_weapwork_01' },
+        { label = 'Weed worker', model = 'mp_m_weed_01' },
+        { label = 'Shopkeeper', model = 'mp_m_shopkeep_01' },
+        { label = 'Line cook', model = 's_m_m_linecook' },
+        { label = 'Police officer', model = 's_m_y_cop_01' },
+        { label = 'Hillbilly', model = 'a_m_m_hillbilly_01' },
+    },
+
+    pedScenarios = {
+        { id = 'none', label = 'Standing still' },
+        { id = 'couch', label = 'Sitting on a couch', dict = 'timetable@ron@ig_3_couch', clip = 'base' },
+        { id = 'bbq', label = 'Grilling', dict = 'amb@prop_human_bbq@male@idle_a', clip = 'idle_b' },
+        { id = 'bin', label = 'Rummaging', scenario = 'PROP_HUMAN_BUM_BIN' },
+        { id = 'atm', label = 'Using an ATM', scenario = 'PROP_HUMAN_ATM' },
+        { id = 'clipboard', label = 'Clipboard', scenario = 'WORLD_HUMAN_CLIPBOARD' },
+        { id = 'repair', label = 'Repairing', dict = 'mini@repair', clip = 'fixing_a_ped' },
+        { id = 'guard', label = 'Standing guard', scenario = 'WORLD_HUMAN_GUARD_STAND' },
+        { id = 'smoking', label = 'Smoking', scenario = 'WORLD_HUMAN_SMOKING' },
+        { id = 'dealer', label = 'Leaning', scenario = 'WORLD_HUMAN_DRUG_DEALER' },
+        { id = 'coffee', label = 'Drinking coffee', scenario = 'WORLD_HUMAN_AA_COFFEE' },
+    },
+
+    props = {
+        'gr_prop_gr_bench_03a',
+        'prop_atm_01',
+        'prop_fleeca_atm',
+        'prop_food_bs_tray_01',
+        'prop_food_tray_01',
+        'p_till_01_s',
+        'prop_till_03',
+        'xm_prop_x17_computer_01',
+        'prop_off_chair_01',
+        'prop_off_chair_04',
+        'prop_off_chair_05',
+        'prop_b_board_blank',
+        'prop_tv_flat_michael',
+        'hei_heist_kit_bin_01',
+    },
+
+    vehicles = {
+        { label = 'Rumpo', model = 'rumpo' },
+        { label = 'Speedo', model = 'speedo' },
+        { label = 'Burrito', model = 'burrito3' },
+        { label = 'Faggio', model = 'faggio' },
+    },
+}
+```
+
+### `shared/config_recipes.lua` [#config-recipes]
+
+```lua title="shared/config_recipes.lua"
+-- Recipes that always exist. Read by config.lua at `recipes`.
+-- They show in the Recipe Manager marked read-only and cannot be deleted in
+-- game. A recipe made in game with the same id replaces one of these.
+--
+-- One entry, keyed by a recipe id (letters, numbers and underscores):
+--   ['recipe_id'] = {
+--       item = 'item_name',      -- Item crafted (required)
+--       label = 'Custom Label',  -- Name shown in menus (optional, defaults to the item's label)
+--       maxAmount = 5,           -- Most crafted at once (optional, default 1)
+--       time = 5000,             -- Milliseconds to craft one (optional, default 5000)
+--       ingredients = {          -- Items used up per craft (required)
+--           { item = 'ingredient', amount = 2 },
+--       },
+--   },
+
+return {
+    -- ['sandwich'] = {
+    --     item = 'sandwich',
+    --     label = 'Sandwich',
+    --     maxAmount = 5,
+    --     time = 5000,
+    --     ingredients = {
+    --         { item = 'bread', amount = 2 },
+    --         { item = 'water', amount = 1 },
+    --     },
+    -- },
+}
+```
+{/* nerve:config:end */}

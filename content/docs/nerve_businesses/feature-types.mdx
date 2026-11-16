@@ -1,0 +1,123 @@
+---
+title: "Feature types"
+description: "The 23 kinds of feature you can place for a business in Nerve Studios Businesses, and how players use each one."
+---
+
+Every feature is placed from the [Business Manager](/nerve_businesses/business-manager#placing-features). Each one has a name, a spot in the world, an optional reach (0.5 to 15 metres, `interactDistance` by default) and a rule for [who can use it](/nerve_businesses/business-manager#who-can-use-it). Players use them through ox_target.
+
+| Category | Types |
+| --- | --- |
+| Storage | Trays, storage, trash cans, freezers, personal lockers, box pickups |
+| Commerce | Registers, shops, supply runs, home delivery |
+| Production | Crafting stations, Product Manager |
+| Services | Boss menus, clothing, garages, menu boards, duty points |
+| Vehicles | Job garages |
+| World | Peds, props, seats, map blips |
+| Navigation | Elevators |
+
+## Storage [#storage]
+
+Every storage feature is an ox_inventory stash. Its slots and weight come from `stashes` in `shared/config.lua`, and each feature can set its own max weight.
+
+- **Trays.** Counters for passing items across, usually open to everyone.
+- **Storage.** Shelves and stockrooms for the jobs you pick.
+- **Trash cans.** Empty themselves `stashes.trashcans.clearAfter` seconds (60 by default) after the last person closes them.
+- **Freezers.** Storage where food stops going off. An item that expires in ox_inventory keeps its freshness while it sits in a freezer, and starts ageing again from the same point when it comes out.
+- **Personal lockers.** Every character gets their own private copy of the same locker.
+- **Box pickups.** **Take box** hands out a branded carry box, see [Carry boxes](#carry-boxes).
+
+### Carry boxes [#carry-boxes]
+
+A carry box is the `business_box` item with the business's own image, name, slots and weight. Using it opens its own small stash.
+
+- Set the branding in the Business Manager's [Apps](/nerve_businesses/business-manager#apps) tab. The boss can change the image and name at the pickup point with **Edit box**.
+- A box can be opened `boxes.uses` times (10 by default, 0 for unlimited). When it wears out, its contents go to the player's pockets, and anything that doesn't fit is dropped at their feet.
+- Money, weapons, ammo and other boxes can never go in a box (`boxes.blacklist` and `boxes.blacklistPrefixes`). With `boxes.recipeOnly = true`, only items some crafting recipe makes are allowed.
+- Items packed in a box count towards a [home delivery](#home-delivery) order.
+
+## Commerce [#commerce]
+
+### Registers [#registers]
+
+1. An employee chooses **Use register**, picks a customer standing within `registers.customerDistance` metres and enters an amount.
+2. The customer gets a payment request, adds a tip if they like and pays by **Cash** or **Card** (bank), or declines. The request expires after `registers.expiry` seconds.
+3. The business takes its commission (`registers.commission` percent, or the register's own **Business commission**) into its business account. The employee gets the rest and every tip in cash.
+
+If the business has no business account, the employee keeps the whole charge.
+
+### Shops [#shops]
+
+An ox_inventory shop with the items and prices you list, up to `shops.maxItems`. With `shops.payBusiness = true`, the takings go to the business account.
+
+### Supply runs [#supply-runs]
+
+1. An employee opens the supply point and orders stock from the items and prices you set. A `supply.serviceFee` percent fee is added.
+2. They pay personally (from `supply.employeeAccount`), or from the business account. With `supply.businessPayBossOnly = true`, only the boss can charge the business.
+3. A van (`supply.vehicle`) spawns at the van spot with its keys. They drive to the supplier marked on the map, **Collect supplies**, **Load supplies** into the van and drive back.
+4. At the supply point, with the van within 40 metres, **Deliver supplies** hands over the stock.
+
+Leaving the van for `supply.abandonAfter` seconds cancels the run. A cancelled run is not refunded. Each business waits `supply.cooldown` minutes between runs. Supplier locations are listed in `shared/config_locations.lua`.
+
+### Home delivery [#home-delivery]
+
+1. An employee chooses **Start home delivery**. An order is rolled from what the delivery point's crafting stations make, with a random number of items and of each item, within the ranges you set.
+2. They gather the items. Items packed in a carry box count. A checklist shows what is still missing.
+3. Back at the delivery point, **Check in the order**.
+4. They drive to the customer marked on the map and **Hand over the order**. The items are taken and the payout is made: the pay per item times the number of items.
+
+`delivery.payTo` decides whether the employee or the business is paid. Each business runs at most `delivery.maxPerBusiness` deliveries at once, and each character waits `delivery.cooldown` seconds between them. Customer spots and models are listed in `shared/config_locations.lua`. Products are never part of an order.
+
+## Production [#production]
+
+### Crafting stations [#crafting-stations]
+
+A station crafts the recipes you pick for it, plus any products the boss assigns to it. The crafting menu shows each recipe, its materials, and what the player carries.
+
+- **Skill check chance.** The chance, in percent, that a craft runs ox_lib's skill check. Its difficulty and keys are set under `crafting.skillCheck`.
+- **Use up materials on a failed check.** When off, a failed skill check keeps the materials.
+- **Animation.** One of the animations in `shared/config_presets.lua`. The grill adds smoke while crafting.
+
+Recipes are made in the [Recipe Manager](/nerve_businesses/business-manager#recipe-manager) or listed in `shared/config_recipes.lua`. Every craft calls the [`Editable.OnCrafted`](/nerve_businesses/hooks#editableoncrafted) hook.
+
+### Product Manager [#product-manager]
+
+The boss chooses **Manage products** here to design the business's own menu: a name, a description, an image, a type (drink, food, joint or alcohol), the ingredients and the crafting stations that make it.
+
+- Each product is crafted as the type's carrier item from `products.baseItems`, showing the product's own name, description and image.
+- Ingredients come from `products.allowedIngredients`, or any item not in `products.ingredientBlacklist` when that list is empty.
+- A business can have up to `products.maxPerBusiness` products. Set `products.enabled = false` to turn products off everywhere.
+
+## Services [#services]
+
+- **Boss menus.** Open your boss menu script for the business's job. qbx_management, esx_society and wasabi_multijob work out of the box. Set another in [`Editable.OpenBossMenu`](/nerve_businesses/hooks#client-hooks).
+- **Clothing.** Changing rooms. illenium-appearance, fivem-appearance and esx_skin work out of the box.
+- **Garages.** Open your garage script, and **Park vehicle** from inside a vehicle. The garage id you set is passed to it. jg-advancedgarages and cd_garage work out of the box.
+- **Menu boards.** Anyone can view the menu image. The boss can change it with **Change menu image**, using an image link from `imageHosts`.
+- **Duty points.** **Clock in / out** toggles the player's duty in the framework, then calls [`Editable.OnDuty`](/nerve_businesses/hooks#editableonduty) and the optional server event in `duty.event`.
+
+## Vehicles [#vehicles]
+
+### Job garages [#job-garages]
+
+Players take out work vehicles from a list you set (model and label), at a zone, a ped or a prop.
+
+- The vehicle spawns on the spawn pad you place, if nothing is within `jobGarages.blockedRadius` metres of it.
+- The player gets the keys and a full tank. Plates start with `jobGarages.platePrefix`.
+- **Return vehicle** works within `jobGarages.returnDistance` metres of the garage or its pad, and takes the keys back.
+- One vehicle per garage per player, unless you turn on **Allow more than one vehicle out**. Never more than `jobGarages.maxActive` at once.
+- Job vehicles are removed when their player leaves the server.
+
+## World [#world]
+
+- **Peds.** A ped model standing still or playing a scenario or animation. Pick from `shared/config_presets.lua` or type any model.
+- **Props.** Any prop model, placed with the [gizmo](/nerve_businesses/business-manager#precision-gizmo) if you need it exact.
+- **Seats.** Players choose **Sit** and press **X** to stand up. See [placing seats](/nerve_businesses/business-manager#seats).
+- **Map blips.** An icon, colour and size. Shown on everyone's map, or only to the jobs you pick.
+
+Peds, props and seats only exist for players within `streamDistance` metres.
+
+## Navigation [#navigation]
+
+### Elevators [#elevators]
+
+An elevator is a list of floors, each with a name, a spot and its own access rule. A player standing at any floor chooses **Use** followed by the elevator's name and picks where to go. Floors they can't use are shown but locked.

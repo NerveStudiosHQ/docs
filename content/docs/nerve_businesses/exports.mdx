@@ -1,0 +1,120 @@
+---
+title: "Exports"
+description: "Server exports that let your phone, MDT and other scripts read businesses, placed features, crafting stations, recipes and products from Nerve Studios Businesses."
+---
+
+Your other scripts can read every business and what is placed for it. All exports are **server side**: call them from a server script. Everything they return is a copy, so changing it changes nothing in the script.
+
+| Export | Returns |
+| --- | --- |
+| `GetBusiness(job)` | The business of a job, or `nil` |
+| `GetBusinesses()` | Every business |
+| `GetFeatures(job, type?)` | The business's placed features, optionally of one type |
+| `GetStation(id)` | A crafting station with everything it can craft, or `nil` |
+| `GetRecipes()` | Every recipe |
+| `GetProducts(job)` | The business's products |
+| `IsBoss(source, job)` | `true` when the player is the boss of the job |
+| `IsAdmin(source)` | `true` when the player can use the Business Manager |
+
+## GetBusiness [#getbusiness]
+
+```lua
+local business = exports.nerve_businesses:GetBusiness('beanmachine')
+```
+
+Returns `nil` when the job has no business. Otherwise a table with:
+
+- `id`: the business's number.
+- `job`: the job id.
+- `label`: the business's name.
+- `box`: its carry box branding, `{ image, label, slots, weight }`. Fields left blank in the manager are `nil`, and the server defaults under `boxes` apply.
+- `listing`: its directory listing, `{ listed, category }`.
+- `storefront`: the ids of the crafting stations picked for its ordering app.
+
+```lua
+-- In a directory app: list every business that is listed
+for _, business in ipairs(exports.nerve_businesses:GetBusinesses()) do
+    if business.listing.listed then
+        print(business.label, business.listing.category)
+    end
+end
+```
+
+`GetBusinesses()` returns a list of the same tables, one per business.
+
+## GetFeatures [#getfeatures]
+
+```lua
+local registers = exports.nerve_businesses:GetFeatures('beanmachine', 'registers')
+```
+
+Returns a list of the business's placed features, or an empty list when the job has no business. Leave out the type for every feature. Each feature has:
+
+- `id`, `type` and `label`.
+- `job`: the job that owns it.
+- `coords`: `{ x, y, z, w }`, where `w` is the heading.
+- `radius`: its reach, or `nil` for the default.
+- `access`: who can use it, `{ public = true }` or `{ public = false, jobs = { [job] = minimumGrade } }`.
+- `data`: the type's own settings from its editor.
+
+The type names are `trays`, `storage`, `trashcans`, `freezer`, `lockers`, `boxes`, `registers`, `shops`, `supplyrun`, `delivery`, `crafting`, `products`, `bossmenus`, `clothing`, `garages`, `menus`, `duty`, `vehiclespawners`, `peds`, `props`, `seats`, `blip` and `elevators`.
+
+## GetStation [#getstation]
+
+```lua
+local station = exports.nerve_businesses:GetStation(12)
+```
+
+Returns a crafting station by its id, the number shown by `/liststations` and in the station lists, or `nil` when no crafting station has that id. It has the same fields as a feature, plus `entries`: everything the station can craft, its recipes and the products assigned to it. Each entry has:
+
+- `id`: the recipe id, or `product:<number>` for a product.
+- `item`: the item it makes.
+- `label`: its name.
+- `maxAmount`: how many can be crafted at once.
+- `time`: milliseconds to craft one.
+- `ingredients`: a list of `{ item, amount }`.
+- `product`: `true` for a product, which also has `image` and `metadata` (the name, description and image the crafted item carries).
+
+Use it with the business's `storefront` list to build an ordering app:
+
+```lua
+local business = exports.nerve_businesses:GetBusiness('beanmachine')
+for _, stationId in ipairs(business.storefront) do
+    local station = exports.nerve_businesses:GetStation(stationId)
+    if station then
+        for _, entry in ipairs(station.entries) do
+            print(entry.label, entry.item)
+        end
+    end
+end
+```
+
+## GetRecipes [#getrecipes]
+
+```lua
+local recipes = exports.nerve_businesses:GetRecipes()
+```
+
+Every recipe, from `shared/config_recipes.lua` and from the Recipe Manager, sorted by name. Each has `id`, `item`, `label`, `maxAmount`, `time`, `ingredients` and `config` (`true` when it comes from the config file).
+
+## GetProducts [#getproducts]
+
+```lua
+local products = exports.nerve_businesses:GetProducts('beanmachine')
+```
+
+The products the boss designed, or an empty list when the job has no business. Each has `id`, `name`, `description`, `image`, `type` (`drink`, `food`, `joint` or `alcohol`), `ingredients` (a list of `{ item, amount }`) and `stations` (the ids of the crafting stations that make it).
+
+## IsBoss and IsAdmin [#isboss-and-isadmin]
+
+```lua
+if exports.nerve_businesses:IsBoss(source, 'beanmachine') then
+    -- show the owner's options
+end
+
+if exports.nerve_businesses:IsAdmin(source) then
+    -- show the admin's options
+end
+```
+
+`IsBoss` is `true` when the player has that job on a boss rank: a boss rank in the framework, or a rank listed in `bossGrades`. `IsAdmin` uses the same rules as the Business Manager: the ACE permission, `admin.groups` or `admin.identifiers`.

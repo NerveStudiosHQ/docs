@@ -1,0 +1,81 @@
+---
+title: "Overview"
+description: "Nerve Studios Businesses: build every business on your server from inside the game, with jobs, ranks and 23 kinds of placeable feature, live and without restarts."
+---
+
+Nerve Studios Businesses lets you build every business on your server from inside the game. Create the job and its ranks, then place registers, storage, crafting stations, shops, supply runs, home delivery, job garages, peds, props, seats, blips, elevators and more. Everything appears for every player the moment you save it, with no config edits and no restarts.
+
+It runs on ESX and QBox. Every screen ships ready to use, with no build step.
+
+<Cards>
+  <Card title="Installation" icon="Rocket" href="/nerve_businesses/installation">
+    Items, admin access and first start
+  </Card>
+  <Card title="Business Manager" icon="LayoutDashboard" href="/nerve_businesses/business-manager">
+    Jobs, ranks, businesses and placing features
+  </Card>
+  <Card title="Feature types" icon="Shapes" href="/nerve_businesses/feature-types">
+    What each of the 23 features does in play
+  </Card>
+  <Card title="Configuration" icon="Settings" href="/nerve_businesses/configuration">
+    Admins, commissions, boxes, missions and limits
+  </Card>
+  <Card title="Exports" icon="Code" href="/nerve_businesses/exports">
+    Read businesses, stations and products from your scripts
+  </Card>
+  <Card title="Hooks" icon="Plug" href="/nerve_businesses/hooks">
+    Your notify, target, banking, keys, garages and logs
+  </Card>
+</Cards>
+
+## Features
+
+- **Business Manager for admins.** Every job on the server, with create, rename, copy and delete, a rank editor with salaries and drag to reorder, and one business per job.
+- **23 kinds of feature** to place for a business, or as public features no job owns. Each one is open to everyone or locked to one or more jobs, with a minimum rank per job.
+- **Live placement** with a marker that follows your camera, arrow keys for rotation and height, ghost previews of peds, props and vehicles, and a precision gizmo for props, peds and seats. Seats keep coming after each one you place, so a row of chairs takes seconds.
+- **Copy, move and clean up.** Copy any feature into another business, teleport to it, move it, or delete every feature of one kind at once. Every change reaches every player straight away.
+- **Storage:** public trays, job storage, trash cans that empty themselves, freezers that stop food going off, private personal lockers, and branded carry boxes with the business's own image and name.
+- **Cash registers.** The employee picks a nearby customer and an amount. The customer adds a tip and pays by cash or card. The business takes a commission, and the employee keeps the rest and every tip.
+- **Shops** with their takings paid to the business.
+- **Crafting stations** with recipes made in game, skill checks and animations (including a grill with smoke), plus a Recipe Manager.
+- **Product Manager.** The boss designs the business's own products, with a name, description, image and ingredients, and picks which stations make them.
+- **Supply runs.** Order stock, pay personally or from the business, drive the van to the supplier, load it and bring it back.
+- **Home delivery.** Orders rolled from what the business's stations make, a live checklist, a customer waiting across town and the payout on handover. Items packed in a business box count.
+- **Job garages** with a vehicle list, a spawn pad that must be clear, keys handed over and taken back, and a limit per player.
+- **Services:** boss menus, clothing points, garages, menu boards the boss can change, duty points and multi-floor elevators with access per floor.
+- **Activity log** per business, Discord logs per category, and [exports](/nerve_businesses/exports) and [hooks](/nerve_businesses/hooks) for your own scripts.
+- **Your accent colour** on every screen, with large, clear text that scales from 720p to 4K.
+- **Translatable.** Every player-facing text is in the locale file.
+
+## How it plays
+
+1. An admin runs `/business`, creates a job (or picks an existing one), adds its ranks and creates its business.
+2. They pick a feature type, fill in its editor and place it in the world. It appears for every player at once.
+3. Employees use what was placed with ox_target: they craft, charge customers, restock with supply runs, run deliveries and take out job vehicles.
+4. The boss designs products, brands the carry boxes and changes the menu boards.
+5. Every change to a business lands in its activity log.
+
+## Requirements
+
+| Requirement | Notes |
+| --- | --- |
+| ESX Legacy or QBox | Jobs, ranks, money and duty |
+| [ox_lib](https://github.com/overextended/ox_lib/releases) | Menus, progress bars, skill checks and language |
+| [oxmysql](https://github.com/overextended/oxmysql/releases) | Stores businesses, features, recipes and products |
+| [ox_inventory](https://github.com/overextended/ox_inventory/releases) | Stashes, shops, boxes and crafted items |
+| [ox_target](https://github.com/overextended/ox_target/releases) | Interacting with everything placed. Another target script can be set in `shared/editable.lua` |
+| esx_addonaccount (ESX) or Renewed-Banking (QBox) | Optional. Business accounts for commissions, shop takings and supply runs. Another banking script can be set in `shared/editable.lua` |
+| OneSync | Required |
+
+The database tables are created on the first start. There is no SQL to import by hand.
+
+## Performance
+
+- The console stays silent unless `debug = true`, apart from warnings and errors you need to act on.
+- Placed peds, props and seats only exist for players within `streamDistance` metres (60 by default).
+
+<Callout type="info">
+
+New here? Start with [Installation](/nerve_businesses/installation).
+
+</Callout>

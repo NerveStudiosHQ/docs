@@ -1,0 +1,32 @@
+---
+title: "Commands"
+description: "The admin chat commands of Nerve Studios Businesses, and how to rename or turn them off."
+---
+
+Every command is for [admins](/nerve_businesses/installation#step-5-give-your-admins-access). Anyone else sees "You do not have permission to use this command". Players use what is placed through ox_target, with no commands.
+
+| Command | What it does |
+| --- | --- |
+| `/business` | Opens the [Business Manager](/nerve_businesses/business-manager) on your own job |
+| `/recipecreator` | Opens the [Recipe Manager](/nerve_businesses/business-manager#recipe-manager) |
+| `/createstation` | Places a crafting station that belongs to no business. Look where it goes and press **E**, or **Backspace** to cancel |
+| `/editstation` | Lists every crafting station to edit or teleport to |
+| `/deletestation` | Lists every crafting station to delete |
+| `/liststations` | Prints every crafting station to chat with its id, distance from you and recipe count |
+
+## Renaming or turning off a command [#renaming-commands]
+
+The names are under `commands` in `shared/config.lua`. Change a name to rename the command, or set it to `false` to turn it off:
+
+```lua
+commands = {
+    manager = 'bizadmin',
+    recipes = 'recipecreator',
+    createStation = false,
+    editStation = 'editstation',
+    deleteStation = 'deletestation',
+    listStations = false,
+},
+```
+
+Restart the resource after changing them.
