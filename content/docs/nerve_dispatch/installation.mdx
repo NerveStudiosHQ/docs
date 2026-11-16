@@ -1,0 +1,111 @@
+---
+title: "Installation"
+description: "Install Nerve Studios Dispatch: add the resource after its requirements, give admins access, check your jobs and run a first call."
+---
+
+## Requirements
+
+- ESX Legacy or QBox
+- [ox_lib](https://github.com/overextended/ox_lib/releases) and [oxmysql](https://github.com/overextended/oxmysql/releases), both started before this resource
+- OneSync turned on
+- Optional: [ox_inventory](https://github.com/overextended/ox_inventory/releases), so gunfire detection can check the weapon in hand and `reports.requirePhone` can check for a phone
+
+There are no items to add and ox_target is not needed.
+
+## Step 1: Add the resource [#step-1-add-the-resource]
+
+1. Download `nerve_dispatch` from your Cfx.re Portal and unzip it.
+2. Make sure the folder is named exactly `nerve_dispatch`.
+3. Put it in your `resources` folder, for example `resources/[nerve]/nerve_dispatch`.
+
+<Callout type="warn">
+
+Don't rename the folder. Other resources call the exports and events by the name `nerve_dispatch`.
+
+</Callout>
+
+## Step 2: Add it to server.cfg [#step-2-add-it-to-server-cfg]
+
+Add it **after** its requirements and after your framework (`es_extended` or `qbx_core`):
+
+```cfg
+ensure oxmysql
+ensure ox_lib
+ensure nerve_dispatch
+```
+
+If you use ox_inventory, start it before `nerve_dispatch` as well.
+
+## Step 3: Give admins access [#step-3-give-admins-access]
+
+This is optional. Admins get every permission in every department, including the console's **Admin** page:
+
+```cfg
+add_ace group.admin nerve_dispatch.admin allow
+```
+
+You can also hand out a single role in one department through ACE, without a job:
+
+```cfg
+add_ace group.dispatch nerve_dispatch.police.dispatcher allow
+add_ace group.dispatch nerve_dispatch.ems.dispatcher allow
+```
+
+The format is `nerve_dispatch.<department>.<role>`. It works for departments with `ace = true`.
+
+## Step 4: Check your jobs [#step-4-check-your-jobs]
+
+1. Open `shared/config_departments.lua`. It sets up police, sheriff, state police, EMS, fire and government departments.
+2. Under each department's `jobs`, make sure the job names match your server, spelled the way your framework spells them. For example, `police = { officer = 0, supervisor = 4 }` makes every police grade an officer and grade 4 and up a supervisor.
+3. The example `dispatch` job gives dispatchers to every department. Rename it to your dispatcher job, or remove it.
+4. With `requireDuty = true`, players only get their roles while they are on duty in your framework.
+
+See [Configuration](/nerve_dispatch/configuration) for every option.
+
+## Step 5: Start and test [#step-5-start-and-test]
+
+1. Restart your server. The database tables are created on the first start, so there is no SQL to import.
+2. Join as an on-duty officer. You are signed on as a unit by yourself. If not, run `/dispatchduty`.
+3. Press `F6` to open the MDT and set a callsign on the **Unit** tab.
+4. Run `/911`, pick a call type and send it. The call alert appears on screen.
+5. Press `Y` to respond. The call shows under **Mine** in the MDT, with a GPS route to it.
+6. As a dispatcher or admin, run `/dispatch` to open the console and see the call on the board and the live map.
+7. In the MDT, choose **Clear** on the call. As the last unit on it, you resolve it.
+
+## Commands and keys
+
+| Command | Default key | What it does |
+| --- | --- | --- |
+| `/911` | | Report an emergency |
+| `/311` | | Report a non-emergency |
+| `/panic` | | Panic button for signed-on units |
+| `/dispatch` | | Open the dispatch console |
+| `/mdt` | `F6` | Open the MDT |
+| `/unitstatus <status>` | | Set your unit status, for example `/unitstatus enroute` |
+| `/respond [call]` | `Y` | Respond to the call alert on screen, or a call by number |
+| `/dispatchduty [department]` | | Sign on or off as a unit |
+
+Change a command name, or turn one off with `false`, under `commands` in `shared/config.lua`. Default keys are under `keys`. Players can rebind the keys in the GTA key settings under **FiveM**.
+
+## Version check
+
+On start, the server console says whether the script is up to date, with a download link when a new version is out. To turn it off, add this to `server.cfg`:
+
+```cfg
+set nerve:versioncheck false
+```
+
+## Translations
+
+All player-facing text is in `locales/en.json`. To translate it, copy the file to your language code (for example `locales/de.json`), translate the values, and set ox_lib's language in `server.cfg`:
+
+```cfg
+setr ox:locale de
+```
+
+## Updating
+
+1. Back up the `shared/config*.lua` files, `shared/editable.lua` and any locale files you changed.
+2. Replace the resource folder with the new version.
+3. Copy your changes back, and read the [changelog](/nerve_dispatch/changelog) for anything new to add.
+4. Restart the server. Database changes are applied on start.

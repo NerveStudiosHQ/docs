@@ -15,6 +15,14 @@
     "version": "1.0.0",
     "date": "2026-11-16"
   },
+  "nerve_dispatch": {
+    "title": "Dispatch",
+    "icon": "Siren",
+    "category": "Law Enforcement",
+    "description": "Emergency dispatch CAD with reporting, unit tracking, live map, MDT, automatic detection and call correlation",
+    "version": "1.0.0",
+    "date": "2026-11-16"
+  },
   "nerve_evidence": {
     "title": "Evidence Lab",
     "icon": "Fingerprint",

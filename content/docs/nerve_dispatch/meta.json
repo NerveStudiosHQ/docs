@@ -1,0 +1,13 @@
+{
+  "title": "Dispatch",
+  "icon": "Siren",
+  "pages": [
+    "overview",
+    "installation",
+    "configuration",
+    "exports",
+    "hooks",
+    "troubleshooting",
+    "changelog"
+  ]
+}
