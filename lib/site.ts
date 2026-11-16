@@ -10,6 +10,7 @@ export const site = {
     discord: 'https://discord.gg/nervestudios',
     website: 'https://nervestudios.net',
     store: 'https://store.nervestudios.net',
-    youtube: 'https://youtube.com/@nervestudios',
+    youtube: 'https://youtube.com/@nervestudioshq',
+    github: 'https://github.com/NerveStudiosHQ',
   },
 } as const;

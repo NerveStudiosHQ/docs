@@ -120,7 +120,7 @@ does and how to use it — never how it is built.**
   headings, the system mono for code.
 - Header is `components/site-header.tsx`, passed as the notebook layout's `header`
   slot. It copies the store header: watermark logo and icon nav links on the left, then
-  search, Discord and YouTube, the sidebar toggle and a Store button on the right. It is a
+  search, Discord, YouTube and GitHub, the sidebar toggle and a Store button on the right. It is a
   solid bar pinned to the top that never changes on scroll (no floating island, no
   blur). It reuses the Fumadocs search and sidebar slots, so keep those when editing it.
   Footer is `components/site-footer.tsx`, a copy of the store footer.
