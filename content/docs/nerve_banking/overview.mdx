@@ -1,0 +1,98 @@
+---
+title: "Overview"
+description: "Nerve Studios Banking: personal, savings, shared, business, society and government accounts, ATMs that show the bank on their own screens, debit cards, optional loans, interest and tax, and exports for your other scripts."
+---
+
+Nerve Studios Banking gives every character a real bank. Players open savings and shared accounts at a branch, order debit cards with a PIN, and use ATMs that show the bank right on the machine's screen. Jobs get society accounts, businesses get accounts with employees and payroll, and the city gets a treasury. Every payment is recorded on both sides, so every balance can be checked against its history.
+
+It runs on ESX and QBox. The banking screen and the ATM screen ship ready to use, with no build step.
+
+<Cards>
+  <Card title="Installation" icon="Rocket" href="/nerve_banking/installation">
+    Dependencies, card item and first start
+  </Card>
+  <Card title="Configuration" icon="Settings" href="/nerve_banking/configuration">
+    Accounts, limits, cards, ATMs and finance
+  </Card>
+  <Card title="ATMs" icon="Monitor" href="/nerve_banking/atms">
+    Screens on the machine and in-game calibration
+  </Card>
+  <Card title="Admin" icon="ShieldCheck" href="/nerve_banking/admin">
+    Dashboard, commands, fraud flags and Discord logs
+  </Card>
+  <Card title="Exports" icon="Code" href="/nerve_banking/exports">
+    Pay and charge players and societies from your scripts
+  </Card>
+  <Card title="Hooks" icon="Plug" href="/nerve_banking/hooks">
+    Your notify, inventory, admin checks and logs
+  </Card>
+</Cards>
+
+## Features
+
+- **Six account types:** personal checking, savings, shared, business, society and government. Each account has its own 8-digit account number, with a copy button wherever it is shown.
+- **Your framework's bank money is the checking account.** Paychecks, shops and every other script that pays into or charges the bank keep working as before.
+- **Deposits, withdrawals and transfers** at bank branches, with a confirmation step that shows who receives the money. Players pick one of their own accounts or a player standing nearby in one click, or type an account number.
+- **Limits per transaction and per day** for players, for each person on a shared or business account, and for each card. Optional fees on deposits, withdrawals, transfers and ATM withdrawals.
+- **Full history and monthly statements** for every account.
+- **Nothing is ever paid twice.** Repeated clicks, lag and reconnects never charge twice, and two payments from one account at the same moment can never spend the same money.
+- **A banking screen laid out like a bank app:** total balance, account cards, recent transactions, your debit card, weekly spending and today's limits.
+- **A lock screen.** The banking screen opens locked. Players unlock it with the PIN of one of their debit cards, or by holding a button when they have no card.
+- **ATMs that show the bank on the machine's own screen.** The camera moves in front of the machine and the player uses it with the mouse and the number keys: insert a card, type the PIN, withdraw, deposit, check a mini statement or change the PIN. Machines that can't show it get a full-screen ATM terminal instead.
+- **Debit cards** with hashed PINs, lockout after wrong PINs, locking, replacement, cancelling and card limits, handed out as a `bank_card` inventory item.
+- **Shared accounts** with per-person permissions and spending limits.
+- **Business accounts** with employees, salaries and payroll, created by your other scripts or from jobs.
+- **Society accounts** for your jobs, with access by job grade, and **government accounts** for tax and fines.
+- **Optional modules,** all off until you turn them on: interest on savings, tax with brackets and tax-free holidays, loans with approval and automatic repayments, credit scores, overdrafts and fraud flags. Scheduled payments are on by default.
+- **An admin dashboard:** totals and 14-day volume, account search, freeze and unfreeze, adjustments and reversals with a reason, fraud alerts, the audit log, loan approvals, ATM management and a balance check.
+- **Discord logs** in 18 categories, each with its own webhook if you want.
+- **Discord profile pictures** for players who have Discord linked.
+- **Your server's look:** your accent colour on both screens, and your logo at the foot of the side menu.
+- **Exports** for shops, jobs, robberies, fines, hospitals and phones, and hooks for your own notify, inventory, admin checks and logging.
+- **Translatable.** Every player-facing text is in the locale file.
+
+## How it plays
+
+1. A player walks up to a bank counter and opens the bank with ox_target (or a key prompt, if you prefer).
+2. The banking screen opens on the lock screen. The player types the PIN of one of their cards, or holds the button if they have none yet.
+3. At the counter they deposit and withdraw cash, transfer money, open savings or shared accounts, add people to a shared account and order a debit card.
+4. The card lands in their inventory. At any ATM they insert it, type the PIN and take out cash.
+5. Bosses and permitted grades manage their job's society account from the same screen. Business accounts show their employees and run payroll.
+
+Cash deposits and withdrawals always happen at a bank counter. Transfers do too, unless you set `transferAnywhere = true` in `shared/config_limits.lua`.
+
+## The lock screen [#the-lock-screen]
+
+The banking screen opens locked, so nobody can use a player's bank while they are away from the keyboard.
+
+- **With a debit card,** the player types the PIN of any of their cards. A wrong PIN counts towards the lockout of their cards, the same as at an ATM. Once the cards are blocked, the bank stays locked until the block ends (`lockMinutes` in `shared/config_cards.lua`).
+- **Without a card,** the player presses and holds the button, or holds Space.
+- The bank stays unlocked for `ui.unlockMinutes` (10 by default). Players can lock it again from the side menu.
+
+Set `ui.unlock = 'hold'` in `shared/config.lua` to always use the hold button, or `false` for no lock screen.
+
+## Requirements
+
+| Requirement | Notes |
+| --- | --- |
+| ESX Legacy or QBox | Characters, jobs, cash and bank money |
+| [ox_lib](https://github.com/overextended/ox_lib/releases) | Interface helpers, callbacks and language |
+| [oxmysql](https://github.com/overextended/oxmysql/releases) | Stores accounts, history, cards and loans. MariaDB 10.2+ or MySQL 8.0.16+ |
+| [ox_target](https://github.com/overextended/ox_target/releases) | Optional. Interacting with bank counters and ATMs. Without it, players get a key prompt instead |
+| [ox_inventory](https://github.com/overextended/ox_inventory/releases) | Optional. For the debit card item. Without it, cards stay in the bank |
+| OneSync | Required |
+| Server artifact 5848 or newer | Required |
+
+The database tables are created on the first start. There is no SQL to import by hand.
+
+## Performance
+
+- About 0.00 ms in the client resmon while the player is not at a bank or an ATM.
+- Only one ATM screen is ever loaded per player, and it is unloaded after a short idle time.
+- The console stays silent unless `debug = true`, apart from warnings and errors you need to act on.
+
+<Callout type="info">
+
+New here? Start with [Installation](/nerve_banking/installation).
+
+</Callout>

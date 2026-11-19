@@ -1,0 +1,90 @@
+---
+title: "Admin"
+description: "The Nerve Studios Banking admin dashboard and commands, who counts as an admin, fraud flags and Discord logs."
+---
+
+## Commands [#commands]
+
+| Command | Who | What it does |
+| --- | --- | --- |
+| `/bankadmin` | Admins | Opens the admin dashboard, wherever you are |
+| `/atmcalibrate` | Admins | Lines up the nearest ATM's screen and camera, live, and saves it for every player. See [ATMs](/nerve_banking/atms#calibrating-a-screen) |
+
+Rename `/bankadmin` with `command` in `shared/config_admin.lua`, and `/atmcalibrate` with `calibrate` in `shared/config_atm.lua`. Set either to `false` to remove it. `/bankadmin` only works in game, not from the server console.
+
+Admins also see an **Admin** section in the banking screen's side menu when they open the bank at a counter.
+
+## Who counts as an admin [#who-counts-as-an-admin]
+
+By default, a player is an admin when any of these is true:
+
+- They have the `nerve_banking.admin` ACE permission:
+
+  ```cfg
+  add_ace group.admin nerve_banking.admin allow
+  ```
+
+- On ESX, their group is `admin` or `superadmin`.
+- On QBox, they hold the `admin` or `god` ACE group, or qbx_core's admin permission.
+
+To use your own staff system, change [`Editable.IsAdmin`](/nerve_banking/hooks#editableisadmin) in `shared/editable.lua`.
+
+## The dashboard [#the-dashboard]
+
+| Section | What it shows and does |
+| --- | --- |
+| **Overview** | Totals across the bank and the money moved over the last 14 days |
+| **Accounts** | Search any account by number, name or owner. Open one to see its history, then freeze or unfreeze it, adjust its balance, or reverse a transaction |
+| **Fraud flags** | Alerts from the fraud checks, for a person to review |
+| **Loan approvals** | Loan applications waiting for an admin, when loans are on |
+| **Audit log** | Every admin action and every change to accounts, cards and access, with who did it |
+| **Reconcile** | Checks that every account matches its history and every transaction balances |
+| **ATMs** | ATMs placed in game: place a new one where you stand, turn one off, or remove it |
+| **Settings** | What each part of the bank is set to right now. Change these in the config files |
+
+Every freeze, adjustment and reversal asks for a reason, which is kept in the audit log.
+
+- **Freeze** stops all money moving in or out until the account is unfrozen. Everyone on the account sees that it is frozen.
+- **Adjust balance** adds or takes money. It comes from or goes to the bank's reserve.
+- **Reverse** books a new entry that undoes a transaction. The original stays in the history, marked as reversed.
+- **Reconcile** only reads. It never changes anything. To run it on a timer and get a console warning when something is off, set `reconcile.intervalMinutes` in `shared/config_limits.lua`.
+
+Set `enabled = false` in `shared/config_admin.lua` to turn the dashboard off completely.
+
+## Fraud flags [#fraud-flags]
+
+Fraud checks are off by default. Turn them on with `fraud.enabled = true` in `shared/config_admin.lua`.
+
+A flag never touches the player or their money. It adds an alert to the dashboard for an admin to review, and with `notifyAdmins = true` online admins get a notification. Each rule has a severity from 1 (worth a look) to 3 (act now):
+
+| Rule | Flags |
+| --- | --- |
+| `largeWithdrawals` | Several large withdrawals by one player in a short time |
+| `rapidTransfers` | Many transfers by one player in a short time |
+| `pingPong` | Money sent back and forth between the same two accounts |
+| `failedPin` | Wrong PINs at ATMs by one player |
+| `largeCashDeposits` | A lot of cash paid in by one player |
+| `failedTransactions` | Many refused transactions by one player |
+| `businessWithdrawals` | A business or society withdrawal far above that account's usual size |
+| `duplicates` | The same amount to the same place, again and again |
+
+Every rule has its own thresholds and can be turned off on its own. `autoFreeze = true` freezes the account on severity 3 alerts until an admin unfreezes it. Leave it off unless you are sure, because it acts without a person checking first.
+
+To send alerts to your own staff tools, use [`Editable.OnFraudAlert`](/nerve_banking/hooks#editableonfraudalert).
+
+## Discord logs [#discord-logs]
+
+Webhook links go in `server.cfg`, never in the config files:
+
+```cfg
+set nerve_banking:webhook "https://discord.com/api/webhooks/..."            # every category
+set nerve_banking:webhook:transfers "https://discord.com/api/webhooks/..."  # one category
+```
+
+A category's own line overrides the shared one. Use `set`, never `setr`, which would send the link to every player.
+
+The categories are `deposits`, `withdrawals`, `transfers`, `failed`, `business`, `society`, `loans`, `loan_repayments`, `interest`, `tax`, `overdraft`, `cards`, `accounts`, `freezes`, `fraud`, `admin`, `permissions` and `scheduled_failures`.
+
+Under `discord` in `shared/config_admin.lua` you can turn each category on or off and set its colour and title, the name and picture the webhook posts as, and a footer. `interest` and `tax` are off by default, because they post one log per account every cycle. Set `showIdentifiers = true` to add each player's character identifier to their logs.
+
+While Discord is down, logs wait in a queue of up to `queueLimit` and are sent once it is back.

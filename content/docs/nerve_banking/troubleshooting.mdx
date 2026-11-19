@@ -1,0 +1,104 @@
+---
+title: "Troubleshooting"
+description: "Fixes for the most common Nerve Studios Banking problems, with the exact console and in-game messages."
+---
+
+Most install problems show up in the **server console** when the resource starts, as lines starting with `[nerve_banking]`. Problems during play show up as a notification in game, or in the F8 console.
+
+## The resource doesn't start [#the-resource-doesnt-start]
+
+- **`no supported framework found (es_extended, qbx_core)`**: neither ESX nor QBox was running when the script started. In F8 it reads `no supported framework found (es_extended, qbx_core); banks and ATMs are off`. Start your framework before `nerve_banking` in `server.cfg`.
+- **`could not create tables, import sql/nerve_banking.sql manually: ...`**: the database user could not create the tables. Import `sql/nerve_banking.sql` with HeidiSQL or your database panel, then restart. The text after the colon gives the database's reason.
+- **`could not read sql/nerve_banking.sql; import it manually`**: the `sql/` folder is missing from the resource. Download it again from your Cfx.re Portal.
+- **`... is missing; the resource files are incomplete`**: part of the resource didn't download or unzip. Download it again from your Cfx.re Portal and replace the folder.
+- A message that names `ox_lib`, `oxmysql` or OneSync: that requirement is missing or starts after this script. See [Installation](/nerve_banking/installation#step-2-add-it-to-server-cfg).
+- **"The bank is still starting, try again shortly"** right after a restart: the database isn't ready yet. Wait a few seconds.
+
+## Nothing happens at the bank counter [#nothing-happens-at-the-bank-counter]
+
+- **No ox_target option:** check F8 for `interaction.mode is "target" but ox_target is not started; using "textui"`. Start ox_target before `nerve_banking`, or keep the key prompt and set `interaction.mode = 'textui'` to silence it.
+- **`no bank branches in shared/config_banks.lua, so nobody can use the bank counter`**: the branch list is empty. Add your branches back.
+- **The counter is in the wrong spot:** an MLO or custom map moved it. Stand at the counter, note your position, and set that branch's `coords` in `shared/config_banks.lua`.
+- **"You can't use the bank right now"**: [`Editable.CanUseBank`](/nerve_banking/hooks#editablecanusebank) returned `false`, for example because the player is dead.
+- **"The bank screen is still loading, try again in a moment"**: try again after a few seconds. If it keeps showing, the UI files are missing or damaged: download the resource again from your Cfx.re Portal.
+
+## Deposits, withdrawals or transfers fail [#transactions-fail]
+
+- **"You moved too far away"**: cash deposits and withdrawals only work within 10 metres of a bank counter. Transfers too, unless you set `transferAnywhere = true` in `shared/config_limits.lua`. This shows when the bank was opened from another script or the admin command away from a branch.
+- **"That is over the limit for one transaction"** or **"That would go over today's limit"**: the player hit a limit in `shared/config_limits.lua`, or a limit set on their card or on a shared or business account. Daily limits reset at 00:00 UTC.
+- **"Wait a little before doing that again"**: savings accounts wait `withdrawCooldownHours` (24 by default) between withdrawals, set in `shared/config_accounts.lua`. Business payroll also waits `payrollCooldownMinutes` between runs.
+- **"You don't have permission to do that"**: on a shared, business or society account, the player's permissions or job grade don't allow it. Society grades are under `society.jobs` in `shared/config_accounts.lua`. With `requireDuty = true`, they must be on duty.
+- **"This account is frozen"**: an admin or a fraud check froze it. An admin can unfreeze it from the dashboard.
+- **"Unlock your bank first"**: the lock screen timed out. Unlock it again.
+
+## The balance doesn't match another script [#the-balance-doesnt-match]
+
+Players' checking balance is their framework bank money, read live. Savings, shared, business and society accounts are separate and held by the bank, so a script that reads the framework's bank money only sees checking. Read the other accounts with the [exports](/nerve_banking/exports#reading-accounts).
+
+If your server used another banking or society script before, its society money isn't moved over automatically. Add it back with an admin adjustment in the dashboard.
+
+## Cards and the card item [#cards-and-the-card-item]
+
+- **`card item 'bank_card' is not in your inventory yet, so cards stay bank-only. Add it as the README shows.`**: the item isn't in ox_inventory yet. Paste it from `install/ox_inventory/items.lua` into `ox_inventory/data/items.lua` and restart. See [Installation](/nerve_banking/installation#step-3-add-the-card-item). To keep cards in the bank on purpose, set `useItem = false` in `shared/config_cards.lua`.
+- **The card has no picture in the inventory:** copy `install/ox_inventory/images/bank_card.png` into `ox_inventory/web/images/`.
+- **"Your card is ready but you have no room for it. Choose Replace on the card at a bank to collect it."**: the player's inventory was full. Make room, then choose **Replace** on the card under **Cards**.
+- **"This card is locked"**: the player locked it, or too many wrong PINs blocked it for `lockMinutes` (30 by default). A card the player locked is unlocked under **Cards** at a bank.
+
+## ATMs don't work [#atms-dont-work]
+
+- **"You have no bank card"** on the ATM screen: the player has no card, or with the item on, isn't carrying it. Order one at a bank under **Cards**.
+- **"That isn't available on this server"**: ATMs are off (`enabled = false` or `mode = 'off'` in `shared/config_atm.lua`), cards are off in `shared/config_cards.lua`, or this ATM was turned off from the dashboard.
+- **"You moved too far away"** at a map ATM: `props` in `shared/config_atms.lua` lists your ATM positions, and this one isn't on it. Add its position, or empty the list.
+- **"You can't use an ATM right now"**: [`Editable.CanUseBank`](/nerve_banking/hooks#editablecanusebank) returned `false`.
+- **"The ATM ended your session"** or **"You walked away from the ATM"**: the player was idle for `sessionSeconds`, or moved more than `leaveDistance` metres away.
+
+## The ATM screen looks wrong [#the-atm-screen-looks-wrong]
+
+- **The picture sits off the glass:** line it up with `/atmcalibrate`. See [Calibrating a screen](/nerve_banking/atms#calibrating-a-screen).
+- **A full-screen ATM terminal opens instead of the machine's screen:** the model has no screen position in `shared/config_atms.lua`, or the screen couldn't start on that player's game. Add the model and calibrate it, or leave it: the terminal works the same.
+- **"The ATM screen could not start"**: with `mode = 'dui'`, the machine's screen failed and there is no fallback. Use `mode = 'auto'` on a live server.
+- **"Only admins can calibrate ATM screens"**: see [Who counts as an admin](/nerve_banking/admin#who-counts-as-an-admin).
+- **"No ATM within 5 metres"**: stand next to the ATM before running `/atmcalibrate`.
+
+## The admin dashboard doesn't open [#the-admin-dashboard-doesnt-open]
+
+- **"You don't have permission to do that"**: add `add_ace group.admin nerve_banking.admin allow` to `server.cfg`, or check that the player is in your framework's admin group. See [Who counts as an admin](/nerve_banking/admin#who-counts-as-an-admin).
+- **`The bank admin command only works in game, from an admin's chat`**: you ran `/bankadmin` in the server console. Run it in game.
+- **Nothing happens:** `enabled = false` or `command = false` in `shared/config_admin.lua`.
+
+## Discord logs don't arrive [#discord-logs-dont-arrive]
+
+- Check that the webhook is set with `set`, not `setr`, and that the convar is spelled `nerve_banking:webhook` or `nerve_banking:webhook:<category>`.
+- **`the Discord webhook for ... is not a Discord webhook link; logs for it are skipped`**: the link isn't a `https://discord.com/api/webhooks/...` link. Copy it again from the channel's integrations.
+- **`Discord refused a log (status ...); check the webhook link`**: the webhook was deleted or the link is wrong.
+- **`Discord did not take a log (status ...); retrying`**: Discord is busy or down. Logs are retried.
+- Check that the category is `enabled` under `discord.categories` in `shared/config_admin.lua`. `interest` and `tax` are off by default.
+
+## Profile pictures don't show [#profile-pictures-dont-show]
+
+Players who haven't linked Discord to FiveM keep their initials. If nobody gets a picture, the lookup service in `ui.avatars.api` may be down. Set `ui.avatars.enabled = false` to always show initials.
+
+## Another script can't use the exports [#exports-refused]
+
+- **`... tried to use the ... export but is not in the allowed list`**: add that resource to `api.allowed` in `shared/config_admin.lua`, or set it to `'*'`.
+- Every refused call returns an `error` code. See [Error codes](/nerve_banking/exports#error-codes).
+
+## "ledger check found problems" in the console [#ledger-check-found-problems]
+
+The automatic ledger check found a balance that doesn't match its history. Open **Reconcile** in the admin dashboard for the details, then open a ticket with them.
+
+## "rejected request from ..." in the console [#rejected-request]
+
+A player's game sent a request the server refused, for example too many in a short time, or from too far away. An occasional line during busy play is harmless. Many lines from one player can mean a modified client.
+
+## The cursor is stuck on screen [#the-cursor-is-stuck-on-screen]
+
+Press Escape to close the bank or the ATM. The cursor is also released when the resource stops or restarts. If a screen never appears or looks broken, the UI files are missing or damaged: download the resource again from your Cfx.re Portal.
+
+## "Could not check for updates" in the server console [#could-not-check-for-updates]
+
+The server couldn't reach the version list. This doesn't affect the script. Turn the check off with `set nerve:versioncheck false` in `server.cfg`.
+
+## Still stuck? [#still-stuck]
+
+Set `debug = true` in `shared/config.lua`, restart the resource, and reproduce the problem. Then open a ticket on [Discord](https://discord.gg/nervestudios) with the server console and F8 console output. See [Support](/general/support) for what to include.

@@ -7,6 +7,14 @@
     "version": "1.0.0",
     "date": "2026-11-18"
   },
+  "nerve_banking": {
+    "title": "Banking",
+    "icon": "Landmark",
+    "category": "Jobs & Economy",
+    "description": "Banking with personal, shared, savings, business and society accounts, ATMs that show the bank on their own screens, debit cards, loans, interest, tax and a developer API",
+    "version": "1.0.0",
+    "date": "2026-11-19"
+  },
   "nerve_blipcreator": {
     "title": "Blip Creator",
     "icon": "MapPin",

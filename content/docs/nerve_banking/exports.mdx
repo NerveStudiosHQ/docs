@@ -1,0 +1,281 @@
+---
+title: "Exports"
+description: "Server and client exports that let your shops, jobs, robberies, fines, phones and other scripts read accounts and move money through Nerve Studios Banking."
+---
+
+Your other scripts read accounts and move money through these exports. The money exports are **server side**: call them from a server script, and start that script after `nerve_banking`. Two client exports open and close the banking screen.
+
+Players' checking balance is their framework bank money. Scripts that already pay into or charge the framework's bank keep working without these exports. Use them when you want a reason in the history, a society or business account, or a guarantee that nothing is paid twice.
+
+## How the exports answer [#results]
+
+Every export returns a table with `success`. When it fails, the table has `error`, one of the [error codes](#error-codes), and `message`, a readable text from the locale file:
+
+```lua
+local result = exports.nerve_banking:AddSocietyMoney('police', 500, { reason = 'Speeding fine', key = 'fine:' .. ticketId })
+if not result.success then
+    print(result.error, result.message)
+end
+```
+
+`GetBalance` and `GetSocietyBalance` return a number instead, or `false` and the error code:
+
+```lua
+local balance, err = exports.nerve_banking:GetBalance(source)
+if not balance then print(err) end
+```
+
+A payment that succeeds returns:
+
+| Field | What it is |
+| --- | --- |
+| `ref` | The transaction's reference, as shown in the history |
+| `amount` | Whole dollars moved |
+| `fee` | Fee charged on top, in whole dollars |
+| `balances` | New balances of the accounts involved, keyed by account id |
+| `cash` | The player's cash afterwards, for deposits and withdrawals |
+| `duplicate` | `true` when a call with the same key already ran and this is its result |
+
+### Never paying twice [#keys]
+
+Every money export takes an optional `key`. Calling it again with the same key returns the first result, with `duplicate = true`, instead of paying again. Use something unique to the event, such as a ticket id or an order number. Keys are up to 80 characters of letters, digits and `-`, `_`, `:` and `.`, and are kept per resource, so two scripts never collide.
+
+### Options [#options]
+
+The money exports take an `opts` table as their last argument:
+
+- `reason`: shown in the history and the Discord logs, up to 128 characters. A plain string instead of a table counts as the reason.
+- `key`: see [Never paying twice](#keys).
+- `meta`: a flat table of extra details kept with the transaction, up to 16 keys. Values are strings, numbers or booleans.
+
+### Who may call them [#who-may-call-them]
+
+`api.allowed` in `shared/config_admin.lua` decides which resources may use the exports: `'*'` for any (the default), or a list such as `{ 'my_shops', 'my_jobs' }`. A resource outside the list gets `NO_PERMISSION` and a warning in the console. `api.enabled = false` refuses every call.
+
+Each resource may make `api.reads` read calls and `api.writes` money calls per 10 seconds. The player limits in `shared/config_limits.lua` don't apply to exports.
+
+## Naming an account [#accounts]
+
+Exports that take an `account` accept:
+
+| Value | Account |
+| --- | --- |
+| `'48213307'` (a string of digits) | The account with that account number |
+| `12` (a number) | The account with that id, as the exports return it in `account.id` |
+| `{ player = source }` | That online player's checking account |
+| `{ society = 'police' }` | That job's society account |
+| `{ business = 'burgershot' }` | The business account with that key |
+
+<Callout type="warn">
+
+Pass account numbers as **strings**. A number is read as the account's id, not its account number.
+
+</Callout>
+
+An account comes back as `{ id, number, type, label, ownerKind, owner, balance, available, overdraftLimit, status, createdAt, lastActivity }`. `type` is `'checking'`, `'savings'`, `'shared'`, `'business'`, `'society'` or `'government'`, and `status` is `'active'`, `'frozen'` or `'closed'`.
+
+## All server exports [#server-exports]
+
+| Export | What it does |
+| --- | --- |
+| [`GetBalance(source)`](#players) | A player's checking balance |
+| [`Deposit(source, amount, opts?)`](#players) | Pays a player's cash into their account |
+| [`Withdraw(source, amount, opts?)`](#players) | Pays money from a player's account out as cash |
+| [`Transfer(from, to, amount, opts?)`](#transfer) | Moves money between two accounts |
+| [`AddSocietyMoney(job, amount, opts?)`](#societies) | Pays money into a job's account |
+| [`RemoveSocietyMoney(job, amount, opts?)`](#societies) | Takes money out of a job's account |
+| [`GetSocietyBalance(job)`](#societies) | A job's account balance |
+| [`GetAccount(account)`](#reading-accounts) | One account |
+| [`GetAccounts(target)`](#reading-accounts) | Every account a character owns or can use |
+| [`GetTransactions(account, opts?)`](#reading-accounts) | A page of an account's history |
+| [`GetFinancialHistory(target, opts?)`](#reading-accounts) | A character's accounts, latest transactions, loans and credit score |
+| [`CreateAccount(spec)`](#opening-accounts) | Opens a savings, shared or business account |
+| [`GetBusinessAccount(business)`](#businesses) | A business account by its key |
+| [`CreateBusinessAccount(business, label, owner?)`](#businesses) | Creates a business account, or returns the existing one |
+| [`ProcessPayroll(account, key)`](#businesses) | Pays every employee their salary |
+| [`FreezeAccount(account, reason)`](#freezing) | Freezes an account |
+| [`UnfreezeAccount(account, reason)`](#freezing) | Unfreezes an account |
+| [`CreateScheduledPayment(spec)`](#scheduled-payments) | Sets up rent, a subscription or a standing order |
+| [`CancelScheduledPayment(payment)`](#scheduled-payments) | Cancels one |
+| [`GetCreditScore(target)`](#loans-and-credit) | A character's credit score |
+| [`GetLoan(loan)`](#loans-and-credit) | One loan |
+| [`CreateLoan(source, spec)`](#loans-and-credit) | Applies for a loan for a player |
+| [`RepayLoan(loan, amount, opts?)`](#loans-and-credit) | Pays towards a loan |
+
+`target` is a player's server id, or a character identifier for a character who is offline.
+
+## Players [#players]
+
+```lua
+local balance = exports.nerve_banking:GetBalance(source)
+
+-- A cash machine in your shop script
+exports.nerve_banking:Deposit(source, 250, { reason = 'Shop deposit', key = 'shop:' .. orderId })
+exports.nerve_banking:Withdraw(source, 100, 'Cash back')
+```
+
+`Deposit` takes the cash from the player and fails with `INSUFFICIENT_CASH` when they don't have it. `Withdraw` pays out as cash and fails with `INSUFFICIENT_FUNDS` when the account is short. Both use the player's checking account. Add `accountType = 'savings'` to `opts` to use their first savings account. The player must be online.
+
+## Transfer [#transfer]
+
+```lua
+-- A phone app sending money to another account number
+local result = exports.nerve_banking:Transfer({ player = source }, '48213307', 500, {
+    reason = 'Rent',
+    key = 'phone:' .. paymentId,
+})
+```
+
+Fails with `SAME_ACCOUNT` when both sides are the same account. Add `allowOverdraft = true` to `opts` to let the paying account use its overdraft room, when overdrafts are on.
+
+## Societies [#societies]
+
+```lua
+-- A fine paid to the police
+exports.nerve_banking:AddSocietyMoney('police', 500, { reason = 'Speeding fine', key = 'fine:' .. ticketId })
+
+-- The mechanics buying parts
+local result = exports.nerve_banking:RemoveSocietyMoney('mechanic', 1200, 'Parts order')
+
+local balance = exports.nerve_banking:GetSocietyBalance('police')
+```
+
+`job` is the framework job name. It uses the job's society account from `shared/config_accounts.lua`, or its business account when the job has no society account and `business.fromJobs` is on. A job without either gets `ACCOUNT_NOT_FOUND`.
+
+`AddSocietyMoney` adds new money to the economy, as a shop sale or a fine does. `RemoveSocietyMoney` takes money out of it and fails with `INSUFFICIENT_FUNDS` when the account is short. To move money from a player to a society, use [`Transfer`](#transfer) instead.
+
+## Reading accounts [#reading-accounts]
+
+```lua
+local res = exports.nerve_banking:GetAccount('48213307')
+if res.success then print(res.account.label, res.account.balance) end
+
+local mine = exports.nerve_banking:GetAccounts(source)      -- { success, accounts }
+
+local page = exports.nerve_banking:GetTransactions('48213307', { limit = 25 })
+-- { success, rows, nextCursor }; pass cursor = page.nextCursor for the next page
+
+local history = exports.nerve_banking:GetFinancialHistory(source, { limit = 50 })
+-- { success, name, accounts, transactions, loans, creditScore }
+```
+
+`GetTransactions` returns up to 50 rows per page, newest first. Filter with `kind`, for example `'deposit'`, `'withdraw'`, `'transfer'` or `'payroll'`. Each row has `ref`, `kind`, `amount` (negative when money left the account), `fee`, `counterparty`, `reason`, `actorName`, `channel`, `balanceAfter`, `createdAt` and `status`.
+
+`GetFinancialHistory` returns up to 100 transactions across all the character's accounts. Use it for an MDT or a loan officer's screen.
+
+## Opening accounts [#opening-accounts]
+
+```lua
+local res = exports.nerve_banking:CreateAccount({
+    type = 'savings',
+    owner = source,
+    label = 'Holiday fund',
+    key = 'welcome-savings',
+})
+```
+
+`type` is `'savings'`, `'shared'` or `'business'`. Savings and shared accounts need an online `owner` and follow the same per-player limits as the banking screen. With `key` (up to 32 letters, digits, `-` and `_`), calling again returns the account the first call opened. For a business account, pass `business` (its key) and `label`, as for [`CreateBusinessAccount`](#businesses).
+
+## Businesses [#businesses]
+
+```lua
+-- A business script creating an account for a shop
+local res = exports.nerve_banking:CreateBusinessAccount('shop_12', 'Grove Street 24/7', source)
+-- { success, account, created }
+
+local account = exports.nerve_banking:GetBusinessAccount('shop_12')
+
+-- Weekly payroll from your own timer
+exports.nerve_banking:ProcessPayroll('shop_12', 'week-2026-46')
+-- { success, paid, failed, total, ref }
+```
+
+The business key is your own stable name for the business: letters, digits, `_`, `-`, `.` and `:`, up to 64 characters. Keys starting with `job:` are kept for the bank's own job accounts. `owner` (a server id or identifier) gets every permission on the account. `created` is `false` when the account already existed.
+
+`ProcessPayroll` pays every employee on a business or society account the salary set in the banking screen. The `key` is unique to the run (up to 48 characters), so the same run never pays anybody twice.
+
+## Freezing [#freezing]
+
+```lua
+exports.nerve_banking:FreezeAccount('48213307', 'Under investigation')
+exports.nerve_banking:UnfreezeAccount('48213307', 'Cleared')
+```
+
+Nothing moves in or out of a frozen account until it is unfrozen. The reason, up to 128 characters, is shown to admins and kept in the audit log.
+
+## Scheduled payments [#scheduled-payments]
+
+```lua
+-- A housing script charging rent every week
+local res = exports.nerve_banking:CreateScheduledPayment({
+    from = { player = source },
+    to = { business = 'dynasty8' },
+    amount = 750,
+    interval = 604800,
+    label = 'Rent, 14 Grove Street',
+    kind = 'rent',
+    key = 'rent:' .. houseId,
+})
+
+exports.nerve_banking:CancelScheduledPayment(res.payment.ref)
+```
+
+- `interval` is in seconds, at least `scheduled.minInterval` in `shared/config_finance.lua` and at most a year.
+- `kind` is `'rent'`, `'subscription'` or `'transfer'` (the default).
+- `firstRun` is an optional Unix time for the first payment, up to `scheduled.maxFirstRunDays` days ahead.
+
+The player sees the payment under **Payments** in the banking screen. Needs `scheduled.enabled = true`, the default.
+
+## Loans and credit [#loans-and-credit]
+
+```lua
+local score = exports.nerve_banking:GetCreditScore(source)
+-- { success, score, min, max, factors, updatedAt }
+
+local res = exports.nerve_banking:CreateLoan(source, { product = 'personal', amount = 5000, term = 14 })
+local loan = exports.nerve_banking:GetLoan(res.loan.ref)
+exports.nerve_banking:RepayLoan(res.loan.ref, 500, { key = 'repay:' .. id })
+```
+
+`CreateLoan` goes through the same checks as the banking screen. `product` is an `id` from `loans.products` in `shared/config_finance.lua`, and `term` one of its `terms`. The loan is paid into the player's checking account unless you pass `accountId`. `RepayLoan` pays from the loan's own account unless you pass `account` in `opts`.
+
+These need loans or credit scores turned on in `shared/config_finance.lua`. Otherwise they return `FEATURE_DISABLED`.
+
+## Client exports [#client-exports]
+
+```lua
+exports.nerve_banking:OpenBank('history')
+exports.nerve_banking:CloseBank()
+```
+
+`OpenBank(section?)` opens the banking screen, for example from a phone app. `section` is one of `'overview'`, `'accounts'`, `'move'`, `'history'`, `'statements'`, `'cards'`, `'scheduled'`, `'loans'`, `'credit'` or `'business'`. Leave it out, or name a section the player can't use, and it opens on the overview. It returns `false` while the player's character isn't loaded yet.
+
+Away from a branch, players can see their accounts, history and cards, but cash deposits and withdrawals need a bank counter. Transfers do too, unless `transferAnywhere = true` in `shared/config_limits.lua`.
+
+## Error codes [#error-codes]
+
+| Code | Meaning |
+| --- | --- |
+| `INVALID_AMOUNT` | The amount isn't a whole number above zero |
+| `INVALID_ACCOUNT` | That account can't be used for this |
+| `ACCOUNT_NOT_FOUND` | No account matches |
+| `ACCOUNT_FROZEN` | The account is frozen |
+| `ACCOUNT_CLOSED` | The account is closed |
+| `NO_PERMISSION` | Not allowed, for example a resource outside `api.allowed` |
+| `INSUFFICIENT_FUNDS` | Not enough money in the account |
+| `INSUFFICIENT_CASH` | The player doesn't carry that much cash |
+| `LIMIT_EXCEEDED` | Over the limit for one transaction |
+| `DAILY_LIMIT` | Over today's limit |
+| `RATE_LIMITED` | Too many calls from this resource, wait a moment |
+| `SAME_ACCOUNT` | Both sides are the same account |
+| `PLAYER_OFFLINE` | The player isn't online |
+| `NOT_READY` | The bank is still starting |
+| `FEATURE_DISABLED` | That part of the bank is turned off |
+| `DB_ERROR` | Something went wrong and nothing was charged. The console has the reason |
+| `BUSY` | Another payment is using the account, try again |
+| `INVALID_INPUT` | An argument is missing or malformed |
+| `NOT_FOUND` | No loan or payment matches |
+| `COOLDOWN` | Wait before doing that again, for example a second savings withdrawal within `withdrawCooldownHours` |
+| `NOT_ELIGIBLE` | The player can't take that loan |
+
+The banking screen and ATMs use a few more codes for cards, PINs and sessions, which the exports don't return.
