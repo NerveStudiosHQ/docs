@@ -48,7 +48,7 @@ If your server used another banking or society script before, its society money 
 
 - **"You have no bank card"** on the ATM screen: the player has no card, or with the item on, isn't carrying it. Order one at a bank under **Cards**.
 - **"That isn't available on this server"**: ATMs are off (`enabled = false` or `mode = 'off'` in `shared/config_atm.lua`), cards are off in `shared/config_cards.lua`, or this ATM was turned off from the dashboard.
-- **"You moved too far away"** at a map ATM: `props` in `shared/config_atms.lua` lists your ATM positions, and this one isn't on it. Add its position, or empty the list.
+- **"You moved too far away"** at a map ATM: the ATM isn't in `props` in `shared/config_atms.lua`, which lists the base map's ATMs. ATMs added by map mods need their position added there, or set `trustMapProps = true`.
 - **"You can't use an ATM right now"**: [`Editable.CanUseBank`](/nerve_banking/hooks#editablecanusebank) returned `false`.
 - **"The ATM ended your session"** or **"You walked away from the ATM"**: the player was idle for `sessionSeconds`, or moved more than `leaveDistance` metres away.
 

@@ -74,6 +74,8 @@ Each model and location can override the ATM settings with `settings`, for examp
 
 To show the ATMs from `locations` and the dashboard on the map, set `blips.enabled = true` in `shared/config_atm.lua`. The ATMs already in the GTA world have no blip.
 
-## Only allowing your map's ATMs [#only-allowing-your-maps-atms]
+## Which map ATMs open [#only-allowing-your-maps-atms]
 
-The server can't see map props, so by default an ATM on the map is trusted when a player stands at one. To only allow fixed spots, list your map's ATM positions under `props` in `shared/config_atms.lua`. ATMs in `locations` and ones placed from the dashboard are always allowed.
+The server can't see map props, so it only opens a map ATM at a known spot. `props` in `shared/config_atms.lua` ships with every ATM on the base map (121 of them), so the GTA world's ATMs work out of the box and a modified client can't open an ATM anywhere else. ATMs in `locations` and ones placed from the dashboard are always allowed.
+
+If your map mods add ATM props, add each one's position to `props` as a `vec3`. If you can't list them, set `trustMapProps = true` to open any ATM prop a player stands at.

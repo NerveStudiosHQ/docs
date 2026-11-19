@@ -17,6 +17,7 @@ description: "Release history for Banking."
 - Players' Discord profile pictures in the bank (`ui.avatars` in `shared/config.lua`).
 - ATMs that show the bank on the machine's own screen, with the camera facing it and the mouse working on it, plus a full-screen ATM terminal for machines that can't. Admins line a model's screen up in game with `/atmcalibrate`, saved for every player.
 - A bright ATM screen with side-key options, a keypad and take-your-cash and take-your-card steps.
+- Every ATM on the base map is listed in `shared/config_atms.lua`, and map ATMs only open at those spots. Add the ATMs your map mods place there, or set `trustMapProps = true`.
 - Debit cards with PINs, locking, replacement and card limits, handed out as a `bank_card` inventory item. The item entry and picture are in `install/ox_inventory/`; until the item is added, cards stay bank-only. Set `cards.useItem = false` to keep them bank-only.
 - Shared accounts and business accounts with per-person permissions, spending limits and payroll.
 - Optional interest, tax, loans, credit score, overdraft and scheduled payments, each off until you turn it on.
