@@ -1,0 +1,313 @@
+---
+title: "Configuration"
+description: "Every option in Animation Positioning's config files."
+---
+
+All options live in `shared/config.lua`, and the screen filters in `shared/config_filters.lua`. Each option has a comment explaining what it does. Restart the resource after changing any of them.
+
+## Change these first [#change-these-first]
+
+- **`ui.accent`** sets the accent colour of every screen. The default `'#ffffff'` keeps it monochrome. Set your server's colour, for example `'#a855f7'`.
+- **`permissions`** limits a tool to players with an ACE permission. `false` lets everyone use it. See [Permissions](/nerve_animpos/controls#permissions).
+- **`animPos.maxDistance`** sets how far players may move their character from where the emote started. Keep it small enough that nobody can move through a wall.
+- **`photoCam.block`** and **`freeCam.block`** keep the cameras closed for a while after a fight (300 seconds by default). `photoCam.block` also keeps the photo camera closed while a weapon is in hand. Set `damage = 0` to never block.
+- **`photoCam.polaroid`** turns polaroids on or off and sets the item names. Change them only if you named the items differently in ox_inventory.
+- **`photoCam.lights.count`** sets how many lights players can place, from 1 to 4. `0` hides the lighting tab.
+
+## Filters [#filters]
+
+Each entry in `shared/config_filters.lua` is one screen filter:
+
+```lua
+{ label = 'Noir', modifier = 'spectator4', strength = 1.0 },
+```
+
+`label` is the name players see, `modifier` is a GTA V timecycle modifier name, and `strength` from `0.0` to `1.0` sets how strongly it applies (`1.0` when left out). The first entry has no modifier and means "no filter". Remove entries to shorten the list, or add your own.
+
+{/* nerve:config:start */}
+{/* Generated from the script's config files. Edit those, not this block. */}
+
+### `shared/config.lua` [#config]
+
+```lua title="shared/config.lua"
+return {
+    debug = false, -- Print troubleshooting lines to the F8 and server consoles
+
+    -- Interface
+    ui = {
+        accent = '#ffffff', -- Accent colour of every screen, as '#RRGGBB' (white reads as monochrome; try '#a855f7')
+    },
+
+    -- Who may use each tool. false = everyone, or an ACE permission name, e.g. 'nerve_animpos.photo'
+    -- Grant one in server.cfg with: add_ace group.vip nerve_animpos.photo allow
+    permissions = {
+        animPos  = false, -- Animation positioning
+        photoCam = false, -- Photo camera (also checked again on the server for every shot)
+        freeCam  = false, -- Free camera
+    },
+
+    -- Camera controls shared by the positioning, photo and free cameras
+    camera = {
+        lookSensitivity = 6.0,  -- Mouse look speed (higher = faster)
+        invertLook      = false, -- Invert vertical mouse look
+        moveSpeed       = 2.5,  -- Camera movement speed with W, A, S, D, in metres per second
+        fastMultiplier  = 3.0,  -- Speed multiplier while Shift is held
+        zoomStep        = 4.0,  -- Field of view change per scroll wheel notch, in degrees
+        transition      = 800,  -- Ease in and out of the camera, in milliseconds (0 = cut)
+    },
+
+    -- Animation positioning: move and rotate your character while an emote plays
+    animPos = {
+        enabled  = true,       -- Turn the whole feature on or off
+        command  = 'animpos',  -- Chat command to open it (false = no command)
+        key      = 'F5',       -- Default key players can rebind in Settings > Key Bindings (false = no key)
+        maxDistance = {
+            horizontal = 2.0,  -- How far the character may move sideways or forward from where the emote started, in metres
+            vertical   = 1.5,  -- How far up or down, in metres
+        },
+        camera = {
+            maxDistance = 20.0, -- How far the positioning camera may fly from the character, in metres
+            distance    = 2.5,  -- Where the camera starts, in metres from the character
+            height      = 0.6,  -- Camera start height above the character, in metres
+            fov         = 50.0, -- Starting field of view, in degrees
+            minFov      = 20.0, -- Narrowest zoom, in degrees
+            maxFov      = 80.0, -- Widest zoom, in degrees
+        },
+        steps = {
+            move   = { 0.01, 0.05, 0.10, 0.25 }, -- Nudge sizes offered in the panel, in metres
+            rotate = { 1, 5, 15, 45 },           -- Rotate sizes offered in the panel, in degrees
+            defaultMove   = 2,                   -- Which move size is picked when the panel opens (position in the list above)
+            defaultRotate = 2,                   -- Which rotate size is picked when the panel opens
+        },
+        returnToStart = true,  -- Put the character back where the emote started when it ends or is adjusted again, so the tool can't be used to walk through walls
+        ghost = {
+            enabled = true,    -- Make your own character see-through while you adjust it (only you see this)
+            opacity = 200,     -- 0 = invisible, 255 = solid
+        },
+        outline       = true,  -- Draw an outline around your character while you adjust it
+        groundOffset  = 1.0,   -- Height of the character's origin above the ground used by "Drop to ground", in metres
+        endKeys = { 22, 30, 31, 32, 33, 34, 35 }, -- Control IDs that end a placed position (jump and the movement keys). See docs.fivem.net/docs/game-references/controls
+        headText = {
+            enabled  = true,   -- Show "Adjusting position" above the player's head to people nearby
+            interval = 10000,  -- Show it again this often, in milliseconds
+            duration = 3000,   -- How long it stays up each time, in milliseconds
+            distance = 10.0,   -- How close others must be to see it, in metres
+        },
+    },
+
+    -- Photo camera: framing, filters, depth blur, lights and screenshots
+    photoCam = {
+        enabled  = true,       -- Turn the whole feature on or off
+        command  = 'photocam', -- Chat command to open it (false = no command)
+        key      = 'F6',       -- Default key players can rebind (false = no key)
+        item = {
+            enabled = false,      -- Open the camera by using an item instead of (or as well as) the command (needs ox_inventory)
+            name    = 'photo_cam', -- Item name
+        },
+        camera = {
+            distance   = 3.0,    -- Where the camera starts, in metres in front of the character
+            height     = 0.1,    -- Camera start height above the character's origin, in metres
+            fov        = 50.0,   -- Starting field of view, in degrees
+            minFov     = 10.0,   -- Narrowest zoom, in degrees
+            maxFov     = 90.0,   -- Widest zoom, in degrees
+            lookButton = 'both', -- Mouse button held to turn the camera: 'left', 'right' or 'both'
+            move = {
+                enabled     = true, -- Let players move the camera with W, A, S, D
+                maxDistance = 5.0,  -- How far the camera may move from the character, in metres
+            },
+        },
+        block = {
+            damage = 300,       -- Seconds after taking or dealing damage before the camera can open (0 = never blocked)
+            weapon = true,      -- Block the camera while a weapon is in hand
+        },
+        effects = {
+            vignette = 50,      -- Starting vignette strength, 0-100
+            dofAmount = 0,      -- Starting depth blur, 0-100 (0 = off)
+            dofRange = 2.0,     -- Starting focus depth, in metres
+            dofRangeMin = 0.5,  -- Smallest focus depth, in metres
+            dofRangeMax = 10.0, -- Largest focus depth, in metres
+        },
+        lights = {
+            count = 3,          -- Number of lights players can place (1-4, 0 = no lighting tab)
+            reach = 30.0,       -- How far a light shines, in metres
+            area = 8.0,         -- How far from the character a light can be placed, in metres
+            minHeight = 0.5,    -- Lowest light height, in metres above the character's origin
+            maxHeight = 8.0,    -- Highest light height, in metres
+            minBrightness = 1,  -- Weakest light power
+            maxBrightness = 20, -- Strongest light power
+            minSpread = 5,      -- Narrowest beam, in degrees
+            maxSpread = 70,     -- Widest beam, in degrees
+            colors = { '#FFFFFF', '#FFE2B8', '#C9E4FF', '#FFB347', '#FF5A5A', '#FF6FCF', '#B48CFF', '#5C86FF', '#4CE3FF', '#5CFF9D' }, -- Colour swatches offered for lights
+        },
+        polaroid = {
+            enabled = true,          -- Offer "Print polaroid": the photo becomes an item players can hold up and show (needs ox_inventory)
+            item    = 'polaroid',    -- Item given for each polaroid; it carries the photo
+            blank = {
+                required = true,              -- Use up one blank film item per polaroid
+                item     = 'polaroid_empty',  -- Blank film item name
+            },
+            prop = {
+                model  = 'prop_cs_planning_photo', -- Prop held in the hand while looking at a polaroid
+                bone   = 28422,                    -- Ped bone the prop is held in (28422 = right hand)
+                offset = { 0.0, 0.0, 0.0 },        -- Prop position in the hand, in metres
+                rotation = { 0.0, 0.0, 0.0 },      -- Prop rotation in the hand, in degrees
+                texture = { dict = 'prop_cs_planning_photo', name = 'prop_replacement_photo' }, -- The prop's picture texture the photo is painted onto. Change it only together with the model
+            },
+            anim = { dict = 'amb@world_human_tourist_map@male@base', clip = 'base' }, -- Animation while holding a polaroid
+            showDistance = 15.0, -- Nearby players within this many metres see the photo on the held prop
+        },
+        shot = {
+            cooldown = 3,       -- Seconds between photos per player
+            encoding = 'jpg',   -- 'jpg', 'png' or 'webp'
+            quality  = 0.92,    -- Image quality, 0.1-1.0 (jpg and webp)
+            copyLink = true,    -- Copy the photo link to the player's clipboard
+        },
+        headText = {
+            enabled  = true,    -- Show "Taking a photo" above the player's head to people nearby
+            interval = 10000,   -- Show it again this often, in milliseconds
+            duration = 3000,    -- How long it stays up each time, in milliseconds
+            distance = 10.0,    -- How close others must be to see it, in metres
+        },
+        filters = lib.load('shared.config_filters'), -- Screen filters: listed in shared/config_filters.lua
+    },
+
+    -- Free camera: hold the key to look around your character
+    freeCam = {
+        enabled  = true,       -- Turn the whole feature on or off
+        key      = 'V',        -- Default key players can rebind (false = no key)
+        holdTime = 1.0,        -- Seconds the key must be held before the camera opens
+        block = {
+            damage = 300,      -- Seconds after taking or dealing damage before the camera can open (0 = never blocked)
+            weapon = false,    -- Block the camera while a weapon is in hand
+        },
+        camera = {
+            distance    = 3.0,  -- Where the camera starts, in metres in front of the character
+            height      = 0.5,  -- Camera start height, in metres
+            maxDistance = 10.0, -- How far the camera may fly from the character, in metres
+            canMove     = true, -- Let players fly the camera with W, A, S, D
+            fov         = 50.0, -- Starting field of view, in degrees
+            minFov      = 15.0, -- Narrowest zoom, in degrees
+            maxFov      = 90.0, -- Widest zoom, in degrees
+        },
+        hiddenClose = {
+            enabled = true,    -- Close the camera when the character is out of sight (off screen or behind a wall)
+            seconds = 5,       -- Countdown before it closes, in seconds
+        },
+        headText = {
+            enabled  = true,   -- Show "In free camera" above the player's head to people nearby
+            interval = 30000,  -- Show it again this often, in milliseconds
+            duration = 1000,   -- How long it stays up each time, in milliseconds
+            distance = 10.0,   -- How close others must be to see it, in metres
+        },
+    },
+}
+```
+
+### `shared/config_filters.lua` [#config-filters]
+
+```lua title="shared/config_filters.lua"
+-- Screen filters offered in the photo camera. Read by config.photoCam.filters.
+--
+-- One entry:
+--   { label = 'Noir', modifier = 'spectator4', strength = 1.0 },
+--
+--   label     Name shown in the filter list
+--   modifier  A GTA V timecycle modifier name. Leave it out for "no filter".
+--   strength  0.0-1.0, how strongly the modifier is applied. Leave it out for 1.0.
+--
+-- The first entry is the one selected when the camera opens; keep "no filter" first.
+-- Favourites are saved per player by label, so renaming a label resets that favourite.
+return {
+    { label = 'None' },
+    { label = 'Noir', modifier = 'spectator4' },
+    { label = 'Noir soft', modifier = 'hud_def_desat_cold_kill' },
+    { label = 'Noir crunch', modifier = 'hud_def_desatcrunch' },
+    { label = 'Noir bloom', modifier = 'cops' },
+    { label = 'Silver screen', modifier = 'NG_deathfail_BW_base' },
+    { label = 'Phone mono', modifier = 'phone_cam7' },
+    { label = 'Green mono', modifier = 'blackNwhite' },
+    { label = 'CCTV', modifier = 'CAMERA_secuirity_FUZZ' },
+    { label = 'Broken tape', modifier = 'Broken_camera_fuzz' },
+    { label = 'Chopper feed', modifier = 'helicamfirst' },
+    { label = 'Old film', modifier = 'CHOP' },
+    { label = 'Cinema', modifier = 'cinema' },
+    { label = 'Cinema deep', modifier = 'cinema_001' },
+    { label = 'Filmic warm', modifier = 'NG_filmic10' },
+    { label = 'Overexposed', modifier = 'BeastLaunch02' },
+    { label = 'Tunnel vision', modifier = 'AirRaceBoost01' },
+    { label = 'Green boost', modifier = 'AirRaceBoost02' },
+    { label = 'Crisp', modifier = 'AmbientPUSH' },
+    { label = 'Contrast', modifier = 'epsilion' },
+    { label = 'Contrast high', modifier = 'exile1_plane' },
+    { label = 'Retro violet', modifier = 'ArenaEMP' },
+    { label = 'Retro cyan', modifier = 'ArenaEMP_Blend' },
+    { label = 'Retro sepia', modifier = 'BeastIntro01' },
+    { label = 'Retro red', modifier = 'BeastIntro02' },
+    { label = 'Beach day', modifier = 'ArenaWheelPurple01' },
+    { label = 'Beach glow', modifier = 'ArenaWheelPurple02' },
+    { label = 'Beach haze', modifier = 'InchPurple01' },
+    { label = 'Vinewood depth', modifier = 'Bank_HLWD' },
+    { label = 'Hazy', modifier = 'Barry1_Stoned' },
+    { label = 'Trip', modifier = 'BikerFilter' },
+    { label = 'Dark corners', modifier = 'BikerForm01' },
+    { label = 'Desert light', modifier = 'Bikers' },
+    { label = 'Desert dusk', modifier = 'BikersSPLASH' },
+    { label = 'Dream blur', modifier = 'BlackOut' },
+    { label = 'Heat pink', modifier = 'BleepYellow02' },
+    { label = 'Bloom', modifier = 'Bloom' },
+    { label = 'Bloom light', modifier = 'BloomLight' },
+    { label = 'Bloom medium', modifier = 'BloomMid' },
+    { label = 'Cold blue', modifier = 'BulletTimeDark' },
+    { label = 'Casino red', modifier = 'casino_managersoffice' },
+    { label = 'Casino floor', modifier = 'casino_mainfloor' },
+    { label = 'Violet touch', modifier = 'CopsSPLASH' },
+    { label = 'Amber touch', modifier = 'CrossLine01' },
+    { label = 'Clean air', modifier = 'CS1_railwayB_tunnel' },
+    { label = 'Blackout', modifier = 'downtown_FIB_cascades_opt' },
+    { label = 'Red shadows', modifier = 'damage' },
+    { label = 'Amber focus', modifier = 'DrivingFocusLight' },
+    { label = 'Green focus', modifier = 'DrivingFocusDark' },
+    { label = 'Blue drift', modifier = 'DRUG_2_drive' },
+    { label = 'Violet drift', modifier = 'drug_drive_blend02' },
+    { label = 'Submerged', modifier = 'Drug_deadman' },
+    { label = 'Deep water', modifier = 'underwater_deep' },
+    { label = 'Pure green', modifier = 'drug_flying_02' },
+    { label = 'Pure pink', modifier = 'drug_flying_base' },
+    { label = 'Bounce light', modifier = 'eatra_bouncelight_beach' },
+    { label = 'Office bright', modifier = 'Facebook_NEW' },
+    { label = 'Server room', modifier = 'facebook_serveroom' },
+    { label = 'Bright I', modifier = 'FIB_5' },
+    { label = 'Bright II', modifier = 'FIB_6' },
+    { label = 'Bright III', modifier = 'FIB_A' },
+    { label = 'Bright IV', modifier = 'FIB_B' },
+    { label = 'Blue vignette', modifier = 'fp_vig_blue' },
+    { label = 'Green vignette', modifier = 'fp_vig_green' },
+    { label = 'Green grade', modifier = 'FranklinColorCode' },
+    { label = 'Green grade soft', modifier = 'FranklinColorCodeBasic' },
+    { label = 'Green grade bright', modifier = 'FranklinColorCodeBright' },
+    { label = 'Tint brown', modifier = 'glasses_brown' },
+    { label = 'Tint navy', modifier = 'glasses_Darkblue' },
+    { label = 'Tint green', modifier = 'glasses_green' },
+    { label = 'Tint orange', modifier = 'glasses_orange' },
+    { label = 'Tint pink', modifier = 'glasses_pink' },
+    { label = 'Tint purple', modifier = 'glasses_purple' },
+    { label = 'Tint red', modifier = 'glasses_red' },
+    { label = 'Tint sunset', modifier = 'glasses_yellow' },
+    { label = 'Fog', modifier = 'graveyard_shootout' },
+    { label = 'Fog grey', modifier = 'nervousRON_fog' },
+    { label = 'Fog dark', modifier = 'SALTONSEA' },
+    { label = 'Fog cove', modifier = 'WATER_cove' },
+    { label = 'Red and blue', modifier = 'Hint_cam' },
+    { label = 'Ice blue', modifier = 'hud_def_colorgrade' },
+    { label = 'Clinic', modifier = 'int_Hospital2_DM' },
+    { label = 'Night blue', modifier = 'introblue' },
+    { label = 'Violet blur', modifier = 'Kifflom' },
+    { label = 'Soft background', modifier = 'michealspliff' },
+    { label = 'Smog', modifier = 'MP_Arena_theme_atlantis' },
+    { label = 'Golden sky', modifier = 'MP_Arena_theme_evening' },
+    { label = 'Stage blue', modifier = 'mp_lad_day' },
+    { label = 'Stage red', modifier = 'mp_lad_judgment' },
+    { label = 'Blush', modifier = 'TinyPink01' },
+}
+```
+{/* nerve:config:end */}

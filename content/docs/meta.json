@@ -10,6 +10,7 @@
     "nerve_dispatch",
     "nerve_evidence",
     "---Server Utilities---",
+    "nerve_animpos",
     "nerve_blipcreator",
     "nerve_watermark",
     "---Changelog---",

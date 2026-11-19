@@ -1,0 +1,84 @@
+---
+title: "Overview"
+description: "Place your character anywhere in an animation with a 3D gizmo, then frame and shoot the scene with a photo camera, lights, filters, polaroids and a free camera"
+---
+
+Nerve Studios Animation Positioning lets players move and rotate their character while an emote plays, so a sit, lean or pose lands exactly where they want it. A photo camera then frames the scene with screen filters, depth blur and up to four spotlights, saves the shot and copies its link. Shots can be printed as polaroids that players hold up for others to see, and a free camera gives a quick cinematic look around.
+
+It runs on ESX, QBox or a standalone server with only ox_lib installed. The UI ships ready to use, with no build step.
+
+<Cards>
+  <Card title="Installation" icon="Rocket" href="/nerve_animpos/installation">
+    Get it running in five minutes
+  </Card>
+  <Card title="Controls" icon="Keyboard" href="/nerve_animpos/controls">
+    Keys and commands for each tool
+  </Card>
+  <Card title="Hooks" icon="Plug" href="/nerve_animpos/hooks">
+    Your own emote menu, HUD, inventory and photo storage
+  </Card>
+  <Card title="Exports" icon="Code" href="/nerve_animpos/exports">
+    Open and close the tools from your own scripts
+  </Card>
+</Cards>
+
+## Features
+
+### Animation positioning
+
+- **Any emote.** Start an emote, press F5 or type `/animpos`, and move or rotate your character with a 3D gizmo.
+- **Key card on the side** that lists every key: switch between moving and rotating, drop to the ground, switch world and local axes, confirm or cancel.
+- **Fine tune page** with live offset and rotation readouts, nudges by a step size you pick, how much of the allowed range is used, and reset position or rotation.
+- **Positioning camera** you fly with W, A, S, D, turn with the right mouse button and zoom with the wheel.
+- **Safe by design.** The character can only move a set distance from where the emote started, and goes back to that spot when the emote ends, so the tool can't be used to get through walls.
+- **See-through character** with an outline while adjusting. Only the player adjusting sees it.
+
+### Photo camera
+
+- **Orbit camera** with mouse look, scroll zoom and W, A, S, D movement within a set distance of your character, plus a focal length readout.
+- **90 screen filters** with search and per-player favourites.
+- **Vignette and depth blur** with an adjustable focus depth that follows your character.
+- **Up to four spotlights** placed on a top and side light stage, each with height, aim at your character or by hand, tilt, power, width, edge softness and colour.
+- **Take photo** saves the shot and copies its link. Filters, vignette, blur and lights end up in the photo, the interface does not.
+- **Hide interface** to frame the shot on a clean screen.
+- **Settings are kept** between openings, so players don't set up their look again each time.
+
+### Polaroids and free camera
+
+- **Polaroids.** Print a shot as an inventory item, using up one blank film. Players hold it up to look at it, and people nearby see the photo on the print in their hand.
+- **Camera item** that opens the photo camera, if you want the camera to be something players buy or find.
+- **Free camera.** Hold V for a second for a cinematic camera around your character. It closes on Escape, on V, or a few seconds after the character goes out of sight.
+
+### For server owners
+
+- **Head text** above players using a tool: "Adjusting position", "Taking a photo" or "In free camera".
+- **Fight and weapon blocks.** The cameras stay closed for a while after a player takes or deals damage, and the photo camera while a weapon is in hand.
+- **ACE permissions** per tool, with the photo camera checked again on the server for every shot.
+- **Rebindable keys.** Players change every key in the game's key bindings.
+- **Emote menus detected on their own:** rpemotes-reborn, rpemotes, scully_emotemenu, dpemotes, cdev_emotemenu, rd-animations, r_animations and cylex_animmenuv2.
+- **Hooks** for your own notifications, emote menu, HUD, inventory and photo storage.
+- **Your accent colour** on every screen. The default is monochrome white.
+- **Translatable.** Every player-facing text is in the locale file.
+
+## Requirements
+
+| Requirement | Notes |
+| --- | --- |
+| [ox_lib](https://github.com/overextended/ox_lib/releases) | Required |
+| [screenshot-basic](https://github.com/citizenfx/screenshot-basic) | Needed to save photos. Without it the camera opens, but photos can't be saved |
+| [Fivemanage](https://fivemanage.com) account | Default photo storage. Any other storage works through a [hook](/nerve_animpos/hooks#editableuploadphoto) |
+| [ox_inventory](https://github.com/overextended/ox_inventory/releases) | Only for polaroids and the camera item. Another inventory works through [hooks](/nerve_animpos/hooks#inventory) |
+| Framework | None needed. Works on ESX, QBox or a standalone server |
+
+There is no database and no SQL to run.
+
+## Performance
+
+- Nothing runs while no tool is open. About 0.00 ms in the client resmon while idle.
+- The console stays silent unless `debug = true`, apart from one warning on start when screenshot-basic is missing.
+
+<Callout type="info">
+
+New here? Start with [Installation](/nerve_animpos/installation).
+
+</Callout>
