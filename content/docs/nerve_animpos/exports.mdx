@@ -1,0 +1,36 @@
+---
+title: "Exports"
+description: "Client exports other resources can call to open, close and check the Nerve Studios Animation Positioning tools."
+---
+
+Other resources can open and close each tool on the player's own game, for example from a radial menu or a phone app. All exports are **client side**: call them from a client script.
+
+| Export | Returns | What it does |
+| --- | --- | --- |
+| `OpenAnimPos()` | nothing | Opens animation positioning |
+| `CloseAnimPos()` | nothing | Closes positioning and ends any placed position |
+| `IsAnimPosOpen()` | `boolean` | Whether the positioning editor is open |
+| `OpenPhotoCam()` | nothing | Opens the photo camera |
+| `ClosePhotoCam()` | nothing | Closes the photo camera |
+| `IsPhotoCamOpen()` | `boolean` | Whether the photo camera is open |
+| `OpenFreeCam()` | nothing | Opens the free camera |
+| `CloseFreeCam()` | nothing | Closes the free camera |
+| `IsFreeCamOpen()` | `boolean` | Whether the free camera is open |
+
+The open exports run the same checks as the keys: the tool must be enabled, the player needs its permission, no other tool may be open, and the fight and weapon blocks apply. When a check fails, the player gets the usual message. See [When a tool won't open](/nerve_animpos/controls#when-a-tool-wont-open).
+
+## Example [#example]
+
+```lua
+-- Open the photo camera from your own menu
+exports.nerve_animpos:OpenPhotoCam()
+
+-- Close whatever is open before a cutscene
+if exports.nerve_animpos:IsPhotoCamOpen() then
+    exports.nerve_animpos:ClosePhotoCam()
+end
+if exports.nerve_animpos:IsFreeCamOpen() then
+    exports.nerve_animpos:CloseFreeCam()
+end
+exports.nerve_animpos:CloseAnimPos()
+```

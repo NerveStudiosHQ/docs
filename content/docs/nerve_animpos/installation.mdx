@@ -1,0 +1,121 @@
+---
+title: "Installation"
+description: "Install Nerve Studios Animation Positioning, set up photo storage and the polaroid items, and check every tool in game."
+---
+
+## Requirements
+
+- [ox_lib](https://github.com/overextended/ox_lib/releases), started before this resource
+- [screenshot-basic](https://github.com/citizenfx/screenshot-basic) to save photos
+- A [Fivemanage](https://fivemanage.com) API key for photo storage, or your own storage through [`Editable.UploadPhoto`](/nerve_animpos/hooks#editableuploadphoto)
+- [ox_inventory](https://github.com/overextended/ox_inventory/releases) for polaroids and the camera item (optional)
+- No framework is needed. The script works on ESX, QBox or a standalone server.
+- No database. There is no SQL to run.
+
+## Step 1: Add the resource [#step-1-add-the-resource]
+
+1. Download `nerve_animpos` from your Cfx.re Portal and unzip it.
+2. Make sure the folder is named exactly `nerve_animpos`.
+3. Put it in your `resources` folder, for example `resources/[nerve]/nerve_animpos`.
+
+<Callout type="warn">
+
+Don't rename the folder. The inventory items and other resources call the script by the name `nerve_animpos`.
+
+</Callout>
+
+## Step 2: Add it to server.cfg [#step-2-add-it-to-server-cfg]
+
+Add it to `server.cfg` **after** its requirements, with your Fivemanage API key:
+
+```cfg
+ensure ox_lib
+ensure screenshot-basic
+ensure ox_inventory
+ensure nerve_animpos
+
+set nerve_animpos:fivemanage "your-fivemanage-api-key"
+```
+
+Use `set`, not `setr`. The key stays on the server and players never receive it. Leave out `ensure ox_inventory` if you don't use it.
+
+## Step 3: Add the items [#step-3-add-the-items]
+
+Skip this step if you don't want polaroids. For polaroids, add both items to `ox_inventory/data/items.lua`:
+
+```lua
+['polaroid'] = {
+    label = 'Polaroid',
+    weight = 10,
+    stack = false,
+    close = true,
+    consume = 0,
+    server = { export = 'nerve_animpos.usePolaroid' },
+},
+['polaroid_empty'] = {
+    label = 'Polaroid film',
+    weight = 10,
+},
+```
+
+Each print uses up one `polaroid_empty`. To print without film, set `photoCam.polaroid.blank.required = false`. Give players film through your shops or crafting as usual.
+
+If you turn on the camera item with `photoCam.item.enabled = true`, add it too:
+
+```lua
+['photo_cam'] = {
+    label = 'Camera',
+    weight = 500,
+    consume = 0,
+    server = { export = 'nerve_animpos.useCamera' },
+},
+```
+
+Add an image for each item to `ox_inventory/web/images/` with the same name, for example `polaroid.png`.
+
+## Step 4: Configure [#step-4-configure]
+
+Open `shared/config.lua`. Every option has a comment that explains it. The defaults work for most servers, but these are worth checking:
+
+- `ui.accent` sets the colour of every screen. White keeps it monochrome. Try `'#a855f7'` for violet.
+- `permissions` limits a tool to players with an ACE permission.
+- `animPos.maxDistance` sets how far players may move their character from where the emote started.
+- `photoCam.block` and `freeCam.block` set how long the cameras stay closed after a fight.
+
+See [Configuration](/nerve_animpos/configuration) for every option.
+
+## Step 5: Start and test [#step-5-start-and-test]
+
+1. Restart your server, or run `ensure nerve_animpos` in the console.
+2. Check the server console. If it says **`screenshot-basic is not running`**, start screenshot-basic before `nerve_animpos`.
+3. Join the server, start any emote and press **F5**. Move your character with the gizmo and press **Enter**.
+4. Press **F6** for the photo camera and click **Take photo**. A link to the photo is copied to your clipboard.
+5. Click **Print polaroid**, then use the polaroid from your inventory to hold it up.
+6. Hold **V** for a second for the free camera.
+
+See [Controls](/nerve_animpos/controls) for every key.
+
+## Version check
+
+On start, the server console says whether the script is up to date, with a download link when a new version is out. To turn it off, add this to `server.cfg`:
+
+```cfg
+set nerve:versioncheck false
+```
+
+## Translations
+
+All player-facing text is in `locales/en.json`. To translate it, copy the file to your language code (for example `locales/de.json`), translate the values, and set ox_lib's language in `server.cfg`:
+
+```cfg
+setr ox:locale de
+```
+
+## Updating
+
+1. Back up `shared/config.lua`, `shared/config_filters.lua`, `shared/editable.lua` and any locale files you changed.
+2. Replace the resource folder with the new version.
+3. Copy your changes back.
+4. Restart the resource.
+
+Polaroids players already printed keep their photo.

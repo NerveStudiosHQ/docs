@@ -1,0 +1,112 @@
+---
+title: "Controls"
+description: "The keys and commands for Nerve Studios Animation Positioning: positioning, the photo camera, polaroids and the free camera."
+---
+
+## Commands and keys
+
+| Tool | Command | Default key |
+| --- | --- | --- |
+| Animation positioning | `/animpos` | F5 |
+| Photo camera | `/photocam` | F6 |
+| Free camera | none | Hold V for 1 second |
+
+Players rebind every key in **Settings > Key Bindings > FiveM**. The default keys only apply to players who haven't bound them yet.
+
+Change the names and keys under `animPos`, `photoCam` and `freeCam` in `shared/config.lua`. Set `command` or `key` to `false` to turn either off. `freeCam.holdTime` sets how long V must be held.
+
+## Animation positioning [#animation-positioning]
+
+Positioning opens only while the player is in an emote, on foot and alive. Drag the gizmo's arrows to move the character and its rings to rotate it.
+
+The key card on the right lists these keys:
+
+| Key | What it does |
+| --- | --- |
+| R | Switch between moving and rotating |
+| G | Drop the character to the ground |
+| L | Switch between world and local axes |
+| Right mouse button | Hold to look around with the camera |
+| F | Open the fine tune page |
+| Enter | Keep the new position |
+| Escape | Cancel and put the character back |
+
+The camera flies with W, A, S, D, faster while Shift is held, and the wheel zooms.
+
+### Fine tune [#fine-tune]
+
+The fine tune page shows the exact offset in centimetres and the rotation in degrees, each with buttons to nudge by the step size picked above it. Bars show how much of the allowed range is used, and the card turns amber when the limit is reached. **Reset** puts the position or the rotation back.
+
+On this page, the arrow keys, Page Up and Page Down, and `,` and `.` nudge by one step. **Back**, F or Backspace returns to the key card.
+
+### How long a position holds [#how-long-a-position-holds]
+
+A confirmed position holds until the emote ends or the player jumps or walks. The keys that end it are `animPos.endKeys`. With `animPos.returnToStart = true`, the character then goes back to where the emote started.
+
+Players can't move further than `animPos.maxDistance` from where the emote started: 2 metres sideways and 1.5 metres up or down by default.
+
+## Photo camera [#photo-camera]
+
+| Key | What it does |
+| --- | --- |
+| Mouse button shown on screen | Hold to look around (`photoCam.camera.lookButton`) |
+| Wheel | Zoom |
+| W, A, S, D | Move the camera, within `photoCam.camera.move.maxDistance` |
+| Q and E | Switch between the **Effects** and **Lighting** tabs |
+| Escape | Close the camera |
+
+The settings card on the right has two tabs:
+
+- **Effects:** the screen filter with search and favourites, vignette, depth blur and focus depth.
+- **Lighting:** a top and side stage to place each light, with aim, tilt, power, width, edge softness and colour. `photoCam.lights.count` sets how many lights there are, from 1 to 4, and `0` hides the tab.
+
+The foot of the card holds **Take photo** and **Print polaroid**. **Hide interface** clears the screen for framing. The settings stay as the player left them the next time they open the camera.
+
+Players wait `photoCam.shot.cooldown` seconds between photos.
+
+## Polaroids [#polaroids]
+
+**Print polaroid** saves the shot and gives the player a `polaroid` item that carries the photo. It uses up one `polaroid_empty` unless `photoCam.polaroid.blank.required` is `false`.
+
+Using a polaroid from the inventory holds it up. The player sees the photo on screen, and people within `photoCam.polaroid.showDistance` metres see it on the print in their hand. Escape or Backspace puts it away.
+
+## Free camera [#free-camera]
+
+Hold V for a second to open it. The camera follows the mouse, W, A, S, D move it within `freeCam.camera.maxDistance`, and the wheel zooms. Escape, Backspace or V closes it.
+
+With `freeCam.hiddenClose` on, the camera closes when the character has been out of sight for 5 seconds, behind a wall or off screen.
+
+## When a tool won't open [#when-a-tool-wont-open]
+
+The player gets a message saying why:
+
+| Message | Why |
+| --- | --- |
+| "Start an animation first, then adjust its position." | Positioning needs an emote playing |
+| "You can't adjust an animation inside a vehicle." | Positioning works on foot only |
+| "Close the camera you have open first." | One tool at a time |
+| "You can't do that right now." | The player is dead or the pause menu is open |
+| "You don't have access to this." | The tool's ACE permission is set and the player doesn't have it |
+| "You were just in a fight. Try again in 4 min." | `photoCam.block.damage` or `freeCam.block.damage` |
+| "Put your weapon away first." | `photoCam.block.weapon` |
+| "You can't use this right now." | Your own check in [`Editable.CanOpen`](/nerve_animpos/hooks#editablecanopen) |
+
+## Permissions [#permissions]
+
+Every player can use every tool by default. To limit one, set an ACE permission name in `shared/config.lua`:
+
+```lua
+permissions = {
+    animPos  = false,
+    photoCam = 'nerve_animpos.photo',
+    freeCam  = false,
+},
+```
+
+Then grant it in `server.cfg`:
+
+```cfg
+add_ace group.vip nerve_animpos.photo allow
+```
+
+The photo camera's permission is checked again on the server for every shot.

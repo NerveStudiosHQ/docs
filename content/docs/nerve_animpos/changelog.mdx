@@ -1,0 +1,26 @@
+---
+title: "Changelog"
+description: "Release history for Animation Positioning."
+---
+
+{/* Generated from CHANGELOG.md by docs-sync.js. Edit that file, not this page. */}
+
+## 1.0.0 (2026-11-18) [#v1-0-0]
+
+#### Added
+- Animation positioning (`/animpos` or F5): while any emote plays, move and rotate your character with a 3D gizmo and a compact key card on the side. Press F for fine tune: nudges with step sizes, live offset and rotation readouts, reset position and reset rotation. G drops you to the ground, Enter confirms, Escape cancels.
+- Positioning camera you fly with W, A, S, D, turn with the right mouse button and zoom with the wheel, kept within a set distance of your character.
+- Movement limits around where the emote started, so the tool can't be used to walk through walls, and a return to that spot when the emote ends or the player moves.
+- Your own character turns see-through with an outline while you adjust it; nobody else sees that.
+- Photo camera (`/photocam` or F6): orbit camera with mouse look, scroll zoom and W, A, S, D movement on a leash. Controls and a focal length readout sit top left, settings in a card on the right with Q / E tabs, level-meter sliders and the shutter built into its foot.
+- 90 screen filters with search and per-player favourites, a vignette, and depth blur with an adjustable focus depth that follows your character.
+- Up to four spotlights placed on a top and side light stage, each with position, height, aim at character or manual aim, tilt, power, width, edge softness and colour.
+- Take photo saves the shot and copies its link. Vignette, filters, blur and lights are all in the saved photo, the HUD is not.
+- Polaroids: print a shot as an item (uses one blank film), then hold it up to look at it while people nearby see the photo on the print in your hand.
+- Optional camera item that opens the photo camera.
+- Free camera: hold V for a second for a cinematic camera around your character. It closes on Escape, on V, or a few seconds after your character goes out of sight.
+- People nearby see "Adjusting position", "Taking a photo" or "In free camera" above your head.
+- The cameras stay closed for a while after you take or deal damage, and the photo camera while a weapon is in hand.
+- ACE permissions per tool, commands and keys that players can rebind, exports to open and close each tool, and hooks for your own notifications, emote menu, HUD, inventory and photo storage.
+- Works on ESX, QBox or a standalone server, with ox_lib as the only requirement.
+- Server console shows on start whether the script is up to date, with a download link when a new version is out (`set nerve:versioncheck false` turns it off).

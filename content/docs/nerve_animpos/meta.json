@@ -1,0 +1,14 @@
+{
+  "title": "Animation Positioning",
+  "icon": "Camera",
+  "pages": [
+    "overview",
+    "installation",
+    "configuration",
+    "controls",
+    "hooks",
+    "exports",
+    "troubleshooting",
+    "changelog"
+  ]
+}

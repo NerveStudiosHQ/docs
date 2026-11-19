@@ -1,0 +1,127 @@
+---
+title: "Hooks"
+description: "Plug your own notifications, emote menu, HUD, inventory and photo storage into Nerve Studios Animation Positioning through shared/editable.lua."
+---
+
+`shared/editable.lua` holds the functions you can change to fit your server. Each one has a working default. The file loads on both the player's game and the server, and the section each hook is in decides where it runs.
+
+## Editable.Notify [#editablenotify]
+
+Runs on both sides. Shows the script's notifications with ox_lib by default. On the player's game `source` is `nil`; on the server it is the player's server id.
+
+```lua
+function Editable.Notify(source, message, kind)
+    -- message is already translated
+    -- kind is 'success', 'error' or 'inform'
+    if IsDuplicityVersion() then
+        TriggerClientEvent('my_notify:send', source, message, kind)
+    else
+        exports['my_notify']:Send(message, kind)
+    end
+end
+```
+
+While the photo camera is open, the script shows its own toast instead, so messages are not hidden under the camera screen.
+
+## Editable.IsPlayingAnim [#editableisplayinganim]
+
+Runs on the player's game. Decides whether the player is in an emote. Positioning only opens while it returns `true`, and a placed position ends when it turns `false`.
+
+These emote menus are detected on their own: rpemotes-reborn, rpemotes, scully_emotemenu, dpemotes, cdev_emotemenu, rd-animations, r_animations and cylex_animmenuv2. The first one that is running decides. For another menu, add a line to the `emoteMenus` list above the function, with the resource name and a check that returns whether an emote is playing:
+
+```lua
+{ resource = 'my_emotes', check = function() return exports.my_emotes:IsInEmote() end },
+```
+
+With no known emote menu running, it returns `true`. Positioning then always opens, and a placement ends when the player jumps or moves.
+
+## Editable.CanOpen [#editablecanopen]
+
+Runs on the player's game. An extra check before a tool opens. `tool` is `'animPos'`, `'photoCam'` or `'freeCam'`. Return `false` to block it, with an optional message for the player:
+
+```lua
+function Editable.CanOpen(tool)
+    if LocalPlayer.state.isCuffed then
+        return false, 'You can\'t do that while cuffed.'
+    end
+    return true
+end
+```
+
+Without a message, the player sees "You can't use this right now."
+
+<Callout type="warn">
+
+This runs on the player's own game. The ACE permissions in `shared/config.lua` are the check to rely on for anything of value.
+
+</Callout>
+
+## Editable.OnOpen and Editable.OnClose [#editableonopen]
+
+Run on the player's game when a tool opens and closes, with the same `tool` names. Hide and show your HUD here:
+
+```lua
+function Editable.OnOpen(tool)
+    exports['my_hud']:SetVisible(false)
+end
+
+function Editable.OnClose(tool)
+    exports['my_hud']:SetVisible(true)
+end
+```
+
+The game's own HUD and minimap are hidden on their own while a camera is open.
+
+## Editable.UploadPhoto [#editableuploadphoto]
+
+Runs on the server. Stores a photo and returns its public link. `image` is the player's screen as a data URI (`data:image/jpeg;base64,...`).
+
+By default it uploads to Fivemanage with the key from `set nerve_animpos:fivemanage "<key>"` in `server.cfg`. To store photos anywhere else, replace the body and return the link, or `nil` when the upload failed:
+
+```lua
+function Editable.UploadPhoto(source, image)
+    local p = promise.new()
+    PerformHttpRequest('https://my-storage.example/upload', function(status, body)
+        local data = status == 200 and body and json.decode(body)
+        p:resolve(data and data.url or nil)
+    end, 'POST', json.encode({ image = image }), {
+        ['Content-Type'] = 'application/json',
+    })
+    return Citizen.Await(p)
+end
+```
+
+Return a full web link. Use `https://`, because polaroids show the photo to other players by loading that link. Anything else counts as a failed upload.
+
+## Inventory [#inventory]
+
+Runs on the server. Polaroids and the camera item use ox_inventory when it is running. For another inventory, fill in all four adapters and they are used instead. Leave them `nil` to keep ox_inventory.
+
+| Adapter | Gets | Returns |
+| --- | --- | --- |
+| `Editable.ItemCount(source, item)` | Player id and item name | How many the player has |
+| `Editable.RemoveItem(source, item, count)` | Player id, item name and count | `true` when removed |
+| `Editable.AddItem(source, item, count, metadata)` | Player id, item name, count and the item's metadata | `true` when given |
+| `Editable.RegisterUsable(item, onUse)` | Item name and a function | Nothing. Call `onUse(source, metadata)` when a player uses the item |
+
+A polaroid's photo is in its metadata, so your inventory must keep item metadata.
+
+```lua
+Editable.ItemCount = function(source, item)
+    return exports.my_inventory:GetItemCount(source, item)
+end
+
+Editable.RemoveItem = function(source, item, count)
+    return exports.my_inventory:RemoveItem(source, item, count)
+end
+
+Editable.AddItem = function(source, item, count, metadata)
+    return exports.my_inventory:AddItem(source, item, count, metadata)
+end
+
+Editable.RegisterUsable = function(item, onUse)
+    exports.my_inventory:RegisterUsableItem(item, function(source, itemData)
+        onUse(source, itemData.metadata or {})
+    end)
+end
+```

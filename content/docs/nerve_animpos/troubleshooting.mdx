@@ -1,0 +1,91 @@
+---
+title: "Troubleshooting"
+description: "Fixes for the most common Nerve Studios Animation Positioning problems, with the exact messages and console lines."
+---
+
+Most problems show up as a message to the player or a line in the **server console**. Set `debug = true` in `shared/config.lua` for the reason behind a failed photo.
+
+## Photos [#photos]
+
+### "Photos are not set up on this server." [#photos-not-set-up]
+
+screenshot-basic isn't running. The server console says so on start:
+
+```
+[nerve_animpos] screenshot-basic is not running: the photo camera opens, but photos cannot be saved.
+```
+
+Install [screenshot-basic](https://github.com/citizenfx/screenshot-basic) and `ensure` it **before** `nerve_animpos` in `server.cfg`.
+
+### "The photo could not be saved. Try again." [#photo-could-not-be-saved]
+
+The screenshot was taken but storing it failed. Turn on `debug` and take a photo again. The server console shows one of these:
+
+- **`upload returned no URL; is the nerve_animpos:fivemanage convar set?`**: the Fivemanage key is missing or wrong. Check `set nerve_animpos:fivemanage "<key>"` in `server.cfg`, with `set` and not `setr`, and restart the server.
+- **`Editable.UploadPhoto failed: ...`**: your own `Editable.UploadPhoto` errored. The text after it says where. See [Hooks](/nerve_animpos/hooks#editableuploadphoto).
+- **`screenshot failed for ...`**: the player's game didn't send a picture. This is usually a one-off; ask them to try again.
+
+### "Wait a moment before the next shot." [#wait-before-next-shot]
+
+The player is within `photoCam.shot.cooldown` seconds of their last photo. Lower it if your players take photos in quick bursts.
+
+## Animation positioning [#animation-positioning]
+
+### "Start an animation first, then adjust its position." [#start-an-animation-first]
+
+Positioning only opens while an emote plays. If an emote is playing and the message still shows, your emote menu's check says it isn't. Check that your emote menu's resource name matches the one in `Editable.IsPlayingAnim`, or add your menu there. See [Hooks](/nerve_animpos/hooks#editableisplayinganim).
+
+### The character won't move any further [#limit-reached]
+
+The card turns amber with **Limit reached**: the character is at `animPos.maxDistance` from where the emote started. Raise `horizontal` or `vertical` if your emotes need more room. Keep the limits small enough that players can't move through walls.
+
+### The position resets on its own [#position-resets]
+
+A placed position ends when the emote ends, or when the player presses one of `animPos.endKeys` (jump and the movement keys by default). With `animPos.returnToStart = true`, the character then goes back to where the emote started. That is on purpose.
+
+### Other players don't see the new position [#others-dont-see-position]
+
+Your server blocks props created by players, usually with `sv_entityLockdown strict`. The script places the character with a small invisible prop, and the polaroid in the player's hand is a prop too. Use `sv_entityLockdown relaxed`, or allow this resource's props.
+
+## Polaroids and items [#polaroids-and-items]
+
+### There is no Print polaroid button [#no-print-polaroid-button]
+
+- ox_inventory isn't running, and no inventory adapter is filled in under [Inventory](/nerve_animpos/hooks#inventory).
+- `photoCam.polaroid.enabled` is `false`.
+
+### "You need a Polaroid film to print a polaroid." [#need-film]
+
+The player has no `polaroid_empty`. Give them film, or set `photoCam.polaroid.blank.required = false`.
+
+### Using a polaroid or the camera item does nothing [#item-does-nothing]
+
+The item's `server.export` in `ox_inventory/data/items.lua` doesn't point at this resource. It must be exactly `nerve_animpos.usePolaroid` for the polaroid and `nerve_animpos.useCamera` for the camera, and the folder must be named `nerve_animpos`. Restart ox_inventory after changing items. For the camera item, also check `photoCam.item.enabled = true`.
+
+### The polaroid shows no photo [#polaroid-shows-no-photo]
+
+The photo link no longer loads. If you changed your photo storage, older prints point at the old links. If you changed `photoCam.polaroid.prop.model`, change `prop.texture` with it, since the photo is painted onto that model's picture.
+
+## A filter does nothing [#filter-does-nothing]
+
+Its timecycle modifier name is misspelled in `shared/config_filters.lua`. Copy the name exactly, or remove the entry.
+
+## A tool won't open [#a-tool-wont-open]
+
+The player gets a message that says why. See [When a tool won't open](/nerve_animpos/controls#when-a-tool-wont-open). If nothing happens at all:
+
+- The tool's `enabled` is `false`, or its `key` and `command` are `false`.
+- The player rebound the key in **Settings > Key Bindings > FiveM**.
+- ox_lib isn't started before `nerve_animpos`.
+
+## The screen is blank or the cursor is stuck [#cursor-stuck]
+
+Press Escape to close the tool. The cursor is also released when the resource stops or restarts. If a screen never appears or looks broken, the UI files are missing or damaged: download the resource again from your Cfx.re Portal.
+
+## "Could not check for updates" in the server console [#could-not-check-for-updates]
+
+The server couldn't reach the version list. This doesn't affect the script. Turn the check off with `set nerve:versioncheck false` in `server.cfg`.
+
+## Still stuck? [#still-stuck]
+
+Set `debug = true` in `shared/config.lua`, restart the resource, and reproduce the problem. Then open a ticket on [Discord](https://discord.gg/nervestudios) with the server console and F8 console output. See [Support](/general/support) for what to include.

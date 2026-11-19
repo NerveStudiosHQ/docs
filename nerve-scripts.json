@@ -1,4 +1,12 @@
 {
+  "nerve_animpos": {
+    "title": "Animation Positioning",
+    "icon": "Camera",
+    "category": "Server Utilities",
+    "description": "Place your character anywhere in an animation with a 3D gizmo, then frame and shoot the scene with a photo camera, lights, filters, polaroids and a free camera",
+    "version": "1.0.0",
+    "date": "2026-11-18"
+  },
   "nerve_blipcreator": {
     "title": "Blip Creator",
     "icon": "MapPin",
