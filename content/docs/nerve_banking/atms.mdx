@@ -1,0 +1,81 @@
+---
+title: "ATMs"
+description: "How Nerve Studios Banking draws the bank on the ATM's own screen, how to line a model up in game with /atmcalibrate, and how to add your own ATMs."
+---
+
+Every ATM prop in the GTA world works as an ATM out of the box. The player walks up, uses it with ox_target (or the key prompt), and the camera moves in front of the machine. The bank is drawn right on the machine's screen, and the player uses it with the mouse. The number keys, Enter and Backspace work too.
+
+ATMs need a debit card. Players order one at a bank branch under **Cards**, then insert it at the ATM and type the PIN.
+
+## What players can do [#what-players-can-do]
+
+- **Withdraw cash,** with quick-pick amounts from `quick` in `shared/config_atm.lua`.
+- **Check the balance** and a **mini statement** of the latest transactions.
+- **Deposit cash,** unless `deposit = false`.
+- **Change the PIN,** unless `pinChange = false`.
+- **Transfer to an account number,** only when you set `transfer = true`. It is off by default, so transfers happen at a branch.
+
+ATM withdrawals have their own, tighter limits under `atm` in `shared/config_limits.lua` (5,000 per withdrawal and 20,000 per day by default), on top of the player's normal limits. Set `maxWithdraw` in `shared/config_atm.lua` to cap one withdrawal further.
+
+The session ends when the player picks **Finish**, after `sessionSeconds` without input, or when they walk more than `leaveDistance` metres away. The card is returned each time.
+
+## On the screen or full screen [#screen-modes]
+
+`mode` in `shared/config_atm.lua` decides where the ATM is drawn:
+
+| `mode` | What players see |
+| --- | --- |
+| `'auto'` (default) | On the machine's own screen when the model has a screen position. Otherwise, or when the screen doesn't start within 5 seconds, a full-screen ATM terminal |
+| `'dui'` | Always on the machine's own screen. Shows an error instead of the full-screen terminal when it fails, which is useful while calibrating |
+| `'nui'` | Always the full-screen ATM terminal |
+| `'off'` | ATMs do nothing |
+
+Both look and work the same. Only one ATM screen is ever loaded per player, and it is unloaded after `duiIdleSeconds` without use.
+
+With `screenMethod = 'auto'`, the page takes the place of the machine's own screen picture where the model has one, so it fits the glass exactly. While a player uses an ATM, other ATMs of the same model near them show their screen too, on their game only. Set `screenMethod = 'quad'` to draw the page over the glass instead, so only the machine in use shows it.
+
+Set `camera = false` to keep the player's own view, and `hideHud = false` to keep the HUD and minimap on screen.
+
+## Calibrating a screen [#calibrating-a-screen]
+
+The screen positions for the four GTA ATM models (`prop_atm_01`, `prop_atm_02`, `prop_atm_03` and `prop_fleeca_atm`) ship ready. If the picture sits off the glass on a model, or you add a model from a custom map, line it up in game:
+
+1. Stand within 5 metres of the ATM as an admin.
+2. Run `/atmcalibrate`.
+3. Move the picture until it sits on the glass, then press **Enter** to save.
+
+| Key | What it does |
+| --- | --- |
+| Arrow keys | Move the picture |
+| Page Up and Page Down | Push it out and in |
+| `+` and `-`, or the mouse wheel | Resize it |
+| Q and E | Tilt it |
+| Z and X | Roll it |
+| Tab | Move one corner at a time |
+| Shift | Fine steps |
+| C | Switch to the camera: the arrows move it, Page Up and Page Down move it closer and further, and the wheel zooms |
+| Delete | Reset |
+| Enter | Save |
+| Backspace | Cancel |
+
+What you save applies to that model for every player, straight away, and stays after a restart. The values are also printed in the F8 console, ready to paste over that model's entry in `shared/config_atms.lua`.
+
+Only admins can calibrate. Rename the command, or set `calibrate = false` to remove it, in `shared/config_atm.lua`.
+
+## Adding ATMs [#adding-atms]
+
+There are three ways to add an ATM that isn't already in the world:
+
+- **From the admin dashboard.** Open **ATMs**, stand where the ATM should be, pick a model and choose **Place here**. It is placed at your position, facing your way. You can turn it off or remove it there later.
+- **In `shared/config_atms.lua`.** Add an entry under `locations` with an `id`, `label`, `model` and `coords`. Set `spawn = true` to place the prop, or `false` to use a prop your map already has there.
+- **A new model.** Add the prop to `models` in `shared/config_atms.lua`, then calibrate its screen with `/atmcalibrate`. A model without a `screen` opens the full-screen terminal.
+
+Each model and location can override the ATM settings with `settings`, for example `{ deposit = false, maxWithdraw = 1000 }`, or charge its own fee.
+
+To show the ATMs from `locations` and the dashboard on the map, set `blips.enabled = true` in `shared/config_atm.lua`. The ATMs already in the GTA world have no blip.
+
+## Which map ATMs open [#only-allowing-your-maps-atms]
+
+The server can't see map props, so it only opens a map ATM at a known spot. `props` in `shared/config_atms.lua` ships with every ATM on the base map (121 of them), so the GTA world's ATMs work out of the box and a modified client can't open an ATM anywhere else. ATMs in `locations` and ones placed from the dashboard are always allowed.
+
+If your map mods add ATM props, add each one's position to `props` as a `vec3`. If you can't list them, set `trustMapProps = true` to open any ATM prop a player stands at.

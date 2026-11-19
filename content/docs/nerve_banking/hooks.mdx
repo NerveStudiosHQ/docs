@@ -1,0 +1,134 @@
+---
+title: "Hooks"
+description: "Plug your own notify, inventory, admin checks, credit rules and logging into Nerve Studios Banking from shared/editable.lua."
+---
+
+`shared/editable.lua` holds the functions you can change to fit your server. Each one works out of the box with ox_lib and ox_inventory. Edit the body, keep the name and arguments, and restart the resource.
+
+Hooks only report and adapt. Balances, permissions and limits are always decided by the bank itself, whatever a hook returns. If a server hook throws an error, the bank carries on and the server console prints `Editable.<name> failed: ...` with the reason.
+
+## Editable.Notify [#editablenotify]
+
+```lua
+function Editable.Notify(source, message, kind)
+```
+
+Shows a notification. It runs on both sides: on the server `source` is the player to notify, on the client it is `nil` and the local player sees it. `kind` is `'success'`, `'error'` or `'inform'`. The file has commented examples for the qbx_core and ESX notifications.
+
+## Editable.IsAdmin [#editableisadmin]
+
+```lua
+function Editable.IsAdmin(source, frameworkAdmin)
+    return IsPlayerAceAllowed(source, 'nerve_banking.admin') or frameworkAdmin
+end
+```
+
+Server only. Whether a player may open the admin dashboard and use `/atmcalibrate`. `frameworkAdmin` is `true` when your framework already treats the player as an admin (see [Who counts as an admin](/nerve_banking/admin#who-counts-as-an-admin)). Return `true` or `false` to use your own staff system:
+
+```lua
+function Editable.IsAdmin(source, frameworkAdmin)
+    return exports.my_staff:IsStaff(source, 'finance')
+end
+```
+
+## Editable.CanUseBank [#editablecanusebank]
+
+```lua
+function Editable.CanUseBank()
+    return not IsEntityDead(cache.ped)
+end
+```
+
+Client only. Return `false` to stop the player using banks and ATMs right now, for example while cuffed or dead. They see "You can't use the bank right now" at a counter, or "You can't use an ATM right now" at an ATM.
+
+## Card item [#card-item]
+
+Four server hooks hand out and read the `bank_card` item. They are written for ox_inventory. For another inventory, change all four. Each one only runs while `useItem = true` in `shared/config_cards.lua`.
+
+### Editable.CardItemReady [#editablecarditemready]
+
+```lua
+function Editable.CardItemReady(item)
+```
+
+Return `true` when the item exists in your inventory. While it returns `false`, cards stay in the bank and every ATM offers all of a player's cards.
+
+### Editable.GiveCardItem [#editablegivecarditem]
+
+```lua
+function Editable.GiveCardItem(source, item, card)
+```
+
+Gives the player the card item when a card is ordered or replaced. `card` has `id`, `last4`, `holder`, `label` and `expires`. Store `card.id` on the item (ox_inventory keeps it as `cardId` in the metadata), so ATMs know which card it is. Return `true` when the item was given. When the player has no room, they are told to choose **Replace** on the card at a bank to collect it.
+
+### Editable.GetCarriedCards [#editablegetcarriedcards]
+
+```lua
+function Editable.GetCarriedCards(source, item)
+```
+
+Return a list of the card ids the player carries, for example `{ 12, 15 }`. ATMs only offer these cards.
+
+### Editable.RemoveCardItem [#editableremovecarditem]
+
+```lua
+function Editable.RemoveCardItem(source, item, cardId)
+```
+
+Takes the card item with that id away, for example when the card is cancelled or replaced.
+
+## Editable.CreditScore [#editablecreditscore]
+
+```lua
+function Editable.CreditScore(identifier, score, factors)
+    return score
+end
+```
+
+Server only, with credit scores on. Changes the score a player ends up with, after the bank has worked it out from the weights in `shared/config_finance.lua`. `factors` has each factor's points before your change. Return a whole number. The result is kept inside the score range, and anything that isn't a whole number keeps the bank's own score.
+
+```lua
+-- A small bonus for players with a job
+function Editable.CreditScore(identifier, score, factors)
+    if exports.my_jobs:HasJob(identifier) then return score + 25 end
+    return score
+end
+```
+
+## Editable.OnTransaction [#editableontransaction]
+
+```lua
+function Editable.OnTransaction(tx)
+```
+
+Server only. Called after every completed transaction. Send it to your own logging here. Discord logs are already built in, see [Discord logs](/nerve_banking/admin#discord-logs). `tx` has `ref`, `kind`, `amount`, `fee`, `from`, `to`, `actor` and `reason`.
+
+```lua
+function Editable.OnTransaction(tx)
+    lib.logger(0, 'nerve_banking', ('%s %s %d'):format(tx.ref, tx.kind, tx.amount))
+end
+```
+
+## Editable.OnFraudAlert [#editableonfraudalert]
+
+```lua
+function Editable.OnFraudAlert(alert)
+```
+
+Server only. Called when the [fraud checks](/nerve_banking/admin#fraud-flags) flag something for review. Nothing happens to the player; an admin decides. Send it to your staff tools here. `alert` has `id`, `rule`, `severity`, `name` and `account`.
+
+## Editable.OnAccountStatus [#editableonaccountstatus]
+
+```lua
+function Editable.OnAccountStatus(data)
+```
+
+Server only. Called when an account is frozen or unfrozen. `data` has `account`, `status` (`'active'` or `'frozen'`), `reason` and `by`.
+
+## Editable.OnBusinessAccount [#editableonbusinessaccount]
+
+```lua
+function Editable.OnBusinessAccount(data)
+```
+
+Server only. Called when a business account is created, from the bank or from another script through [`CreateBusinessAccount`](/nerve_banking/exports#businesses). `data` has `account`, `business` and `owner`.

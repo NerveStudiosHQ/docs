@@ -1,0 +1,896 @@
+---
+title: "Configuration"
+description: "Every option in Banking's config files."
+---
+
+Each part of the bank has its own file in `shared/`. Every option has a comment explaining what it does. Restart the resource after changing any of them. Admins can see what each part is set to right now under **Settings** in the [admin dashboard](/nerve_banking/admin#the-dashboard).
+
+| File | What it sets |
+| --- | --- |
+| `shared/config.lua` | Debug, currency symbol, accent colour, lock screen, profile pictures, logo, interaction mode |
+| `shared/config_accounts.lua` | Savings, shared, business, society and government accounts |
+| `shared/config_limits.lua` | Limits and fees for deposits, withdrawals, transfers and ATMs |
+| `shared/config_cards.lua` | Debit cards, PINs, lockout, fees and the card item |
+| `shared/config_atm.lua` | ATM screen mode, camera, session length, what ATMs allow |
+| `shared/config_atms.lua` | ATM models and their screen positions, extra ATM locations |
+| `shared/config_banks.lua` | Bank branches, blips and tellers |
+| `shared/config_finance.lua` | Interest, tax, loans, credit score, overdraft and scheduled payments |
+| `shared/config_admin.lua` | Admin dashboard, exports, fraud flags and Discord logs |
+
+## Change these first [#change-these-first]
+
+- **`society.jobs`** in `shared/config_accounts.lua` lists the jobs with a society account and the lowest grade that can view, deposit, withdraw and manage it. `police`, `ambulance` and `mechanic` are set up by default. Add your own jobs, or set `allJobs = true` to give every job one.
+- **`government.accounts`** in the same file holds the city treasury and the job that runs it (`government` by default). Tax is paid into it.
+- **`shared/config_banks.lua`** lists the branches: the eight GTA banks. If an MLO moves a counter, set `coords` to where the player stands at it. Turn on a `teller` for a clerk behind the counter.
+- **`shared/config_limits.lua`** sets how much players can withdraw and transfer per transaction and per day, and any fees. ATMs have tighter limits of their own. Set `transferAnywhere = true` to allow transfers wherever the banking screen is open.
+- **`shared/config_finance.lua`** holds interest, tax, loans, credit scores and overdrafts. Each is off until you set `enabled = true`. Scheduled payments are on by default.
+- **`ui.accent`** in `shared/config.lua` is the highlight colour on the banking and ATM screens, as a hex code.
+- **`ui.unlock`** decides the lock screen: `'pin'` (the player's debit card PIN, or a hold button for players without a card), `'hold'` (press and hold) or `false` (no lock screen). **`ui.unlockMinutes`** is how long the screen stays unlocked.
+- **`interaction.mode`** is `'target'` (ox_target), `'textui'` (an ox_lib prompt and E) or `'3dtext'` (floating text and E).
+- **`useItem`** in `shared/config_cards.lua` hands cards out as the `bank_card` item. Set it to `false` to keep cards in the bank. See [Installation](/nerve_banking/installation#step-3-add-the-card-item).
+- **`transfer`** in `shared/config_atm.lua` is off by default, so transfers happen at a branch. See [ATMs](/nerve_banking/atms) for the rest.
+
+## Profile pictures [#profile-pictures]
+
+Players with Discord linked see their Discord profile picture in the bank. Everyone else keeps their initials. The picture is looked up by the player's Discord user id through the service set in `ui.avatars.api`, which must answer like Discord's user object. Set `ui.avatars.enabled = false` to keep initials for everyone and send nothing.
+
+## Your logo [#your-logo]
+
+To show your server's logo at the foot of the bank's side menu, put the image files (PNG or WebP) in the resource's `images` folder, or use https:// links, and set `ui.logo`:
+
+```lua
+logo = { mark = 'images/mark.png', wordmark = 'images/wordmark.png' },
+```
+
+The mark shows while the menu is closed. The wider wordmark is optional and shows while it is open.
+
+## Money and accounts [#money-and-accounts]
+
+- Players' checking balance is their framework bank money. Savings, shared, business, society and government accounts are held by the bank itself.
+- Amounts are whole dollars. Rates are in basis points: 100 bp is 1%.
+- Daily limits reset at 00:00 UTC. Interest, tax and overdraft fees run on fixed UTC cycles, so a restart never pays or charges the same cycle twice.
+- Fees go to the bank's own fee account, not to a player or society.
+
+## All options [#all-options]
+
+{/* nerve:config:start */}
+{/* Generated from the script's config files. Edit those, not this block. */}
+
+### `shared/config.lua` [#config]
+
+```lua title="shared/config.lua"
+-- General settings. Each part of the bank has its own file next to this one:
+--   config_accounts.lua  account types, shared, savings, business, society and government accounts
+--   config_limits.lua    deposit, withdrawal and transfer limits and fees
+--   config_cards.lua     debit cards and PINs
+--   config_atm.lua       how ATMs look and behave
+--   config_atms.lua      ATM models and extra ATM locations
+--   config_banks.lua     bank branches (where the full banking screen opens)
+--   config_finance.lua   interest, tax, loans, credit score, overdraft and scheduled payments
+--   config_admin.lua     admin dashboard, fraud flags and Discord logs
+
+return {
+    debug = false,  -- Print troubleshooting detail to the console
+    currency = '$', -- Symbol shown before amounts
+
+    -- Look of the banking screens
+    ui = {
+        accent = '#a855f7', -- Highlight colour in the banking screens and on ATM screens (hex)
+        locale = 'en-US',   -- Number and date format in the screens (any browser locale, e.g. 'de-DE')
+        unlock = 'pin',     -- Lock screen when the banking screen opens: 'pin' (the player's debit card PIN; players without a card hold a button instead), 'hold' (press and hold to unlock) or false (no lock screen)
+        unlockMinutes = 10, -- Minutes the banking screen stays unlocked before it asks for the PIN again
+        avatars = {         -- Players' Discord profile pictures in the banking screen (players without Discord linked keep their initials)
+            enabled = true,  -- false = always show initials
+            api = 'https://discord-api-cfworker.chroniclesla.workers.dev/api/v1/user/', -- Lookup service the player's Discord id is appended to; it must answer like Discord's user object with avatar.link
+        },
+        logo = false,       -- Your server's logo at the bottom of the side menu, e.g. { mark = 'images/mark.png', wordmark = 'images/wordmark.png' }: a file in this resource's images folder or an https:// link; the mark shows while the menu is closed, the wider wordmark (optional) while it is open (false = no logo)
+    },
+
+    -- How players interact with banks and ATMs
+    interaction = {
+        mode = 'target',     -- 'target' (ox_target), 'textui' (ox_lib prompt and E), or '3dtext' (floating text and E)
+        distance = 1.5,      -- Metres from a bank counter or ATM to interact
+        key = 38,            -- Control for 'textui' and '3dtext' (38 = E)
+    },
+
+    accounts = lib.load('shared.config_accounts'), -- Account types: shared/config_accounts.lua
+    limits = lib.load('shared.config_limits'),     -- Limits and fees: shared/config_limits.lua
+    cards = lib.load('shared.config_cards'),       -- Debit cards: shared/config_cards.lua
+    atm = lib.load('shared.config_atm'),           -- ATM behaviour: shared/config_atm.lua
+    atms = lib.load('shared.config_atms'),         -- ATM models and locations: shared/config_atms.lua
+    banks = lib.load('shared.config_banks'),       -- Bank branches: shared/config_banks.lua
+    finance = lib.load('shared.config_finance'),   -- Interest, tax, loans, credit, overdraft, scheduled payments: shared/config_finance.lua
+    admin = lib.load('shared.config_admin'),       -- Admin, fraud flags and Discord logs: shared/config_admin.lua
+}
+```
+
+### `shared/config_accounts.lua` [#config-accounts]
+
+```lua title="shared/config_accounts.lua"
+-- Account types and who may use them. Read by `accounts` in shared/config.lua.
+--
+-- Job grades below are the framework grade numbers (0 is the lowest grade).
+-- A grade of false means nobody gets that permission by grade alone; with
+-- bossManages on, the job's boss grade still gets everything.
+
+return {
+    -- Personal checking. Every character gets one; its balance is your framework's
+    -- own bank money, so other scripts that pay into or charge the bank keep working.
+    checking = {
+        label = 'Personal Checking', -- Name a new checking account gets (players can rename theirs)
+    },
+
+    -- Savings accounts players open themselves. They earn interest when interest is on in config_finance.lua
+    savings = {
+        enabled = true,             -- false: players can't open new savings accounts (open ones keep working)
+        label = 'Savings',          -- Name a new savings account gets when the player leaves the name empty
+        maxPerPlayer = 2,           -- Savings accounts one character can have open at once (0 = none)
+        withdrawCooldownHours = 24, -- Hours a savings account must wait after a withdrawal or transfer out before the next one (0 = no wait)
+        depositCooldownMinutes = 0, -- Minutes a savings account must wait after a deposit or transfer in before the next one (0 = no wait)
+        maxBalance = 0,             -- Most a savings account can hold, in dollars; deposits that would go over it are refused (0 = no cap)
+    },
+
+    -- Shared accounts: one owner, other players added at the bank counter with their own permissions and limits
+    shared = {
+        enabled = true,             -- false: players can't open new shared accounts (open ones keep working)
+        label = 'Shared Account',   -- Name a new shared account gets when the player leaves the name empty
+        maxPerPlayer = 2,           -- Shared accounts one character can own at once (0 = none)
+        maxHolders = 5,             -- People on one shared account besides its owner
+    },
+
+    -- Business accounts, created by other scripts through the CreateBusinessAccount export or from jobs below
+    business = {
+        enabled = true,              -- false: no new business accounts are created (existing ones keep working)
+        fromJobs = false,            -- true: the boss of any job without a society account below gets a business account for it the first time they open the bank; or a list of job names, e.g. { 'burgershot', 'bennys' }
+        maxEmployees = 25,           -- People on one business or society account besides its owner
+        maxSalary = 0,               -- Highest salary per payroll run one employee can be given, in dollars (0 = no cap)
+        payrollCooldownMinutes = 30, -- Minutes between two payroll runs a player starts on one business or society account (0 = no wait; scheduled payroll never waits)
+    },
+
+    -- Society accounts: one shared account per job, used through job grades
+    society = {
+        enabled = true,             -- false: no society accounts at all
+        bossManages = true,         -- The framework's boss grade of a job gets every permission on its society account
+        requireDuty = false,        -- Only players on duty in your framework get their job's society permissions
+        allJobs = false,            -- true: every framework job gets a society account, using `default` for jobs not listed in `jobs`
+
+        -- Grades for jobs not listed in `jobs` when allJobs is on
+        default = {
+            viewGrade = false,      -- Lowest grade that sees the balance and transactions
+            depositGrade = 0,       -- Lowest grade that can deposit
+            withdrawGrade = false,  -- Lowest grade that can withdraw and transfer out
+            manageGrade = false,    -- Lowest grade that manages the account: rename, add people, set salaries, run payroll
+        },
+
+        -- One entry per job name. label is what players see as the account's owner.
+        jobs = {
+            police = { label = 'LSPD', viewGrade = 0, depositGrade = 0, withdrawGrade = 3, manageGrade = 4 },
+            ambulance = { label = 'EMS', viewGrade = 0, depositGrade = 0, withdrawGrade = 3, manageGrade = 4 },
+            mechanic = { label = 'Mechanics', viewGrade = 1, depositGrade = 0, withdrawGrade = 3, manageGrade = 4 },
+        },
+    },
+
+    -- Government accounts. Tax is paid into the first one unless config_finance.lua names another.
+    government = {
+        -- id is fixed once in use (don't rename it). Players of `job` at minGrade or above see the account and can
+        -- deposit; spendGrade and above can withdraw and transfer; manageGrade and above manage it.
+        -- spendGrade or manageGrade false: only the job's boss grade can.
+        accounts = {
+            { id = 'treasury', label = 'City Treasury', job = 'government', minGrade = 0, spendGrade = 3, manageGrade = 4 },
+        },
+    },
+}
+```
+
+### `shared/config_admin.lua` [#config-admin]
+
+```lua title="shared/config_admin.lua"
+-- Admin dashboard, fraud flags, Discord logs and the developer exports.
+-- Read by `admin` in shared/config.lua.
+--
+-- Who counts as an admin is decided in shared/editable.lua (Editable.IsAdmin).
+
+return {
+    -- Admin dashboard
+    enabled = true,          -- Admins can open the dashboard (false refuses every dashboard request)
+    command = 'bankadmin',   -- Chat command that opens the dashboard for admins (false for no command)
+
+    -- Exports other resources use to move money and read accounts
+    api = {
+        enabled = true,      -- Other resources can use the exports (false refuses every call)
+        allowed = '*',       -- Resources allowed to call them: '*' for any, or a list such as { 'my_shops', 'my_jobs' }
+        reads = 600,         -- Read calls (balances, accounts, history) per resource per 10 seconds
+        writes = 120,        -- Money and account changes per resource per 10 seconds
+    },
+
+    -- Fraud flags. A flag never touches the player or their money: it adds an alert to the
+    -- admin dashboard for a person to review. Windows are in seconds, amounts in whole dollars.
+    fraud = {
+        enabled = false,      -- Run the checks below (false turns every check off)
+        notifyAdmins = true,  -- Online admins get a notification for each new alert
+        autoFreeze = false,   -- Freeze the account on severity 3 alerts until an admin unfreezes it (leave false unless you are sure)
+
+        -- Severity is 1 (worth a look), 2 (suspicious) or 3 (act now). Set enabled = false on a rule to turn only that one off.
+        rules = {
+            -- Several large withdrawals by one player in a short time
+            largeWithdrawals = { enabled = true, severity = 2, amount = 50000, count = 3, window = 600 },   -- 3 withdrawals of $50,000 or more within 10 minutes
+            -- Many transfers by one player in a short time
+            rapidTransfers = { enabled = true, severity = 1, count = 10, window = 120 },                    -- 10 transfers within 2 minutes
+            -- Money sent back and forth between the same two accounts
+            pingPong = { enabled = true, severity = 2, count = 4, window = 600 },                           -- 4 transfers alternating between two accounts within 10 minutes
+            -- Wrong PINs at ATMs by one player
+            failedPin = { enabled = true, severity = 2, count = 5, window = 900 },                          -- 5 wrong PINs within 15 minutes, on any of their cards
+            -- A lot of cash paid in by one player
+            largeCashDeposits = { enabled = true, severity = 2, amount = 250000, window = 3600 },           -- $250,000 or more of cash deposited within an hour
+            -- Many refused transactions by one player (over limits, not enough money, frozen accounts)
+            failedTransactions = { enabled = true, severity = 1, count = 15, window = 300 },                -- 15 refused transactions within 5 minutes
+            -- A business or society withdrawal far above that account's usual size
+            businessWithdrawals = { enabled = true, severity = 3, multiplier = 5, minAmount = 25000, minSamples = 5, days = 30 }, -- over 5x the 30-day average, at least $25,000, once the account has 5 earlier withdrawals
+            -- The same amount to the same place, again and again
+            duplicates = { enabled = true, severity = 1, count = 3, window = 120 },                         -- 3 identical transactions within 2 minutes
+        },
+    },
+
+    -- Discord logs. Webhook links never go in this file: add them to server.cfg with `set`
+    -- (never `setr`, which sends them to every player):
+    --   set nerve_banking:webhook "https://discord.com/api/webhooks/..."            every category
+    --   set nerve_banking:webhook:transfers "https://discord.com/api/webhooks/..."  one category (overrides the one above)
+    discord = {
+        enabled = true,        -- Send logs to Discord when a webhook is set (false sends nothing)
+        username = 'Bank',     -- Name the webhook posts as
+        avatar = '',           -- Picture the webhook posts with (an https link, '' for the webhook's own)
+        footer = '',           -- Small text under every log ('' for none)
+        showIdentifiers = false, -- Add the player's character identifier to every log (false shows names only)
+        queueLimit = 500,      -- Logs waiting to be sent before new ones are dropped (while Discord is down)
+
+        -- One entry per kind of log. colour is a decimal colour (0xRRGGBB works too).
+        categories = {
+            deposits          = { enabled = true, colour = 0x34d399, title = 'Deposit' },               -- Cash paid into accounts
+            withdrawals       = { enabled = true, colour = 0xfbbf24, title = 'Withdrawal' },            -- Cash taken out of accounts
+            transfers         = { enabled = true, colour = 0xa855f7, title = 'Transfer' },              -- Money between accounts
+            failed            = { enabled = true, colour = 0xef4444, title = 'Refused transaction' },   -- Transactions the bank refused
+            business          = { enabled = true, colour = 0x60a5fa, title = 'Business account' },      -- Money in and out of business accounts, payroll
+            society           = { enabled = true, colour = 0x38bdf8, title = 'Society account' },       -- Money in and out of job society accounts
+            loans             = { enabled = true, colour = 0xc084fc, title = 'Loan' },                  -- Loan payouts and decisions
+            loan_repayments   = { enabled = true, colour = 0x34d399, title = 'Loan repayment' },        -- Loan installments and repayments
+            interest          = { enabled = false, colour = 0x34d399, title = 'Interest' },             -- Savings interest payouts (one per account per cycle, can be many)
+            tax               = { enabled = false, colour = 0xfbbf24, title = 'Tax' },                  -- Wealth tax collected (one per account per cycle, can be many)
+            overdraft         = { enabled = true, colour = 0xfbbf24, title = 'Overdraft fee' },         -- Overdraft interest and fees
+            cards             = { enabled = true, colour = 0xa855f7, title = 'Card' },                  -- Cards issued, locked, replaced, cancelled; card fees
+            accounts          = { enabled = true, colour = 0xa855f7, title = 'Account' },               -- Accounts opened, renamed, closed
+            freezes           = { enabled = true, colour = 0xef4444, title = 'Account frozen' },        -- Accounts frozen and unfrozen
+            fraud             = { enabled = true, colour = 0xef4444, title = 'Fraud alert' },           -- Fraud flags
+            admin             = { enabled = true, colour = 0xededed, title = 'Admin action' },          -- Adjustments, reversals and other admin actions
+            permissions       = { enabled = true, colour = 0x60a5fa, title = 'Account access' },        -- People added to or removed from accounts, permission changes
+            scheduled_failures = { enabled = true, colour = 0xef4444, title = 'Scheduled payment failed' }, -- Scheduled payments that could not run
+        },
+    },
+}
+```
+
+### `shared/config_atm.lua` [#config-atm]
+
+```lua title="shared/config_atm.lua"
+-- How ATMs look and behave. Read by `atm` in shared/config.lua.
+--
+-- An ATM shows the bank on its own screen: the player walks up, the camera moves
+-- in front of the screen and they use it with the mouse and the number keys.
+-- Models without a screen in shared/config_atms.lua, and players whose game
+-- cannot show the screen, get the same ATM as a screen overlay instead.
+
+return {
+    enabled = true,              -- Players can use ATMs at all (false = no ATM interactions anywhere)
+
+    -- Where the ATM screen is drawn:
+    --   'auto'  on the ATM's own screen when the model has one in config_atms.lua, otherwise (or when
+    --           that screen does not start within 5 seconds) as an overlay
+    --   'dui'   always on the ATM's own screen; shows an error instead of the overlay when it fails
+    --           (useful while calibrating screens)
+    --   'nui'   always as an overlay
+    --   'off'   ATMs do nothing (same as enabled = false)
+    mode = 'auto',
+
+    -- How the page gets onto an ATM's own screen:
+    --   'auto'     in place of the machine's own screen picture where the model has one (it fits the
+    --              glass exactly), otherwise drawn over the glass. While a player uses an ATM, every
+    --              ATM of the same model near them shows their screen too, on their game only.
+    --   'quad'     always drawn over the glass, so only the machine in use shows it
+    screenMethod = 'auto',
+
+    duiWidth = 1024,             -- Pixel width of the screen page; its height follows the shape of each model's screen
+    duiIdleSeconds = 120,        -- Seconds the screen page stays loaded after the last use, so the next ATM opens instantly (0 = unload straight away)
+
+    sessionSeconds = 60,         -- Seconds without input before the ATM ends the session and ejects the card (at least 15)
+    leaveDistance = 2.5,         -- Metres a player can move from the ATM before the session ends
+
+    -- What players can do at an ATM. Withdrawals and balance checks are always available.
+    deposit = true,              -- Deposit cash into an account
+    transfer = false,            -- Transfer to another account number (false = only at a bank branch)
+    pinChange = true,            -- Change a card's PIN
+
+    quick = { 20, 50, 100, 200, 500, 1000 }, -- Quick-pick amounts on the withdrawal screen, in whole dollars (up to 8)
+    maxWithdraw = 0,             -- Most an ATM pays out in one withdrawal, in dollars, on top of the limits in config_limits.lua (0 = no ATM cap)
+    statementRows = 8,           -- Recent transactions shown on the ATM's mini statement
+
+    -- Presentation
+    camera = true,               -- Move the camera in front of the screen (false = keep the player's own view)
+    cameraEase = 500,            -- Milliseconds the camera takes to move in and out (0 = cut straight to it)
+    cameraFov = 40.0,            -- Field of view of that camera in degrees, unless a model sets its own in config_atms.lua
+    cameraFill = 0.7,            -- How much of the view the screen fills when a model's camera has no fixed position (0.2 to 1.0)
+    cameraLift = 10.0,           -- Degrees the camera looks down onto the screen from straight in front of it
+    hideHud = true,              -- Hide the HUD and minimap while the screen is in use
+    sounds = true,               -- Play the game's keypad sound when a key is pressed on the screen
+
+    -- Animation while the player stands at the ATM (false = no animation)
+    animation = {
+        dict = 'amb@prop_human_atm@male@idle_a', -- Animation dictionary
+        clip = 'idle_b',                         -- Animation inside the dictionary
+    },
+
+    -- Map blips for the ATMs in shared/config_atms.lua `locations` and the ones admins
+    -- register in game. The ATMs already in the GTA world have no blip.
+    blips = {
+        enabled = false,         -- Show these blips (true or false)
+        sprite = 277,            -- Blip icon (277 = dollar sign)
+        colour = 2,              -- Blip colour (2 = green)
+        scale = 0.7,             -- Blip size
+    },
+
+    -- Chat command that lines up the nearest ATM's screen and camera in game. Only
+    -- admins can use it (nerve_banking.admin, or the framework's admin groups; see
+    -- Editable.IsAdmin). What they save applies to that model for every player.
+    -- false = no command.
+    calibrate = 'atmcalibrate',
+}
+```
+
+### `shared/config_atms.lua` [#config-atms]
+
+```lua title="shared/config_atms.lua"
+-- ATM models and extra ATM locations. Read by `atms` in shared/config.lua.
+--
+-- models: every prop players can use as an ATM, wherever it stands in the world.
+--   model     the prop's model name
+--   label     name shown on the ATM's screen (leave out for the default "ATM")
+--   settings  this model's own choices, overriding shared/config_atm.lua:
+--             { deposit = true/false, transfer = true/false, pinChange = true/false,
+--               maxWithdraw = dollars, fee = { flat = dollars, bp = basis points, max = dollars } }
+--   screen    where the glass is, in metres from the prop, seen by a player standing in
+--             front of it: x = right, y = into the machine, z = up. Either
+--               { center = vec3(...), width = m, height = m, tilt = degrees the top leans back }
+--             or the four corners
+--               { topLeft = vec3(...), topRight = vec3(...), bottomLeft = vec3(...), bottomRight = vec3(...) }
+--             Leave `screen` out and the model opens the overlay instead.
+--   texture   the model's own screen picture, which the page takes the place of:
+--             { name = texture, dict = dictionary (leave out for the model name),
+--               area = { x, y, w, h } the part of the picture the glass shows, as fractions }
+--   method    'quad' draws this model's page over the glass even when it has a `texture`
+--   camera    { fov = degrees } frames the screen by itself; add offset = vec3(...) to fix where
+--             the camera stands, as an offset from the prop. It always looks at the screen.
+--
+-- The calibrate command in shared/config_atm.lua lines any model up in game, saves it
+-- for every player and prints the values in this format to the F8 console.
+
+return {
+    models = {
+        -- Free-standing ATM, older style
+        {
+            model = 'prop_atm_01',
+            texture = { name = 'prop_cashpoint_screen' },
+            screen = { center = vec3(-0.0545, -0.1358, 1.0873), width = 0.224, height = 0.183, tilt = 9.7 },
+            camera = { fov = 40.0 },
+        },
+
+        -- Free-standing ATM
+        {
+            model = 'prop_atm_02',
+            texture = { name = 'prop_cashpoint_screen' },
+            screen = { center = vec3(-0.1203, 0.0898, 1.1416), width = 0.326, height = 0.2415, tilt = 14.4 },
+            camera = { fov = 40.0 },
+        },
+
+        -- Wall ATM
+        {
+            model = 'prop_atm_03',
+            texture = { name = 'prop_cashpoint_screen' },
+            screen = { center = vec3(-0.1215, 0.0715, 1.147), width = 0.327, height = 0.244, tilt = 14.5 },
+            camera = { fov = 40.0 },
+        },
+
+        -- Fleeca wall ATM. Its screen shares one picture with the rest of the machine's
+        -- lights, so the page is drawn over the glass unless `method` is removed.
+        {
+            model = 'prop_fleeca_atm',
+            method = 'quad',
+            texture = { name = 'prop_fleece_emis', area = { x = 0.004, y = 0.508, w = 0.492, h = 0.465 } },
+            screen = { center = vec3(-0.121, 0.094, 1.148), width = 0.326, height = 0.262, tilt = 14.5 },
+            camera = { fov = 40.0 },
+        },
+    },
+
+    -- Extra ATMs at fixed places, for example inside an MLO. Admins can also add
+    -- ATMs in game from the admin dashboard; those are stored in the database.
+    --   id        a unique name for this ATM (letters, digits, _ and -)
+    --   label     name shown on the ATM's screen
+    --   model     prop model; uses that model's screen above when it is in `models`
+    --   coords    vec4(x, y, z, heading) of the prop's base
+    --   spawn     place the prop there (true), or use one the map already has (false)
+    --   enabled   false switches this ATM off without deleting it
+    --   settings  this ATM's own choices, the same as for a model above
+    locations = {
+        -- { id = 'pier_atm', label = 'Del Perro Pier', model = 'prop_atm_02', coords = vec4(-1667.3, -1072.1, 13.15, 140.0), spawn = true },
+    },
+
+    -- Where the map's own ATM props stand. The server can't see map props, so it
+    -- only opens a map ATM at one of these spots; otherwise a modified client
+    -- could open an ATM anywhere. The list below is every ATM on the base map
+    -- (121, read from the game files). Add the ATMs your own map mods place as
+    -- vec3 positions of the prop. ATMs in `locations` and ones added from the
+    -- admin dashboard are always allowed.
+    trustMapProps = false,   -- true: also open ATM props that aren't listed, on the player's word (only for maps whose ATMs you can't list)
+    props = {
+        vec3(-3240.03, 1008.55, 11.83), -- prop_atm_01
+        vec3(-3144.89, 1127.81, 19.84), -- prop_atm_01
+        vec3(-3040.20, 593.30, 6.91), -- prop_atm_01
+        vec3(-1827.69, 784.47, 137.32), -- prop_atm_01
+        vec3(-1430.66, -211.36, 45.47), -- prop_atm_01
+        vec3(-1415.48, -212.33, 45.50), -- prop_atm_01
+        vec3(-1391.34, -589.86, 29.32), -- prop_atm_01
+        vec3(-1289.74, -227.16, 41.43), -- prop_atm_01
+        vec3(-1286.70, -213.78, 41.43), -- prop_atm_01
+        vec3(-1285.14, -223.94, 41.43), -- prop_atm_01
+        vec3(-1282.10, -210.56, 41.43), -- prop_atm_01
+        vec3(-1110.23, -1691.15, 3.38), -- prop_atm_01
+        vec3(-1091.89, 2709.05, 17.92), -- prop_atm_01
+        vec3(-1044.47, -2739.64, 8.12), -- prop_atm_01
+        vec3(-718.26, -915.71, 18.22), -- prop_atm_01
+        vec3(-57.40, -1751.75, 28.42), -- prop_atm_01
+        vec3(-57.17, -92.38, 56.75), -- prop_atm_01
+        vec3(33.19, -1348.81, 28.50), -- prop_atm_01
+        vec3(129.70, -1290.84, 28.27), -- prop_atm_01
+        vec3(130.15, -1291.63, 28.27), -- prop_atm_01
+        vec3(130.58, -1292.37, 28.27), -- prop_atm_01
+        vec3(158.80, 234.75, 105.64), -- prop_atm_01
+        vec3(228.03, 337.85, 104.50), -- prop_atm_01
+        vec3(357.13, 174.08, 102.06), -- prop_atm_01
+        vec3(380.66, 322.84, 102.57), -- prop_atm_01
+        vec3(540.22, 2671.68, 41.16), -- prop_atm_01
+        vec3(1153.11, -326.90, 68.20), -- prop_atm_01
+        vec3(1171.52, 2703.14, 37.15), -- prop_atm_01
+        vec3(1172.46, 2703.14, 37.15), -- prop_atm_01
+        vec3(1687.40, 4815.90, 41.01), -- prop_atm_01
+        vec3(1700.69, 6426.76, 31.63), -- prop_atm_01
+        vec3(1703.32, 4934.05, 41.06), -- prop_atm_01
+        vec3(1735.01, 6410.01, 34.04), -- prop_atm_01
+        vec3(1822.97, 3682.58, 33.27), -- prop_atm_01
+        vec3(1968.39, 3743.08, 31.34), -- prop_atm_01
+        vec3(2559.05, 389.47, 107.62), -- prop_atm_01
+        vec3(2564.00, 2584.55, 37.07), -- prop_atm_01
+        vec3(2683.59, 3286.30, 54.24), -- prop_atm_01
+        vec3(-2295.85, 357.93, 173.60), -- prop_atm_02
+        vec3(-2295.07, 356.26, 173.60), -- prop_atm_02
+        vec3(-2294.30, 354.61, 173.60), -- prop_atm_02
+        vec3(-2071.93, -317.29, 12.32), -- prop_atm_02
+        vec3(-1570.77, -547.70, 33.93), -- prop_atm_02
+        vec3(-1569.84, -547.03, 33.93), -- prop_atm_02
+        vec3(-1410.74, -98.93, 51.40), -- prop_atm_02
+        vec3(-1410.18, -100.65, 51.40), -- prop_atm_02
+        vec3(-1305.71, -706.69, 24.31), -- prop_atm_02
+        vec3(-847.20, -340.43, 37.68), -- prop_atm_02
+        vec3(-846.65, -341.51, 37.67), -- prop_atm_02
+        vec3(-821.89, -1081.55, 10.14), -- prop_atm_02
+        vec3(-720.63, -415.52, 33.98), -- prop_atm_02
+        vec3(-712.94, -818.48, 22.74), -- prop_atm_02
+        vec3(-710.08, -818.48, 22.74), -- prop_atm_02
+        vec3(-660.68, -854.49, 23.46), -- prop_atm_02
+        vec3(-596.13, -1160.85, 21.33), -- prop_atm_02
+        vec3(-594.61, -1160.85, 21.33), -- prop_atm_02
+        vec3(-386.46, 6046.41, 30.47), -- prop_atm_02
+        vec3(-282.71, 6226.43, 30.50), -- prop_atm_02
+        vec3(-273.37, -2024.21, 29.17), -- prop_atm_02
+        vec3(-262.36, -2012.05, 29.17), -- prop_atm_02
+        vec3(-132.67, 6366.88, 30.47), -- prop_atm_02
+        vec3(-97.64, 6455.73, 30.47), -- prop_atm_02
+        vec3(-95.87, 6457.46, 30.47), -- prop_atm_02
+        vec3(5.69, -919.96, 28.48), -- prop_atm_02
+        vec3(24.59, -945.54, 28.33), -- prop_atm_02
+        vec3(156.19, 6643.20, 30.59), -- prop_atm_02
+        vec3(173.82, 6638.22, 30.59), -- prop_atm_02
+        vec3(236.98, 219.88, 105.41), -- prop_atm_02
+        vec3(237.41, 218.95, 105.41), -- prop_atm_02
+        vec3(237.84, 218.03, 105.41), -- prop_atm_02
+        vec3(238.27, 217.11, 105.41), -- prop_atm_02
+        vec3(238.70, 216.19, 105.41), -- prop_atm_02
+        vec3(264.87, 209.95, 105.41), -- prop_atm_02
+        vec3(265.22, 210.90, 105.41), -- prop_atm_02
+        vec3(265.56, 211.86, 105.41), -- prop_atm_02
+        vec3(265.91, 212.82, 105.41), -- prop_atm_02
+        vec3(266.26, 213.77, 105.41), -- prop_atm_02
+        vec3(285.35, 142.98, 103.16), -- prop_atm_02
+        vec3(289.27, -1282.32, 28.66), -- prop_atm_02
+        vec3(289.53, -1256.79, 28.44), -- prop_atm_02
+        vec3(296.18, -896.23, 28.29), -- prop_atm_02
+        vec3(296.88, -894.32, 28.26), -- prop_atm_02
+        vec3(527.78, -160.66, 56.14), -- prop_atm_02
+        vec3(1077.78, -776.97, 57.26), -- prop_atm_02
+        vec3(1137.81, -468.86, 65.70), -- prop_atm_02
+        vec3(1167.06, -455.65, 65.82), -- prop_atm_02
+        vec3(2558.32, 350.99, 107.60), -- prop_atm_02
+        vec3(-3241.45, 997.91, 11.55), -- prop_atm_03
+        vec3(-3043.83, 594.16, 6.73), -- prop_atm_03
+        vec3(-2974.59, 380.13, 14.00), -- prop_atm_03
+        vec3(-2958.98, 487.31, 14.48), -- prop_atm_03
+        vec3(-2956.85, 487.22, 14.48), -- prop_atm_03
+        vec3(-1315.42, -834.43, 15.95), -- prop_atm_03
+        vec3(-1314.47, -835.69, 15.95), -- prop_atm_03
+        vec3(-867.97, -186.34, 36.88), -- prop_atm_03
+        vec3(-867.01, -187.99, 36.88), -- prop_atm_03
+        vec3(-617.80, -708.86, 29.04), -- prop_atm_03
+        vec3(-617.80, -706.85, 29.04), -- prop_atm_03
+        vec3(-614.52, -705.60, 30.22), -- prop_atm_03
+        vec3(-611.86, -705.60, 30.22), -- prop_atm_03
+        vec3(-537.81, -854.94, 28.28), -- prop_atm_03
+        vec3(-526.78, -1223.37, 17.45), -- prop_atm_03
+        vec3(-303.23, -829.31, 31.42), -- prop_atm_03
+        vec3(-301.66, -829.59, 31.42), -- prop_atm_03
+        vec3(-259.28, -723.27, 32.70), -- prop_atm_03
+        vec3(-256.64, -715.89, 32.79), -- prop_atm_03
+        vec3(-254.52, -692.89, 32.58), -- prop_atm_03
+        vec3(-204.02, -861.01, 29.27), -- prop_atm_03
+        vec3(-165.58, 234.77, 93.93), -- prop_atm_03
+        vec3(-165.58, 232.70, 93.93), -- prop_atm_03
+        vec3(-30.10, -723.29, 43.22), -- prop_atm_03
+        vec3(-27.89, -724.11, 43.22), -- prop_atm_03
+        vec3(89.81, 2.88, 67.35), -- prop_atm_03
+        vec3(111.39, -774.84, 30.44), -- prop_atm_03
+        vec3(112.48, -819.81, 30.34), -- prop_atm_03
+        vec3(114.55, -775.97, 30.42), -- prop_atm_03
+        vec3(118.64, -883.57, 30.14), -- prop_atm_03
+        vec3(-1206.14, -325.03, 36.85), -- prop_fleeca_atm
+        vec3(-1205.38, -326.53, 36.85), -- prop_fleeca_atm
+        vec3(145.84, -1035.63, 28.37), -- prop_fleeca_atm
+        vec3(147.47, -1036.22, 28.37), -- prop_fleeca_atm
+    },
+}
+```
+
+### `shared/config_banks.lua` [#config-banks]
+
+```lua title="shared/config_banks.lua"
+-- Bank branches. Read by `banks` in shared/config.lua.
+--
+-- Each branch is a counter where the full banking screen opens. ATMs are set
+-- up separately in shared/config_atms.lua.
+--
+-- One entry per branch:
+--   id      unique name, lowercase (don't rename one in use; logs and the screen refer to it)
+--   label   name shown at the top of the banking screen
+--   coords  where the player stands at the counter, as vec3(x, y, z) the way /coords or a
+--           coordinate tool shows your character's position
+--   blip    map icon: { sprite = GTA blip sprite, colour = GTA blip colour, scale = size,
+--           label = optional map legend name (leave out to group every branch as "Bank") },
+--           or false for no blip
+--   teller  optional clerk standing behind the counter, only spawned on your screen:
+--           { enabled = true or false, model = ped model name, coords = vec4(x, y, z, heading)
+--           where the clerk stands, scenario = optional GTA scenario name such as
+--           'WORLD_HUMAN_CLIPBOARD' (leave out to stand still) }
+--
+-- Remove a branch to close it, or add your own for a custom bank interior.
+
+return {
+    {
+        id = 'legion',
+        label = 'Fleeca Bank, Legion Square',
+        coords = vec3(150.27, -1040.20, 29.37),
+        blip = { sprite = 108, colour = 2, scale = 0.8 },
+        teller = { enabled = false, model = 'a_f_y_business_02', coords = vec4(149.46, -1042.09, 29.37, 335.43) },
+    },
+    {
+        id = 'alta',
+        label = 'Fleeca Bank, Hawick Avenue',
+        coords = vec3(314.19, -278.62, 54.17),
+        blip = { sprite = 108, colour = 2, scale = 0.8 },
+        teller = { enabled = false, model = 'a_f_y_business_02', coords = vec4(313.84, -280.58, 54.16, 338.31) },
+    },
+    {
+        id = 'burton',
+        label = 'Fleeca Bank, Burton',
+        coords = vec3(-351.53, -49.53, 49.04),
+        blip = { sprite = 108, colour = 2, scale = 0.8 },
+        teller = { enabled = false, model = 'a_f_y_business_02', coords = vec4(-351.23, -51.28, 49.04, 341.73) },
+    },
+    {
+        id = 'rockford',
+        label = 'Fleeca Bank, Boulevard Del Perro',
+        coords = vec3(-1212.98, -330.84, 37.79),
+        blip = { sprite = 108, colour = 2, scale = 0.8 },
+        teller = { enabled = false, model = 'a_f_y_business_02', coords = vec4(-1211.90, -331.90, 37.78, 20.07) },
+    },
+    {
+        id = 'greatocean',
+        label = 'Fleeca Bank, Great Ocean Highway',
+        coords = vec3(-2962.58, 482.63, 15.70),
+        blip = { sprite = 108, colour = 2, scale = 0.8 },
+        teller = { enabled = false, model = 'a_f_y_business_02', coords = vec4(-2961.14, 483.09, 15.70, 83.84) },
+    },
+    {
+        id = 'harmony',
+        label = 'Fleeca Bank, Route 68',
+        coords = vec3(1175.06, 2706.64, 38.09),
+        blip = { sprite = 108, colour = 2, scale = 0.8 },
+        teller = { enabled = false, model = 'a_f_y_business_02', coords = vec4(1174.80, 2708.20, 38.09, 178.52) },
+    },
+    {
+        id = 'pacific',
+        label = 'Pacific Standard Bank',
+        coords = vec3(241.73, 220.71, 106.29),
+        blip = { sprite = 108, colour = 2, scale = 0.9 },
+        teller = { enabled = false, model = 'u_m_m_bankman', coords = vec4(241.44, 227.19, 106.29, 170.43) },
+    },
+    {
+        id = 'paleto',
+        label = 'Blaine County Savings, Paleto Bay',
+        coords = vec3(-112.20, 6469.30, 31.63),
+        blip = { sprite = 108, colour = 2, scale = 0.8 },
+        teller = { enabled = false, model = 'a_m_m_business_01', coords = vec4(-112.22, 6471.01, 31.63, 134.18) },
+    },
+}
+```
+
+### `shared/config_cards.lua` [#config-cards]
+
+```lua title="shared/config_cards.lua"
+-- Debit cards and PINs. Read by `cards` in shared/config.lua.
+--
+-- A card belongs to one player and draws on one account. Players order cards
+-- at a bank and use them at ATMs with their PIN. Only the last four digits of a
+-- card number are ever shown, and PINs are stored as one-way hashes, so nobody
+-- (staff included) can read a player's PIN back.
+
+return {
+    enabled = true,          -- Players can order debit cards (false = no cards, and ATMs stay closed because they need one)
+
+    -- Physical card item. With it on, players get a card in their inventory
+    -- when it is ordered, and ATMs only offer the cards a player carries.
+    -- Add the item first: install/ox_inventory/ has the items.lua entry and
+    -- the picture. Until the item exists, cards stay bank-only and the console
+    -- says so once.
+    useItem = true,          -- Hand out cards as an inventory item (false = cards live only in the bank; every ATM offers all of a player's cards)
+    item = 'bank_card',      -- Name of the card item in your inventory
+
+    -- PINs
+    pinLength = 4,           -- Digits in a PIN (4 to 8)
+    maxAttempts = 3,         -- Wrong PINs in a row before the card is blocked (1 or more)
+    lockMinutes = 30,        -- Minutes a card stays blocked after too many wrong PINs
+    activation = false,      -- true: new cards arrive inactive and the player picks the PIN later under Change PIN (false = the PIN is chosen when ordering)
+
+    -- Ordering
+    expiryYears = 4,         -- Years until a new card expires; an expired card can be replaced for the replacement fee
+    issueFee = 50,           -- Dollars charged to the account when a card is ordered (0 = free)
+    replaceFee = 100,        -- Dollars charged to the account when a card is replaced (0 = free)
+    maxPerAccount = 1,       -- Cards one player can hold on the same account at once (1 or more)
+    issuePerm = 'withdraw',  -- What another player needs on a shared, business or society account to order a card for it: 'withdraw', 'transfer' or 'manage' (account owners can always order)
+    accountTypes = { 'checking', 'savings', 'shared', 'business', 'society' }, -- Account types a card can draw on
+
+    -- Spending limits a new card starts with. Players can lower or raise them on
+    -- the card later. The account's own limits always apply on top.
+    limits = {
+        perTx = 0,           -- Most dollars in one ATM transaction with the card (0 = only the account's limits)
+        daily = 0,           -- Most dollars per day with the card (0 = only the account's limits)
+    },
+}
+```
+
+### `shared/config_finance.lua` [#config-finance]
+
+```lua title="shared/config_finance.lua"
+-- Interest, tax, overdraft, credit score, loans and scheduled payments.
+-- Money is whole dollars. Rates are basis points: 100 bp = 1%, 1 bp = 0.01%.
+-- Every part except scheduled payments is off until you turn it on.
+-- Cycles (interest, tax, overdraft fees) start on fixed clock boundaries in UTC, so a
+-- restart or a second server never pays or charges the same cycle twice.
+
+return {
+    -- Interest paid by the bank on balances
+    interest = {
+        enabled = false,          -- Pay interest at all
+        intervalHours = 24,       -- Hours between payouts (24 = once a day at 00:00 UTC)
+        rates = {                 -- Interest per payout in basis points, by account type (10 = 0.1% per payout)
+            savings = 10,
+            -- business = 5,
+        },
+        minBalance = 1000,        -- Accounts holding less than this earn nothing (0 = no minimum)
+        maxBalance = 1000000,     -- Only this much of a balance earns interest (0 = no cap)
+        maxPayout = 5000,         -- Most one account can earn in one payout (0 = no cap)
+        compound = true,          -- true: interest earns interest too; false: only the money paid in earns it
+        depositCooldownHours = 24, -- Money paid in during these hours before a payout does not earn yet (0 = off)
+        excludeAccounts = {},     -- Account numbers that never earn, e.g. { '12345678' }
+        excludeOwners = {},       -- Character identifiers, job names or business keys that never earn
+        notify = true,            -- Tell online players when interest arrives
+    },
+
+    -- Tax collected from accounts
+    tax = {
+        enabled = false,          -- Collect tax at all
+        mode = 'balance',         -- 'balance' taxes what accounts hold; 'income' taxes money received during the cycle
+        intervalHours = 168,      -- Hours between collections (168 = weekly)
+        brackets = {              -- Progressive brackets: each rate applies only to the part above its `from` (bp)
+            { from = 0, bp = 0 },
+            { from = 50000, bp = 50 },
+            { from = 250000, bp = 100 },
+            { from = 1000000, bp = 200 },
+        },
+        minTaxable = 10000,       -- Accounts (balance mode) or income (income mode) below this pay nothing (0 = no minimum)
+        maxPerCycle = 50000,      -- Most one account pays in one collection (0 = no cap)
+        types = { 'checking', 'savings', 'business' }, -- Account types that are taxed
+        exemptJobs = {},          -- Jobs whose members and society accounts pay no tax, e.g. { 'police', 'ambulance' }
+        incomeKinds = { 'transfer', 'payroll', 'scheduled' }, -- Income mode: which incoming payments count as income
+        holidays = {              -- Days with no collection, in the server's local date ('YYYY-MM-DD')
+            -- { from = '2026-12-24', to = '2026-12-26' },
+        },
+        destination = 'treasury', -- Government account id from shared/config_accounts.lua that receives tax (false = the bank keeps it)
+        insufficient = 'partial', -- Account short of money: 'partial' takes what is there, 'skip' takes nothing, 'overdraft' may use overdraft room
+        notify = true,            -- Tell online players when tax is taken
+    },
+
+    -- Accounts allowed to go below zero
+    overdraft = {
+        enabled = false,          -- Give accounts overdraft room at all (off resets player and business accounts to no overdraft)
+        types = { 'shared', 'business' }, -- Account types that get overdraft room (only bank-held types; checking lives in the framework and can't go negative)
+        limit = 1000,             -- Overdraft room for player accounts when credit bands are off or not used
+        businessLimit = 5000,     -- Overdraft room for business accounts
+        useCredit = true,         -- With the credit score on, player accounts get the room of the best band their score reaches
+        bands = {                 -- Credit score bands, highest first: score needed and overdraft room it gives
+            { minScore = 750, limit = 5000 },
+            { minScore = 650, limit = 2500 },
+            { minScore = 550, limit = 1000 },
+        },
+        fee = {                   -- Charged once a day on accounts below zero
+            flat = 25,            -- Flat fee per day
+            bp = 10,              -- Plus this share of the amount overdrawn per day (10 = 0.1%)
+            max = 500,            -- Most charged in one day (0 = no cap)
+        },
+        notify = true,            -- Tell online players when an overdraft fee is charged
+    },
+
+    -- Credit score, worked out from how players use the bank
+    credit = {
+        enabled = false,          -- Keep credit scores at all
+        min = 300,                -- Lowest possible score
+        max = 850,                -- Highest possible score
+        startScore = 600,         -- Score used for players the bank has not scored yet
+        recalcHours = 24,         -- Hours a score stays fresh before it is worked out again
+        windowDays = 30,          -- Days of history that count for payments, fees and misses
+        neutral = 500,            -- Points (out of 1000) a factor gives when there is no history for it yet
+        weights = {               -- How much each factor counts; any numbers, they are shares of the score range
+            paymentHistory = 30,  -- Loan installments and scheduled payments made on time
+            loanRepayments = 15,  -- Loans paid off against loans defaulted
+            balance = 15,         -- Money held across the player's own accounts
+            accountAge = 10,      -- Age of the player's oldest account
+            overdraft = 10,       -- Days charged an overdraft fee
+            utilisation = 10,     -- Loan debt against money held
+            tax = 5,              -- Tax paid against tax missed
+            missed = 5,           -- Missed loan installments and failed scheduled payments
+        },
+        balanceTarget = 50000,    -- Money held that gives full points for balance
+        ageTargetDays = 30,       -- Account age in days that gives full points for age
+        overdraftPenalty = 100,   -- Points (out of 1000) lost per overdraft fee in the window
+        missedPenalty = 200,      -- Points (out of 1000) lost per miss in the window
+        maxAdjustment = 200,      -- Largest total admin or script adjustment, up or down
+    },
+
+    -- Loans from the bank
+    loans = {
+        enabled = false,          -- Offer loans at all
+        maxActive = 1,            -- Loans one character can have open or waiting at once
+        penaltyFlat = 100,        -- Added to the debt for each missed installment
+        penaltyBp = 500,          -- Plus this share of the missed amount (500 = 5%)
+        defaultAfter = 3,         -- Missed installments before a loan is marked defaulted
+        offlineGraceHours = 24,   -- Installments due while the borrower is offline (checking accounts) wait this long before counting as missed
+        notify = true,            -- Tell online players about approvals, missed installments and payoffs
+        products = {
+            {
+                id = 'personal',                -- Unique id (letters, numbers, _ and -)
+                label = 'Personal loan',        -- Name shown to players
+                description = 'A small loan paid back in daily installments.', -- Shown under the name
+                min = 1000,                     -- Smallest amount
+                max = 25000,                    -- Largest amount
+                terms = { 7, 14, 28 },          -- Number of installments the player can choose
+                rateBp = 150,                   -- Interest per installment period on what is still owed (150 = 1.5%)
+                intervalHours = 24,             -- Hours between installments
+                minScore = 550,                 -- Lowest credit score that can apply, with credit scores on (false = anyone)
+                minAccountAgeDays = 2,          -- Days the player must have banked here before applying (0 = no wait)
+                accountTypes = { 'checking', 'savings' }, -- Accounts the loan can be paid into and collected from
+                autoApprove = { maxAmount = 5000, minScore = 650 }, -- Approved at once up to this amount and from this score (false = an admin decides every one)
+            },
+            {
+                id = 'business',
+                label = 'Business loan',
+                description = 'A larger loan for a business account, paid back weekly.',
+                min = 10000,
+                max = 250000,
+                terms = { 4, 8, 12 },
+                rateBp = 400,
+                intervalHours = 168,
+                minScore = 650,
+                minAccountAgeDays = 7,
+                accountTypes = { 'business' },
+                autoApprove = false,
+            },
+        },
+    },
+
+    -- Recurring payments players set up themselves, plus rent and subscriptions from other scripts
+    scheduled = {
+        enabled = true,           -- Allow scheduled payments at all
+        intervals = { 86400, 604800, 2592000 }, -- Intervals players can pick, in seconds (1 day, 1 week, 30 days)
+        minInterval = 3600,       -- Shortest interval other scripts can use through the export, in seconds
+        maxPerPlayer = 10,        -- Active and paused payments one character can have
+        maxFirstRunDays = 30,     -- Furthest ahead the first payment can be set, in days
+        maxRetries = 3,           -- Failed attempts before a payment stops and shows as failed
+        retryMinutes = { 5, 30, 120 }, -- Wait before each retry, in minutes (the last value repeats)
+        offlineRetryMinutes = 15, -- Wait before trying again when the payer is offline (does not use up a retry)
+        applyLimits = true,       -- Count scheduled payments against the player's daily transfer limit
+        notify = true,            -- Tell online players when a payment fails or stops
+    },
+}
+```
+
+### `shared/config_limits.lua` [#config-limits]
+
+```lua title="shared/config_limits.lua"
+-- Limits and fees. Read by `limits` in shared/config.lua.
+--
+-- Amounts are whole dollars and 0 always means no limit. Daily limits reset at
+-- 00:00 UTC. Limits here apply to each player across all of their accounts;
+-- account holders and debit cards can have tighter limits of their own, set
+-- from the banking screen. Scripts using the exports are not limited.
+--
+-- A fee is `flat` dollars plus `bp` basis points of the amount (100 bp = 1%),
+-- capped at `max` dollars (0 = no cap). The player pays it on top of the amount.
+
+return {
+    -- Per player, at the bank counter and at ATMs together
+    deposit = {
+        perTx = 0,         -- Most cash a player can pay in at once
+        daily = 0,         -- Most cash a player can pay in per day
+    },
+    withdraw = {
+        perTx = 100000,    -- Most a player can take out at once
+        daily = 500000,    -- Most a player can take out per day
+    },
+    transfer = {
+        perTx = 250000,    -- Most a player can send in one transfer
+        daily = 1000000,   -- Most a player can send per day
+    },
+
+    -- Tighter limits at ATMs, on top of the ones above
+    atm = {
+        withdraw = {
+            perTx = 5000,  -- Most one ATM withdrawal can be
+            daily = 20000, -- Most a player can take from ATMs per day
+        },
+    },
+
+    -- Fees the bank charges. Fees go to the bank's own fee account.
+    fees = {
+        deposit  = { flat = 0, bp = 0, max = 0 }, -- Paying cash in at the counter or an ATM
+        withdraw = { flat = 0, bp = 0, max = 0 }, -- Taking cash out at the counter
+        transfer = { flat = 0, bp = 0, max = 0 }, -- Sending money to another account
+        atm      = { flat = 0, bp = 0, max = 0 }, -- Taking cash out at an ATM (instead of the withdraw fee)
+    },
+
+    -- Where players can move money
+    transferAnywhere = false, -- Transfers work wherever the banking screen is open, not only within 10 m of a branch
+
+    -- Safety
+    lockTimeoutMs = 3000,     -- Milliseconds a payment waits for another one on the same account before failing as busy (100 to 30000)
+    idempotencyDays = 30,     -- Days a payment is remembered so a repeated click never pays twice (0 = forever)
+
+    -- Ledger check
+    reconcile = {
+        intervalMinutes = 0,  -- Minutes between automatic ledger checks that warn in the console when something is off (0 = only when an admin runs it)
+    },
+}
+```
+{/* nerve:config:end */}

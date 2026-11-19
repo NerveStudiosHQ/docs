@@ -1,0 +1,15 @@
+{
+  "title": "Banking",
+  "icon": "Landmark",
+  "pages": [
+    "overview",
+    "installation",
+    "configuration",
+    "atms",
+    "admin",
+    "exports",
+    "hooks",
+    "troubleshooting",
+    "changelog"
+  ]
+}

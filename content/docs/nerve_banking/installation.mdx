@@ -1,0 +1,128 @@
+---
+title: "Installation"
+description: "Install Nerve Studios Banking: add the resource, the card item and the admin permission, then start the server and make a first deposit."
+---
+
+## Requirements
+
+- ESX Legacy or QBox
+- [ox_lib](https://github.com/overextended/ox_lib/releases) and [oxmysql](https://github.com/overextended/oxmysql/releases), started before this resource
+- A database on MariaDB 10.2+ or MySQL 8.0.16+
+- OneSync turned on, and server artifact 5848 or newer
+- Optional: [ox_target](https://github.com/overextended/ox_target/releases) for bank counters and ATMs (without it, players get a key prompt)
+- Optional: [ox_inventory](https://github.com/overextended/ox_inventory/releases) for the debit card item
+
+## Step 1: Add the resource [#step-1-add-the-resource]
+
+1. Download `nerve_banking` from your Cfx.re Portal and unzip it.
+2. Make sure the folder is named exactly `nerve_banking`.
+3. Put it in your `resources` folder, for example `resources/[nerve]/nerve_banking`.
+
+<Callout type="warn">
+
+Don't rename the folder. Other resources call the exports by the name `nerve_banking`.
+
+</Callout>
+
+## Step 2: Add it to server.cfg [#step-2-add-it-to-server-cfg]
+
+Add it **after** its requirements and your framework:
+
+```cfg
+ensure oxmysql
+ensure ox_lib
+ensure ox_target
+ensure ox_inventory
+ensure es_extended   # or qbx_core
+ensure nerve_banking
+```
+
+Leave out `ox_target` or `ox_inventory` if you don't use them. Start any script that calls the banking exports after `nerve_banking`.
+
+## Step 3: Add the card item [#step-3-add-the-card-item]
+
+Debit cards are an inventory item called `bank_card`. Everything for it is in the resource's `install/ox_inventory/` folder.
+
+1. Paste the entry from `install/ox_inventory/items.lua` into `ox_inventory/data/items.lua`, inside the returned table:
+
+   ```lua
+   ['bank_card'] = {
+       label = 'Debit card',
+       weight = 10,
+       stack = false,
+       close = true,
+       description = 'A debit card. Insert it at an ATM.',
+   },
+   ```
+
+2. Copy `install/ox_inventory/images/bank_card.png` into `ox_inventory/web/images/`.
+3. Restart the server.
+
+A player gets the card in their inventory when they order or replace it. An ATM only offers the cards the player is carrying.
+
+- **Before the item exists,** cards stay in the bank and every ATM offers all of a player's cards. The server console says so once.
+- **To turn the item off,** set `useItem = false` in `shared/config_cards.lua`. Cards then live only in the bank.
+- **If you rename the item,** set `item` in `shared/config_cards.lua` to the new name.
+- **Another inventory?** Plug it in through the card item hooks in `shared/editable.lua`. See [Hooks](/nerve_banking/hooks#card-item).
+
+## Step 4: Give your admins the dashboard [#step-4-give-your-admins-the-dashboard]
+
+Add this to `server.cfg`:
+
+```cfg
+add_ace group.admin nerve_banking.admin allow
+```
+
+Your framework's own admins also count: the `admin` and `superadmin` groups on ESX, and the `admin` and `god` groups on QBox. See [Admin](/nerve_banking/admin#who-counts-as-an-admin).
+
+## Step 5: Add Discord webhooks (optional) [#step-5-add-discord-webhooks]
+
+Webhook links go in `server.cfg`, never in the config files:
+
+```cfg
+set nerve_banking:webhook "https://discord.com/api/webhooks/..."
+set nerve_banking:webhook:transfers "https://discord.com/api/webhooks/..."
+```
+
+The first line sends every category to one channel. A line with a category name sends that category somewhere else. Use `set`, never `setr`, which would send the link to every player. See [Discord logs](/nerve_banking/admin#discord-logs) for the categories.
+
+## Step 6: Start and test [#step-6-start-and-test]
+
+1. Restart your server. The database tables are created on the first start, so there is no SQL to import.
+2. Join and walk to a bank, for example Fleeca Bank at Legion Square. Branches show on the map.
+3. Open the bank at the counter. With no card yet, hold the button on the lock screen to unlock it.
+4. Deposit some cash. Your checking balance is your framework bank money, so it matches what your HUD and other scripts show.
+5. Go to **Cards** and order a debit card with a PIN. It lands in your inventory.
+6. Walk to any ATM, insert the card and withdraw some cash.
+7. As an admin, run `/bankadmin` to open the dashboard.
+
+<Callout type="info">
+
+The ATM screen positions for the four GTA ATM models ship ready. If the picture sits off the glass on your map, line it up with `/atmcalibrate`. See [ATMs](/nerve_banking/atms#calibrating-a-screen).
+
+</Callout>
+
+## Version check
+
+On start, the server console says whether the script is up to date, with a download link when a new version is out. To turn it off, add this to `server.cfg`:
+
+```cfg
+set nerve:versioncheck false
+```
+
+## Translations
+
+All player-facing text is in `locales/en.json`. To translate it, copy the file to your language code (for example `locales/de.json`), translate the values, and set ox_lib's language in `server.cfg`:
+
+```cfg
+setr ox:locale de
+```
+
+Number and date formats on the screens follow `ui.locale` in `shared/config.lua`, for example `'de-DE'`.
+
+## Updating
+
+1. Back up every `shared/config*.lua` file, `shared/editable.lua` and any locale files you changed.
+2. Replace the resource folder with the new version.
+3. Copy your changes back, and read the [changelog](/nerve_banking/changelog) for anything new to add.
+4. Restart the server. Database changes are applied on start.

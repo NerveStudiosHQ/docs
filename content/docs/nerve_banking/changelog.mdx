@@ -1,0 +1,27 @@
+---
+title: "Changelog"
+description: "Release history for Banking."
+---
+
+{/* Generated from CHANGELOG.md by docs-sync.js. Edit that file, not this page. */}
+
+## 1.0.0 (2026-11-19) [#v1-0-0]
+
+#### Added
+- Checking, savings, shared, business, society and government accounts, each with its own account number that players can copy from the dashboard and the account page.
+- Deposits, withdrawals and transfers at bank branches, with limits and fees per transaction and per day, and a confirmation step that shows who receives the money.
+- Transfers to one of your own accounts or to a player standing nearby in one click, or to any account number.
+- A ledger behind every account, so balances can always be checked against their history.
+- A banking screen laid out like a bank app: total balance, account cards, recent transactions, your debit card, weekly spending and today's limits. The side menu rests as a row of icons and opens with labels on hover; show your server's logo at its foot with `ui.logo` in `shared/config.lua`.
+- A lock screen when the banking screen opens: players unlock it with their debit card PIN, or hold a button if they have no card. Set `ui.unlock` to 'pin', 'hold' or false and `ui.unlockMinutes` for how long it stays open.
+- Players' Discord profile pictures in the bank (`ui.avatars` in `shared/config.lua`).
+- ATMs that show the bank on the machine's own screen, with the camera facing it and the mouse working on it, plus a full-screen ATM terminal for machines that can't. Admins line a model's screen up in game with `/atmcalibrate`, saved for every player.
+- A bright ATM screen with side-key options, a keypad and take-your-cash and take-your-card steps.
+- Every ATM on the base map is listed in `shared/config_atms.lua`, and map ATMs only open at those spots. Add the ATMs your map mods place there, or set `trustMapProps = true`.
+- Debit cards with PINs, locking, replacement and card limits, handed out as a `bank_card` inventory item. The item entry and picture are in `install/ox_inventory/`; until the item is added, cards stay bank-only. Set `cards.useItem = false` to keep them bank-only.
+- Shared accounts and business accounts with per-person permissions, spending limits and payroll.
+- Optional interest, tax, loans, credit score, overdraft and scheduled payments, each off until you turn it on.
+- Fraud flags for admins to review. Nothing happens to a player automatically.
+- Discord logs per category.
+- Admin dashboard with account search, freezing, adjustments, reversals, fraud alerts, the audit log, loan approvals, ATM management and a balance check.
+- Exports for other resources: accounts, balances, deposits, withdrawals, transfers, society money, loans, credit scores, payroll and scheduled payments.
