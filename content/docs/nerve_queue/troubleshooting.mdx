@@ -1,0 +1,50 @@
+---
+title: "Troubleshooting"
+description: "Fixes for the most common Nerve Studios Queue problems, with the exact console warnings."
+---
+
+The queue runs on the server, so every warning is in the **server console**. Turn on `log = true` in `shared/config.lua` to see a line for every player who joins the line, leaves it or is let in, and `debug = true` for more detail.
+
+## Players are held twice, or never get in [#held-twice]
+
+Another resource is also handling connections: a framework queue, a whitelist or an older queue script. Run only one queue. If you use a whitelist resource, move its check into `Editable.CanConnect` or use [manual approval](/nerve_queue/exports#manual-approval).
+
+## Nobody gets in for the first minute [#startup-hold]
+
+That is the startup hold, `joining.startupHold` (60 seconds), which lets the rest of your server finish loading first. Run `queue open` to end it now, or set it to `0`.
+
+## Players wait although slots are free [#slots-free]
+
+- `joining.reservedSlots` keeps slots for bypass players only. `queue status` shows how many are reserved.
+- `joining.maxLoading` caps players loading in at once. A player counts as loading until they spawn, or until `joining.loadingTimeout`.
+- `joining.spacing` lets one player in per that many seconds.
+- **"Server restarting soon, joining is paused"**: a txAdmin scheduled restart is coming. See `joining.restartLock`.
+
+## Discord doesn't work [#discord]
+
+- **`config: discord is on but nerve_queue:discord_key is missing from server.cfg`**: add `set nerve_queue:discord_key "nq_..."` to `server.cfg`. Get a key with `/queue-key generate` in your Discord.
+- **`config: discord is on but nerve_queue:bot_token is missing from server.cfg`**: add `set nerve_queue:bot_token "..."`, or switch `discord.provider` back to `'nerve'`.
+- **`config: discord.guild is not a Discord server id`**: set `discord.guild` to your server id, only digits.
+- **`Discord refused the lookup (HTTP 401)`** or **`(HTTP 403)`**: the key or token is wrong, or the bot was removed from your Discord. Generate a new key, or check the bot is still in the server.
+- **`your Discord server could not be reached`**: the bot isn't in the Discord `discord.guild` names.
+- **`Discord is rate limiting lookups`**: lookups pause for a moment and carry on by themselves. Raise `discord.cacheSeconds` if you see it often.
+- **A role change doesn't count**: lookups are cached for `discord.cacheSeconds`. Run `queue reload` to clear the cache.
+- **"We couldn't find your Discord"** for a player: Discord wasn't running when they started FiveM, or FiveM isn't linked to it. Close FiveM, open Discord, then start FiveM again.
+
+## Saved priority doesn't count [#saved-priority]
+
+- **`could not create the priority table`**: your database user can't create tables. Import `sql/nerve_queue.sql` by hand.
+- **`saved priority needs priority.database = true`**: turn the database on in `shared/config.lua`.
+- The row's `identifier` must match the one the queue tracks, `license2` by default. Run `queue list` while the player is waiting to see theirs.
+- **`priority lookup for ... took over 5 seconds`**: the database is slow or overloaded, and the player was queued without their saved priority.
+
+## The card looks wrong [#card]
+
+- **`cards/myserver.json could not be used (file not found)`**: the file name doesn't match `card.template`. Leave out `.json`.
+- **`(not a valid Adaptive Card)`**: the file isn't valid JSON, or is missing `"type": "AdaptiveCard"` and `"body"`. Check it in the [Adaptive Cards designer](https://adaptivecards.io/designer/).
+- **A part of the card is blank**: it uses a feature newer than Adaptive Cards 1.3, which the FiveM connecting screen can't show.
+- **A button or the logo is missing**: its link in `card` is empty or not `https://`. Look for **`config: card.logo is not an https:// link`**.
+
+## A config warning [#config-warnings]
+
+Any warning that starts with `config:` names the option that was typed wrong and the value used instead. For example, **`config: joining.spacing is above 60; using 60`**. Fix the option and run `queue reload`.

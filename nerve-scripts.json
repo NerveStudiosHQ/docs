@@ -47,6 +47,14 @@
     "version": "1.0.0",
     "date": "2026-11-16"
   },
+  "nerve_queue": {
+    "title": "Queue",
+    "icon": "ListOrdered",
+    "category": "Server Utilities",
+    "description": "Priority connection queue with Discord roles, a live queue card, reserved slots, reconnect grace and txAdmin restart awareness",
+    "version": "1.0.0",
+    "date": "2026-11-20"
+  },
   "nerve_watermark": {
     "title": "Watermark",
     "icon": "Stamp",

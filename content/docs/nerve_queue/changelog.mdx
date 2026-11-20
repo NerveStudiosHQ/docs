@@ -1,0 +1,24 @@
+---
+title: "Changelog"
+description: "Release history for Queue."
+---
+
+{/* Generated from CHANGELOG.md by docs-sync.js. Edit that file, not this page. */}
+
+## 1.0.0 (2026-11-20) [#v1-0-0]
+
+#### Added
+
+- Priority queue: players get in by points, then by who came first.
+- A live queue card with the player's place, wait, estimated wait, priority and status, plus a queue list and a personal priority page.
+- Priority from the database, Discord roles, temporary grants, reconnect grace and your own system through `shared/editable.lua`.
+- Players who crash or disconnect while waiting get their place back if they return within the grace window.
+- Discord through the Nerve Studios bot (nothing to host) or your own bot, with priority by role, names, avatars, a members-only option and a role whitelist.
+- Reserved slots and a bypass list for staff.
+- A startup hold, spacing between joins and a cap on players loading at once, so a full queue never hitches the server.
+- txAdmin restart awareness: joining pauses right before a scheduled restart.
+- Queue length in the server list name.
+- Manual approval mode for your own resources, with a timeout and fallback.
+- `queue` admin command: status, list, info, kick, grant, revoke, add, delete, open and reload.
+- Exports and events for other resources.
+- English, German, Spanish, French, Dutch and Portuguese.

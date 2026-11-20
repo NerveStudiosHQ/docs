@@ -1,0 +1,69 @@
+---
+title: "Discord"
+description: "Connect Nerve Studios Queue to your Discord for priority by role, Discord names and avatars, and members-only joining."
+---
+
+With Discord connected, the queue can:
+
+- give priority to members with certain roles (`shared/config_roles.lua`)
+- show each player's Discord name and avatar on the queue card
+- only let in members of your Discord (`discord.requireMember`)
+- only let in members with certain roles (`discord.whitelist`)
+- refuse players who connect without Discord running (`discord.requireLinked`)
+
+Players are looked up by the Discord account FiveM sees when they connect, so Discord has to be running on their computer.
+
+There are two ways to connect it. Pick one, then set `discord.enabled = true` in `shared/config.lua` and restart the resource.
+
+## Option A: the Nerve Studios bot [#nerve-bot]
+
+Nothing to create or host.
+
+1. Invite the Nerve Studios queue bot to your Discord. The link is in the Nerve Studios Discord.
+2. In your Discord, run `/queue-key generate`. You need the Manage Server permission. The key is shown once, so copy it.
+3. Add the key to `server.cfg`:
+
+   ```cfg
+   set nerve_queue:discord_key "nq_..."
+   ```
+
+4. Keep `discord.provider = 'nerve'` in `shared/config.lua`.
+
+`/queue-key revoke` turns the key off. Run `/queue-key generate` again for a new one.
+
+## Option B: your own bot [#own-bot]
+
+1. Create an application at [discord.com/developers/applications](https://discord.com/developers/applications) and add a bot. Copy its token.
+2. Invite the bot to your Discord. It needs no permissions and no privileged intents.
+3. Add the token to `server.cfg`:
+
+   ```cfg
+   set nerve_queue:bot_token "your bot token"
+   ```
+
+4. In `shared/config.lua`, set `discord.provider = 'bot'` and `discord.guild` to your Discord server id (right click the server icon, **Copy Server ID**, with Developer Mode on).
+
+<Callout type="warn">
+
+Use `set`, never `setr`, for the key and the token. `setr` sends the value to every player.
+
+</Callout>
+
+## Members only and whitelist [#members-only-and-whitelist]
+
+```lua
+discord = {
+    enabled = true,
+    requireMember = true,                       -- only members of your Discord
+    whitelist = { '123456789012345678' },       -- and only with one of these roles
+    allowWhenDown = true,
+},
+```
+
+Both turn on `requireLinked` by themselves, because a player without Discord can't be checked.
+
+If Discord is down (it doesn't answer, or answers with an error), `allowWhenDown = true` lets players queue as normal, without their Discord priority. Set it to `false` to ask them to try again later instead. When Discord is rate limiting lookups, or refuses your key or token, players are always asked to try again, so nobody gets past the whitelist by accident. Players who were let in without their Discord priority get it as soon as Discord answers again.
+
+## When does a role change count? [#caching]
+
+Lookups are cached for `discord.cacheSeconds` (5 minutes by default), so a role change counts within that time. `queue reload` clears the cache straight away.

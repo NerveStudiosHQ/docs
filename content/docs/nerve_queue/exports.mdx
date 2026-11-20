@@ -1,0 +1,80 @@
+---
+title: "Exports"
+description: "Server exports and events for reading and controlling Nerve Studios Queue from your own resources."
+---
+
+All exports are **server side**. Identifiers are the ones the queue tracks players by, `license2` by default (see `identifier` in `shared/config.lua`).
+
+## Reading the queue [#reading]
+
+| Export | Returns |
+| --- | --- |
+| `GetQueueLength()` | Players waiting |
+| `GetPlayerPosition(identifier)` | `{ position, total, points }`, or `nil` when not waiting |
+| `GetPlayerPriorityPoints(identifier)` | Their points, or `nil` |
+| `IsPlayerQueued(identifier)` | `boolean` |
+| `GetTopQueuePlayers(count)` | The first `count` players (see below) |
+| `GetQueueSnapshot()` | Every waiting player (see below) |
+| `GetEstimatedWait(position)` | Seconds until that place is let in, or `nil` while there isn't enough history |
+| `GetEstimatedWaitString(position)` | The same as text, for example `4m 10s` |
+| `GetLoadingCount()` | Players let in who haven't finished loading |
+| `GetAvailableSlots(withReserved)` | Free slots, counting the reserved ones when `withReserved` is `true` |
+| `IsRestartLocked()` | Whether joining is paused for a restart |
+
+`GetTopQueuePlayers` and `GetQueueSnapshot` return a list of:
+
+```lua
+{ source = 65537, identifier = 'license2:...', name = 'Alex', position = 1, points = 5000, bypass = false, waited = 84 }
+```
+
+`waited` is in seconds. `source` is the player's temporary id while connecting.
+
+## Changing the queue [#changing]
+
+| Export | What it does |
+| --- | --- |
+| `RemoveFromQueue(identifier, message)` | Removes a waiting player with your message. Returns `true` if they were waiting |
+| `GrantTemporaryPriority(identifier, points, seconds, label)` | Temporary priority, like `queue grant`. `seconds` 0 or `nil` = until the next restart |
+| `RevokeTemporaryPriority(identifier)` | Removes it. Returns whether there was one |
+| `SetRestartLock(seconds)` | Pauses joining for that many seconds (0 lifts it) |
+| `OpenQueue()` | Ends the startup hold now |
+
+```lua
+-- Give the winner of an event a head start for the next hour
+exports.nerve_queue:GrantTemporaryPriority(identifier, 10000, 3600, 'Event winner')
+```
+
+## Manual approval [#manual-approval]
+
+With `manual.enabled = true`, the queue stops each player at the front of the line, fires `nerve_queue:playerReady` and waits for your resource to answer:
+
+| Export | What it does |
+| --- | --- |
+| `AllowPlayer(source)` | Lets the player in |
+| `RejectPlayer(source, message)` | Refuses them with your message |
+| `UpdatePlayerMessage(source, message)` | Changes the text they see while you decide |
+
+If nothing answers within `manual.timeout` seconds, `manual.fallback` decides.
+
+```lua
+AddEventHandler('nerve_queue:playerReady', function(source, identifier, points)
+    exports.nerve_queue:UpdatePlayerMessage(source, 'Checking your whitelist application...')
+
+    if MyWhitelist.IsApproved(identifier) then
+        exports.nerve_queue:AllowPlayer(source)
+    else
+        exports.nerve_queue:RejectPlayer(source, 'Apply on our website first.')
+    end
+end)
+```
+
+## Events [#events]
+
+Server events other resources can listen to:
+
+```lua
+AddEventHandler('nerve_queue:playerQueued', function(source, identifier, position, points) end)
+AddEventHandler('nerve_queue:playerAdmitted', function(source, identifier, points) end)
+AddEventHandler('nerve_queue:playerLeftQueue', function(identifier, reason) end) -- 'disconnected', 'removed' or 'rejected'
+AddEventHandler('nerve_queue:playerReady', function(source, identifier, points) end) -- manual approval only
+```

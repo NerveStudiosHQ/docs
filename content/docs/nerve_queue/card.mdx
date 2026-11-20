@@ -1,0 +1,72 @@
+---
+title: "Queue card"
+description: "Change the card players see while they wait in Nerve Studios Queue: templates, placeholders and buttons."
+---
+
+While players wait they see an Adaptive Card on the connecting screen. It has three pages:
+
+- **Main card**: their place in line, wait time, estimated wait, priority and a status line, with buttons for the other pages and your links.
+- **Queue**: the first `card.listSize` players in line, with the player's own row highlighted. Set `card.listNames = false` to show positions and points only.
+- **My priority**: every priority row the player has and their total, with a **Get priority** button when `card.store` is set.
+
+## Your logo and buttons [#logo-and-buttons]
+
+Set these in `shared/config.lua`. Each must be an `https://` link. Leave one as `''` and its image or button is removed from the card.
+
+| Option | Shows |
+| --- | --- |
+| `card.logo` | Your logo at the top of every page |
+| `card.store` | A **Get priority** button, for example your Tebex store |
+| `card.website` | A **Website** button |
+| `card.discord` | A **Discord** button with your invite |
+| `card.avatar` | The picture for players without a Discord avatar |
+
+## Using your own layout [#templates]
+
+The main card is a file in the `cards` folder:
+
+- `cards/default.json`: the full card
+- `cards/compact.json`: a smaller card with a fact list
+
+To make your own, copy `default.json` to a new name, for example `cards/myserver.json`, edit it, set `card.template = 'myserver'` and run `queue reload`. If your file can't be read, the queue prints why and uses `default.json`.
+
+Cards use [Adaptive Cards 1.3](https://adaptivecards.io/designer/), which is what the FiveM connecting screen shows. Paste a card into the designer to edit it visually. Stick to `TextBlock`, `Image`, `ColumnSet`, `Container`, `FactSet`, `ActionSet`, `Action.Submit` and `Action.OpenUrl`.
+
+## Placeholders [#placeholders]
+
+Write a placeholder inside any text in the card. The queue fills it in for each player.
+
+| Placeholder | Value |
+| --- | --- |
+| `{{position}}` | Place in line, for example `3` |
+| `{{total}}` | Players waiting |
+| `{{of_total}}` | `of 12 in line`, translated |
+| `{{points}}` | The player's priority points |
+| `{{waited}}` | Time waited, for example `2:14` |
+| `{{estimate}}` | Estimated wait, or the startup countdown |
+| `{{status}}` | The status line, for example "You're next, joining now" |
+| `{{name}}` | The player's name |
+| `{{avatar}}` | Link to the player's avatar |
+| `{{server}}` | Your server name |
+| `{{slots_free}}` | Free slots right now |
+| `{{slots_max}}` | `sv_maxclients` |
+| `{{logo}}`, `{{website}}`, `{{discord}}`, `{{store}}` | Your links from the config |
+| `{{card.title}}` and any other locale key | That text from the locale file, in the server's language |
+
+Every value is escaped, so nothing a player puts in their name can change the card.
+
+## Buttons [#buttons]
+
+Buttons that switch pages are `Action.Submit` with an `action`:
+
+```json
+{ "type": "Action.Submit", "title": "{{card.list}}", "data": { "action": "list" } }
+```
+
+| `action` | Opens |
+| --- | --- |
+| `list` | The queue list |
+| `priority` | The player's priority page |
+| `back` | The main card |
+
+Links are `Action.OpenUrl`. Use `{{store}}`, `{{website}}` or `{{discord}}` as the `url` and the button is removed whenever that link is empty in the config.

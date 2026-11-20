@@ -1,0 +1,37 @@
+---
+title: "Commands"
+description: "The Nerve Studios Queue admin command: see the queue, kick players, grant and save priority, lift the startup hold and reload."
+---
+
+Everything runs through one command, `queue`. Use it in the server console, or in game with the ace set in `commands.restricted` (`group.admin` by default). Rename it with `commands.name`, or set that to `false` to turn it off; both need a resource restart.
+
+| Command | What it does |
+| --- | --- |
+| `queue status` | Players waiting and loading in, free and reserved slots, startup hold, restart lock, Discord and database |
+| `queue list` | Everyone waiting: place, name, points, time waited and identifier |
+| `queue info <who>` | One player's priority rows |
+| `queue kick <who> [message]` | Removes a player from the queue, with your message if you give one |
+| `queue grant <identifier> <points> [minutes] [label]` | Temporary priority (0 minutes = until the next restart) |
+| `queue revoke <identifier>` | Removes temporary priority |
+| `queue add <identifier> <points> [days] [label]` | Saves priority in the database (0 days = forever) |
+| `queue delete <identifier>` | Deletes all of a player's saved priority |
+| `queue open` | Ends the startup hold now |
+| `queue reload` | Reloads `shared/config*.lua`, the language and the card |
+
+`<who>` is an identifier such as `license2:0123abcd...` or a place in line such as `3`. `<identifier>` can be any identifier type the queue tracks players by.
+
+A player who is waiting moves to their new place as soon as their priority changes.
+
+## Examples [#examples]
+
+```
+queue grant license2:0123abcd... 10000 60 Event winner
+queue add discord:123456789012345678 5000 30 Supporter
+queue kick 4 Come back after the restart
+```
+
+<Callout type="info">
+
+`queue reload` keeps everyone in line. If `shared/config.lua` has an error, it keeps the old settings and prints what is wrong.
+
+</Callout>

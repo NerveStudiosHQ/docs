@@ -1,0 +1,88 @@
+---
+title: "Priority"
+description: "How Nerve Studios Queue sorts the line, where priority points come from and how to give them out."
+---
+
+Every waiting player has a number of priority points. The player with the most points is let in first. Players with the same points are let in first come, first served.
+
+A player's points come from up to five places. With `priority.stack = true` (the default) they are added together. With `false`, only the highest one counts.
+
+| Source | How to set it |
+| --- | --- |
+| Saved priority | `queue add` in the console, or rows in the `nerve_queue_priority` table |
+| Discord roles | `shared/config_roles.lua` |
+| Reconnect grace | `priority.grace` in `shared/config.lua` |
+| Temporary priority | `queue grant`, or the `GrantTemporaryPriority` export |
+| Your own system | `Editable.ExtraPriority` in `shared/editable.lua` |
+
+Players can see every row and their total on the **My priority** page of the queue card.
+
+## Saved priority [#saved-priority]
+
+Saved priority is stored in the database and stays after restarts. It is the right place for priority a player bought or earned.
+
+```
+queue add license2:0123abcd... 5000 30 Supporter
+```
+
+That gives the player 5,000 points labelled **Supporter** for 30 days. Leave the days out, or use `0`, for priority that never expires. `queue delete <identifier>` removes all of a player's saved priority.
+
+The identifier is the one the queue tracks players by, `license2` by default (see `identifier` in `shared/config.lua`). Run `queue list` to see the identifiers of players who are waiting.
+
+You can also write rows from your own scripts or your store. The table is:
+
+| Column | Notes |
+| --- | --- |
+| `identifier` | The player's identifier, for example `license2:0123abcd...` |
+| `label` | Name shown on the player's priority page |
+| `points` | Points this row gives |
+| `expires_at` | When it stops counting, or `NULL` for never |
+
+Set `priority.database = false` if you don't want saved priority. The table is then not created or read.
+
+## Discord roles [#discord-roles]
+
+Give points to members with a role in `shared/config_roles.lua`:
+
+```lua
+return {
+    ['123456789012345678'] = { points = 5000, label = 'Staff' },
+    ['234567890123456789'] = { points = 2500 },
+}
+```
+
+Leave `label` out to show the role's name from Discord. This needs Discord to be connected, see [Discord](/nerve_queue/discord). Role changes count within `discord.cacheSeconds`.
+
+## Reconnect grace [#reconnect-grace]
+
+Players who crash or lose connection don't lose out:
+
+- A player who was **waiting** gets their old place back if they reconnect within `priority.grace.seconds`.
+- A player who was **playing** gets `priority.grace.points` for `priority.grace.seconds` after they leave.
+
+Set `priority.grace.enabled = false` to turn both off.
+
+## Temporary priority [#temporary-priority]
+
+Temporary priority is kept in memory and is gone after a restart. It is useful for events and giveaways:
+
+```
+queue grant license2:0123abcd... 10000 60 Event winner
+```
+
+That gives 10,000 points for 60 minutes. Use `0` minutes for until the next restart. `queue revoke <identifier>` removes it early. A player who is already waiting moves to their new place straight away.
+
+## Bypass and reserved slots [#bypass-and-reserved-slots]
+
+Players listed in `shared/config_bypass.lua` skip the queue:
+
+```lua
+return {
+    'license2:0123456789abcdef0123456789abcdef01234567',
+    'discord:123456789012345678',
+}
+```
+
+Any identifier type works. `joining.reservedSlots` keeps that many slots free for them: regular players never take a reserved slot, and bypass players can use one even when the server is full for everyone else. When even the reserved slots are full, bypass players wait at the front with `priority.bypassPoints`.
+
+For a rule of your own, for example everyone with an admin ace, return `true` from `Editable.IsBypass`. See [Hooks](/nerve_queue/hooks).

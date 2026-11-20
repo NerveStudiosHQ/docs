@@ -1,0 +1,60 @@
+---
+title: "Overview"
+description: "Nerve Studios Queue is a priority connection queue with Discord roles, a live queue card, reserved slots, reconnect grace and txAdmin restart awareness."
+---
+
+Nerve Studios Queue holds players on the connecting screen when your server is full and lets them in by priority. While they wait, they see a live card with their place in line, how long they have waited, an estimated wait and their priority, plus a queue list and a page that shows where their priority comes from.
+
+It runs on the server only, works on ESX, QBox or any other framework, and needs nothing but ox_lib and oxmysql.
+
+<Cards>
+  <Card title="Installation" icon="Rocket" href="/nerve_queue/installation">
+    Get it running in five minutes
+  </Card>
+  <Card title="Priority" icon="ArrowUpNarrowWide" href="/nerve_queue/priority">
+    Where points come from and how the line is sorted
+  </Card>
+  <Card title="Discord" icon="MessageCircle" href="/nerve_queue/discord">
+    Roles, names, avatars and members-only joining
+  </Card>
+  <Card title="Queue card" icon="LayoutTemplate" href="/nerve_queue/card">
+    Change what players see while they wait
+  </Card>
+</Cards>
+
+## Features
+
+- **Priority queue.** Players get in by points, and players with the same points get in first come, first served.
+- **Live queue card** with the player's place, wait time, estimated wait, priority and a status line, plus a queue list and a personal priority page.
+- **Priority from everywhere:** saved priority in the database, Discord roles, temporary grants, reconnect grace and your own donator or store system.
+- **Crash protection.** A player who crashes while waiting gets their place back when they return within the grace window. A player who crashes while playing gets reconnect priority.
+- **Discord** through the Nerve Studios bot or your own bot: priority by role, Discord names and avatars on the card, a members-only option and a role whitelist.
+- **Reserved slots and a bypass list** for staff.
+- **No join hitching.** A startup hold, spacing between joins and a cap on players loading at once.
+- **txAdmin aware.** Joining pauses right before a scheduled restart, and starts again if the restart is skipped.
+- **Queue length in the server list** in front of your server name, if you want it.
+- **Manual approval** for your own resources, with a timeout and fallback.
+- **Admin command** to see the queue, kick, grant temporary priority and save priority.
+- **Exports and events** for other resources.
+- **Six languages:** English, German, Spanish, French, Dutch and Portuguese.
+
+## Requirements
+
+| Requirement | Notes |
+| --- | --- |
+| [ox_lib](https://github.com/overextended/ox_lib/releases) | Started before this resource |
+| [oxmysql](https://github.com/overextended/oxmysql/releases) | Started before this resource. The priority table creates itself |
+| Framework | None needed. Works on ESX, QBox or any other framework |
+
+## Performance
+
+- Server only. Players download nothing from this resource.
+- The queue loop runs twice a second and only does work for players who are waiting.
+- Discord lookups are cached, so players reconnecting over and over never hammer Discord.
+- The console stays silent unless you turn on `log` or `debug`, apart from warnings about config mistakes you need to fix.
+
+<Callout type="info">
+
+New here? Start with [Installation](/nerve_queue/installation).
+
+</Callout>

@@ -1,0 +1,139 @@
+---
+title: "Configuration"
+description: "Every option in Queue's config files."
+---
+
+All options live in `shared/config.lua`. Each one has a comment explaining what it does.
+
+{/* nerve:config:start */}
+{/* Generated from the script's config files. Edit those, not this block. */}
+
+### `shared/config.lua` [#config]
+
+```lua title="shared/config.lua"
+-- General settings. Lists that grow with your server have their own file next to this one:
+--   config_roles.lua   priority points per Discord role
+--   config_bypass.lua  players who skip the queue and may use reserved slots
+--
+-- The Discord key or bot token is a secret, so it goes in server.cfg instead of here:
+--   set nerve_queue:discord_key "nq_..."   (Nerve Studios bot)
+--   set nerve_queue:bot_token "..."        (your own bot)
+--
+-- After changing this file, run `queue reload` in the server console.
+
+return {
+    debug = false,           -- Print troubleshooting detail to the console
+    log = false,             -- Print one line when a player joins the queue, leaves it or is let in (warnings and errors always print)
+    identifier = 'license2', -- Identifier players are tracked by: 'license2', 'license', 'fivem', 'discord' or 'steam' (players without it fall back to license2, then license, then fivem)
+
+    -- Letting players in
+    joining = {
+        startupHold = 60,     -- Seconds everyone waits after the queue starts, so the rest of your server finishes loading (0 = off)
+        spacing = 1,          -- Seconds between letting two players in, so a full queue doesn't load at once and hitch the server (0 = as fast as slots open)
+        maxLoading = 0,       -- Most players loading in at the same time (0 = no limit)
+        loadingTimeout = 300, -- Seconds a player may take to load in before their slot is given to the next in line
+        reservedSlots = 0,    -- Slots only players in config_bypass.lua can take
+        restartLock = 60,     -- Stop letting players in this many seconds before a txAdmin scheduled restart (0 = off)
+    },
+
+    -- Priority. A player's points decide their place in line; equal points queue first come, first served.
+    priority = {
+        stack = true,            -- true = add all of a player's priority together, false = count only their highest
+        database = true,         -- Read priority from the nerve_queue_priority table, which is created for you (false = off)
+        bypassPoints = 1000000,  -- Points bypass players queue with when even the reserved slots are full; keep it above anything else you give out
+        grace = {                -- Players who crash or disconnect don't lose out: a waiting player gets their place back, a playing player gets priority
+            enabled = true,      -- false = off
+            points = 1000,       -- Points a player who was in the server gets when they reconnect
+            seconds = 180,       -- Seconds after leaving that their place or points are kept
+        },
+        roles = lib.load('shared.config_roles'),   -- Points per Discord role: shared/config_roles.lua
+        bypass = lib.load('shared.config_bypass'), -- Queue skippers: shared/config_bypass.lua
+    },
+
+    -- Discord. Gives priority by role, shows names and avatars, and can limit joining to your members.
+    discord = {
+        enabled = false,        -- Look players up in your Discord (needs the key or token in server.cfg, see the top of this file)
+        provider = 'nerve',     -- 'nerve' (invite the Nerve Studios bot, run /queue-key generate and set nerve_queue:discord_key) or 'bot' (your own bot: set nerve_queue:bot_token and guild below)
+        guild = '',             -- Your Discord server id, only for 'bot' (right click the server icon, Copy Server ID)
+        requireLinked = false,  -- Refuse players who connect without Discord running
+        requireMember = false,  -- Only let in members of your Discord
+        whitelist = false,      -- Only let in members with one of these role ids, e.g. { '123456789012345678', '234567890123456789' } (false = everyone)
+        nickname = false,       -- Show the player's nickname in your Discord instead of their Discord name
+        avatar = true,          -- Show the player's Discord avatar on the queue card
+        allowWhenDown = true,   -- Let players in when Discord is down while requireMember or the whitelist is on (false = ask them to try again later; a rate limit or a refused key always asks them to try again)
+        cacheSeconds = 300,     -- Seconds a player's roles are remembered; role changes take up to this long to count
+        timeout = 8,            -- Seconds to wait for Discord before carrying on without it
+    },
+
+    -- The card players see while they wait
+    card = {
+        template = 'default',   -- File in the cards folder to use (copy cards/default.json, edit it, put its name here)
+        refresh = 1,            -- Seconds between card updates (a card is only resent when something on it changed)
+        listSize = 15,          -- Players shown on the queue list page
+        listNames = true,       -- Show names on the queue list page (false = positions and points only)
+        logo = '',              -- https:// link to your logo, shown at the top of the card ('' = no logo)
+        avatar = 'https://cdn.discordapp.com/embed/avatars/0.png', -- Picture for players without a Discord avatar
+        website = '',           -- https:// link for the Website button ('' = no button)
+        discord = '',           -- https:// invite for the Discord button ('' = no button)
+        store = '',             -- https:// link for the Priority button, e.g. your Tebex store ('' = no button)
+    },
+
+    -- Server name in the server list
+    hostname = {
+        enabled = false,                         -- Show the queue length in front of your server name while players are waiting
+        format = '[Queue: {count}] {hostname}',  -- {count} = players waiting, {hostname} = your sv_hostname
+    },
+
+    -- Let another resource of yours approve each player at the front of the line
+    manual = {
+        enabled = false,        -- Wait for AllowPlayer or RejectPlayer (see the docs) before letting anyone in
+        timeout = 60,           -- Seconds to wait for your resource to answer
+        fallback = 'reject',    -- 'reject' or 'allow' when it doesn't answer in time
+    },
+
+    -- Console and admin commands (queue status, list, remove, grant, revoke, open, reload)
+    commands = {
+        name = 'queue',             -- Command name (false = no commands)
+        restricted = 'group.admin', -- Ace players need to use it in game; the server console can always use it
+    },
+}
+```
+
+### `shared/config_bypass.lua` [#config-bypass]
+
+```lua title="shared/config_bypass.lua"
+-- Players who skip the queue. Read by `priority.bypass` in config.lua.
+--
+-- One identifier per entry, any type a player has: 'license2:...', 'license:...',
+-- 'discord:...', 'fivem:...', 'steam:...'. Players on this list go straight in
+-- while there is a free or reserved slot (`joining.reservedSlots`), and when even
+-- those are full they wait at the front with `priority.bypassPoints`.
+--
+-- Run `queue list` in the console to see the identifiers of players waiting.
+
+return {
+    -- 'license2:0123456789abcdef0123456789abcdef01234567',
+    -- 'discord:123456789012345678',
+}
+```
+
+### `shared/config_roles.lua` [#config-roles]
+
+```lua title="shared/config_roles.lua"
+-- Priority points per Discord role. Read by `priority.roles` in config.lua.
+-- Needs `discord.enabled = true`.
+--
+-- One entry per role: the role id as the key (right click the role, Copy Role ID,
+-- with Developer Mode on in Discord), then:
+--   points  Points a member with this role gets
+--   label   Name shown on the player's priority page (leave it out to use the role's name in Discord)
+--
+-- A member with several of these roles gets all of them added together, or only
+-- the highest when `priority.stack = false`.
+
+return {
+    -- ['123456789012345678'] = { points = 5000, label = 'Staff' },
+    -- ['234567890123456789'] = { points = 2500 },
+}
+```
+{/* nerve:config:end */}
