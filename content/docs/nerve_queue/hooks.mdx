@@ -1,0 +1,62 @@
+---
+title: "Hooks"
+description: "Plug your ban list, donator system and logs into Nerve Studios Queue with the hooks in shared/editable.lua."
+---
+
+`shared/editable.lua` holds functions you can change to connect the queue to your own systems. They run on the server. Every one works as shipped, so only change the ones you need. If a hook errors, the queue carries on without it and prints one warning.
+
+## Editable.CanConnect [#editablecanconnect]
+
+Runs before a player is put in line. Return `false` and a message to refuse them, for example for your own ban list or a maintenance mode:
+
+```lua
+function Editable.CanConnect(identifier, source)
+    if GetConvar('maintenance', 'false') == 'true' and not IsPlayerAceAllowed(source, 'group.admin') then
+        return false, 'We are doing maintenance. Back soon!'
+    end
+    return true
+end
+```
+
+## Editable.IsBypass [#editableisbypass]
+
+Return `true` to let a player skip the queue and use the reserved slots, on top of `shared/config_bypass.lua`:
+
+```lua
+function Editable.IsBypass(identifier, source)
+    return IsPlayerAceAllowed(source, 'group.admin')
+end
+```
+
+## Editable.ExtraPriority [#editableextrapriority]
+
+Priority from your own system, such as a donator script. Return a list of rows; each shows on the player's priority page.
+
+```lua
+function Editable.ExtraPriority(identifier, source)
+    local tier = exports.my_donators:GetTier(identifier)
+    if tier == 'gold' then
+        return { { label = 'Gold supporter', points = 3000 } }
+    end
+    return {}
+end
+```
+
+It runs while the player connects, so keep it quick. A slow database call here makes every player wait for it.
+
+## Editable.DisplayName and Editable.Avatar [#editabledisplayname]
+
+Change the name or picture on the queue card. Return `nil` to keep the default (the Discord name and avatar when Discord is on, otherwise the FiveM name and `card.avatar`). An avatar must be an `https://` link.
+
+## Editable.OnQueued, OnAdmitted and OnLeft [#logging]
+
+Called when a player joins the line, is let in, or leaves without getting in. Send them to your logs:
+
+```lua
+function Editable.OnAdmitted(data)
+    -- data.source, data.identifier, data.name, data.points, data.waited (seconds)
+    exports.my_logs:Send('queue', ('%s joined after waiting %d seconds'):format(data.name, data.waited))
+end
+```
+
+`OnLeft` gets `data.reason`: `'disconnected'`, `'removed'` (kicked or removed by an export) or `'rejected'` (refused in manual approval).

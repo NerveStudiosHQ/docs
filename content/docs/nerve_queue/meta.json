@@ -1,0 +1,17 @@
+{
+  "title": "Queue",
+  "icon": "ListOrdered",
+  "pages": [
+    "overview",
+    "installation",
+    "configuration",
+    "priority",
+    "discord",
+    "card",
+    "commands",
+    "exports",
+    "hooks",
+    "troubleshooting",
+    "changelog"
+  ]
+}

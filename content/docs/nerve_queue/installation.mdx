@@ -1,0 +1,90 @@
+---
+title: "Installation"
+description: "Install Nerve Studios Queue, check it works and set it up for your server."
+---
+
+## Requirements
+
+- [ox_lib](https://github.com/overextended/ox_lib/releases) and [oxmysql](https://github.com/overextended/oxmysql/releases), started before this resource
+- No framework is needed. The queue works on ESX, QBox or any other framework.
+- The priority table creates itself. There is no SQL to run.
+
+## Step 1: Add the resource [#step-1-add-the-resource]
+
+1. Download `nerve_queue` from your Cfx.re Portal and unzip it.
+2. Make sure the folder is named exactly `nerve_queue`.
+3. Put it in your `resources` folder, for example `resources/[nerve]/nerve_queue`.
+
+<Callout type="warn">
+
+Don't rename the folder. Other resources call the exports by the name `nerve_queue`.
+
+</Callout>
+
+## Step 2: Add it to server.cfg [#step-2-add-it-to-server-cfg]
+
+Add it **after** oxmysql and ox_lib, and before your framework:
+
+```cfg
+ensure oxmysql
+ensure ox_lib
+ensure nerve_queue
+```
+
+<Callout type="warn">
+
+Run only one queue. If your framework or another resource has its own queue or connection checks, turn them off, or players are held twice.
+
+</Callout>
+
+## Step 3: Configure [#step-3-configure]
+
+Open `shared/config.lua`. Every option has a comment that explains it. The defaults work for most servers, but these are worth checking:
+
+- `joining.startupHold` keeps everyone waiting for 60 seconds after the queue starts, so the rest of your server finishes loading first.
+- `joining.reservedSlots` and `shared/config_bypass.lua` keep slots free for staff.
+- `card.logo`, `card.website`, `card.discord` and `card.store` put your logo and buttons on the queue card.
+- `discord` connects your Discord. See [Discord](/nerve_queue/discord).
+
+See [Configuration](/nerve_queue/configuration) for every option.
+
+## Step 4: Start and test [#step-4-start-and-test]
+
+1. Restart your server, or run `ensure nerve_queue` in the console.
+2. Run `queue status` in the server console. It shows how many players are waiting and whether the startup hold is still on.
+3. Connect to your server. During the startup hold you see the queue card with a countdown, then you are let in.
+
+To see the queue with only a few players, lower `sv_maxclients` on a test server.
+
+<Callout type="info">
+
+If the console shows a warning that starts with `config:`, a value in `shared/config.lua` was typed wrong. The queue uses the default for that option until you fix it.
+
+</Callout>
+
+## Version check
+
+On start, the server console says whether the script is up to date, with a download link when a new version is out. To turn it off, add this to `server.cfg`:
+
+```cfg
+set nerve:versioncheck false
+```
+
+## Translations
+
+English, German, Spanish, French, Dutch and Portuguese are included. Set ox_lib's language in `server.cfg`:
+
+```cfg
+setr ox:locale de
+```
+
+For another language, copy `locales/en.json` to your language code, for example `locales/it.json`, and translate the values. Keep every `%s`, because the queue fills them in.
+
+## Updating
+
+1. Back up `shared/config.lua`, `shared/config_roles.lua`, `shared/config_bypass.lua`, `shared/editable.lua`, your cards and any locale files you changed.
+2. Replace the resource folder with the new version.
+3. Copy your changes back.
+4. Restart the resource. Players waiting in the queue are asked to reconnect.
+
+Saved priority lives in the database, so it stays.
